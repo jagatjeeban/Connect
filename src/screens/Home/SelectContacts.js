@@ -41,7 +41,7 @@ const SelectContacts = ({ navigation, route }) => {
   const ContactItem = ({ item, index }) => {
     return (
       <TouchableOpacity key={index} activeOpacity={0.7} onPress={() => selectContacts(item?.recordID, !item?.isSelected)} style={styles.contactItemContainer}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', width: "87%" }}>
+        <View style={styles.contactItemLeft}>
           {item?.thumbnailPath !== '' ?
             <FastImage source={{ uri: item?.thumbnailPath, priority: 'high' }} style={styles.contactImg} />
             :
@@ -65,7 +65,7 @@ const SelectContacts = ({ navigation, route }) => {
   //contacts group item component
   const ContactGroupItem = ({ item: letter, index }) => {
     return (
-      <View key={index} style={{ flexDirection: 'row' }}>
+      <View key={index} style={styles.contactGroupContainer}>
         <Text style={styles.contactInitialText}>{letter}</Text>
         <FlatList
           data={contacts.filter(contact => getUcFirstLetter(contact?.displayName) === letter)}
@@ -112,9 +112,9 @@ const SelectContacts = ({ navigation, route }) => {
   return (
     <SafeAreaView style={styles.safeAreaView}>
       <PageHeader headerTitle={selectedCount ? `${selectedCount} selected` : 'Select Contacts'} backBtn iconArr={selectedCount ? ['trash', 'share'] : null} searchEvent={(req) => searchEvent(req)} navigation={navigation} />
-      <View style={{ paddingHorizontal: 20 }}>
+      <View style={styles.listContainer}>
         {loaderStatus ?
-          <View style={{ alignItems: "center", justifyContent: "center", marginTop: '90%' }}>
+          <View style={styles.loaderContainer}>
             <ActivityIndicator size={'large'} color={Colors.Primary} />
           </View>
           :
@@ -123,7 +123,7 @@ const SelectContacts = ({ navigation, route }) => {
             nestedScrollEnabled={true}
             showsVerticalScrollIndicator={false}
             renderItem={ContactGroupItem}
-            ListFooterComponent={<View style={{ height: Platform.OS === 'android' ? 230 : 200 }} />}
+            ListFooterComponent={<View style={styles.listFooter} />}
             keyExtractor={(_, index) => index.toString()}
           />
         }
@@ -136,8 +136,7 @@ export default SelectContacts;
 
 export const styles = StyleSheet.create({
   safeAreaView: {
-    flex: 1,
-    backgroundColor: Colors.BgColor
+    flex: 1
   },
   contactNameText: {
     color: Colors.Base_White,
@@ -177,6 +176,25 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 10,
     width: "100%"
+  },
+  contactItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: "87%",
+  },
+  contactGroupContainer: {
+    flexDirection: 'row',
+  },
+  listContainer: {
+    paddingHorizontal: 20,
+  },
+  loaderContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: '90%',
+  },
+  listFooter: {
+    height: Platform.OS === 'android' ? 230 : 200,
   },
   checkBtn: {
     width: 20,

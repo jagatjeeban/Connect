@@ -1,8 +1,10 @@
 import { View, SafeAreaView, StyleSheet, Platform, TouchableOpacity, Image, Text, TextInput, StatusBar, FlatList } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react';
 import { useIsFocused } from '@react-navigation/native';
+import Contact from 'react-native-contacts';
+import { showMessage } from 'react-native-flash-message';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { setAdjustPan, setAdjustResize } from 'rn-android-keyboard-adjust';
+import { useDispatch, useSelector } from 'react-redux';
 
 //import constants
 import { Colors, FontFamily, Images } from '../../common/constants';
@@ -24,6 +26,113 @@ import SvgPlus from '../../assets/icons/svg/plusWhite.svg';
 //import custom functions
 import { getUcFirstLetterString } from '../../common/helper/customFun';
 
+//import redux actions
+import { storeContacts } from '../../store/dashSlice';
+
+//phone number item component
+const PhoneNumberItem = ({ item, index = 0, labelRef, formActionStatus = 'add', labelList = [], dropdownController, addPhoneNumberItem, removePhoneNumberItem, addIntoPhoneNumber, closeDropdown }) => {
+  return (
+    <View key={index}>
+      <View style={[styles.width100, styles.formSection, styles.phoneFieldSection]}>
+        <View style={styles.numberTitleContainer}>
+          <Text style={styles.inputTitle}>Phone Number</Text>
+          {index === 0 ?
+            <TouchableOpacity onPress={addPhoneNumberItem} style={styles.inlineActionRow}>
+              <View style={styles.addNumberBtn}>
+                <SvgPlus width={12} height={12} />
+              </View>
+              <Text style={styles.addNumberText}>Add</Text>
+            </TouchableOpacity>
+            :
+            <TouchableOpacity onPress={() => removePhoneNumberItem?.(index)} style={styles.inlineActionRow}>
+              <Text style={[styles.addNumberText, styles.removeActionText]}>Remove</Text>
+            </TouchableOpacity>
+          }
+        </View>
+        <View style={styles.inputWithIcon}>
+          <SvgCall />
+          <View style={styles.inputWithIconContent}>
+            <TextInput
+              placeholder={'Enter number'}
+              value={item?.number}
+              selectionColor={Colors.Primary}
+              placeholderTextColor={Colors.Base_Medium_Grey}
+              style={styles.inputContainer}
+              keyboardType={'phone-pad'}
+              onChangeText={(e) => addIntoPhoneNumber?.(e, 'number', index)}
+            />
+          </View>
+        </View>
+      </View>
+      <View style={[styles.width100, styles.formSection, styles.dropdownSection]}>
+        <Text style={styles.inputTitle}>Select Label</Text>
+        <DropDown
+          onRef={labelRef}
+          dropDownList={labelList}
+          isEdit={formActionStatus === 'edit' && item?.label}
+          placeholder={formActionStatus === 'edit' && item?.label ? getUcFirstLetterString(item?.label) : 'Select Label'}
+          dropdownController={dropdownController}
+          onSelectEvent={(e) => addIntoPhoneNumber(e?.title, 'label', index)}
+          closeDropdown={() => closeDropdown('dropDown1')}
+          clearInput={() => null}
+        />
+      </View>
+    </View>
+  )
+}
+
+//email id item component
+const EmailIdItem = ({ labelRef, formActionStatus = 'add', labelList = [], dropdownController, item, index = 0, addEmailIdItem, removeEmailIdItem, addIntoEmailId, closeDropdown }) => {
+  return (
+    <View key={index}>
+      <View style={[styles.width100, styles.formSection, styles.phoneFieldSection]}>
+        <View style={styles.numberTitleContainer}>
+          <Text style={styles.inputTitle}>Email Id</Text>
+          {index === 0 ?
+            <TouchableOpacity onPress={addEmailIdItem} style={styles.inlineActionRow}>
+              <View style={styles.addNumberBtn}>
+                <SvgPlus width={12} height={12} />
+              </View>
+              <Text style={styles.addNumberText}>Add</Text>
+            </TouchableOpacity>
+            :
+            <TouchableOpacity onPress={() => removeEmailIdItem?.(index)} style={styles.inlineActionRow}>
+              <Text style={[styles.addNumberText, styles.removeActionText]}>Remove</Text>
+            </TouchableOpacity>
+          }
+        </View>
+        <View style={styles.inputWithIcon}>
+          <SvgMail />
+          <View style={styles.inputWithIconContent}>
+            <TextInput
+              placeholder={'example@gmail.com'}
+              value={item?.email}
+              selectionColor={Colors.Primary}
+              placeholderTextColor={Colors.Base_Medium_Grey}
+              style={styles.inputContainer}
+              keyboardType={'email-address'}
+              onChangeText={(e) => addIntoEmailId?.(e, 'email', index)}
+            />
+          </View>
+        </View>
+      </View>
+      <View style={[styles.width100, styles.formSection, styles.dropdownSection]}>
+        <Text style={styles.inputTitle}>Select Label</Text>
+        <DropDown
+          onRef={labelRef}
+          dropDownList={labelList}
+          isEdit={formActionStatus === 'edit'}
+          placeholder={formActionStatus === 'edit' ? getUcFirstLetterString(item?.label) : 'Select Label'}
+          dropdownController={dropdownController}
+          onSelectEvent={(e) => addIntoEmailId?.(e?.title, 'label', index)}
+          closeDropdown={() => closeDropdown?.('dropDown2')}
+          clearInput={() => null}
+        />
+      </View>
+    </View>
+  )
+}
+
 const CreateContact = ({ navigation, route }) => {
 
   const phoneNumberObj = {
@@ -42,7 +151,12 @@ const CreateContact = ({ navigation, route }) => {
     'phoneNumbers': []
   };
 
+  //hooks
+  const dispatch = useDispatch();
   const isFocused = useIsFocused();
+
+  //store events
+  const storedContacts = useSelector(state => state.dash.contacts);
 
   //refs
   const dropdownController = useRef(null);
@@ -50,17 +164,19 @@ const CreateContact = ({ navigation, route }) => {
   const labelRef = useRef();
   const labelRef2 = useRef();
 
-  //states
-  const [labelList, setLabelList] = useState([
+  const labelList = [
     { id: 1, title: 'Mobile' },
     { id: 2, title: 'Work' },
     { id: 3, title: 'Home' },
     { id: 4, title: 'Other' }
-  ]);
+  ];
+
+  //states
   const [formValue, setFormValue] = useState(Object.assign({}, contactFormObj));
   const [phoneNumbers, setPhoneNumbers] = useState([Object.assign({}, phoneNumberObj)]);
   const [emailAddresses, setEmailAddresses] = useState([Object.assign({}, emailAddressObj)]);
   const [formActionStatus, setFormActionStatus] = useState('add');
+  const [loaderStatus, setLoaderStatus] = useState(false);
 
   //function to close the dropdowns
   const closeDropdown = (req) => {
@@ -75,16 +191,12 @@ const CreateContact = ({ navigation, route }) => {
 
   //function to add new phone number with label
   const addPhoneNumberItem = () => {
-    setPhoneNumbers(prevList => {
-      return [...prevList, phoneNumberObj];
-    })
+    setPhoneNumbers(prevList => [...prevList, phoneNumberObj]);
   }
 
   //function to add new email id with label
   const addEmailIdItem = () => {
-    setEmailAddresses(prevList => {
-      return [...prevList, emailAddressObj];
-    })
+    setEmailAddresses(prevList => [...prevList, emailAddressObj]);
   }
 
   //function to remove a phone number item
@@ -127,111 +239,136 @@ const CreateContact = ({ navigation, route }) => {
     })
   }
 
-  //phone number item component
-  const PhoneNumberItem = ({ item, index }) => {
-    console.log('Label', item?.label);
+  //component to render the phone number item
+  const RenderPhoneNumberItem = ({ item, index }) => {
     return (
-      <View key={index}>
-        <View style={[styles.width100, { marginTop: 30, zIndex: 4 }]}>
-          <View style={styles.numberTitleContainer}>
-            <Text style={styles.inputTitle}>Phone Number</Text>
-            {index === 0 ?
-              <TouchableOpacity onPress={() => addPhoneNumberItem()} style={{ flexDirection: 'row', alignItems: "center" }}>
-                <View style={styles.addNumberBtn}>
-                  <SvgPlus width={12} height={12} />
-                </View>
-                <Text style={styles.addNumberText}>Add</Text>
-              </TouchableOpacity>
-              :
-              <TouchableOpacity onPress={() => removePhoneNumberItem(index)} style={{ flexDirection: 'row', alignItems: "center" }}>
-                <Text style={[styles.addNumberText, { color: Colors.Base_Red }]}>Remove</Text>
-              </TouchableOpacity>
-            }
-          </View>
-          <View style={styles.inputWithIcon}>
-            <SvgCall />
-            <View style={{ marginLeft: 20, width: "90%" }}>
-              <TextInput
-                placeholder={'Enter number'}
-                value={item?.number}
-                selectionColor={Colors.Primary}
-                placeholderTextColor={Colors.Base_Medium_Grey}
-                style={styles.inputContainer}
-                keyboardType={'phone-pad'}
-                onChangeText={(e) => addIntoPhoneNumber(e, 'number', index)}
-              />
-            </View>
-          </View>
-        </View>
-        <View style={[styles.width100, { marginTop: 30, zIndex: 3 }]}>
-          <Text style={styles.inputTitle}>Select Label</Text>
-          <DropDown
-            onRef={labelRef}
-            dropDownList={labelList}
-            isEdit={formActionStatus === 'edit' && item?.label}
-            placeholder={formActionStatus === 'edit' && item?.label ? getUcFirstLetterString(item?.label) : 'Select Label'}
-            dropdownController={dropdownController}
-            onSelectEvent={(e) => addIntoPhoneNumber(e?.title, 'label', index)}
-            closeDropdown={() => closeDropdown('dropDown1')}
-            clearInput={() => null}
-          />
-        </View>
-      </View>
+      <PhoneNumberItem
+        labelRef={labelRef}
+        labelList={labelList}
+        formActionStatus={formActionStatus}
+        dropdownController={dropdownController}
+        item={item}
+        index={index}
+        addPhoneNumberItem={addPhoneNumberItem}
+        removePhoneNumberItem={removePhoneNumberItem}
+        addIntoPhoneNumber={addIntoPhoneNumber}
+        closeDropdown={closeDropdown}
+      />
     )
   }
 
-  //email id item component
-  const EmailIdItem = ({ item, index }) => {
+  //component to render the email id item
+  const RenderEmailIdItem = ({ item, index }) => {
     return (
-      <View key={index}>
-        <View style={[styles.width100, { marginTop: 30, zIndex: 4 }]}>
-          <View style={styles.numberTitleContainer}>
-            <Text style={styles.inputTitle}>Email Id</Text>
-            {index === 0 ?
-              <TouchableOpacity onPress={() => addEmailIdItem()} style={{ flexDirection: 'row', alignItems: "center" }}>
-                <View style={styles.addNumberBtn}>
-                  <SvgPlus width={12} height={12} />
-                </View>
-                <Text style={styles.addNumberText}>Add</Text>
-              </TouchableOpacity>
-              :
-              <TouchableOpacity onPress={() => removeEmailIdItem(index)} style={{ flexDirection: 'row', alignItems: "center" }}>
-                <Text style={[styles.addNumberText, { color: Colors.Base_Red }]}>Remove</Text>
-              </TouchableOpacity>
-            }
-          </View>
-          <View style={styles.inputWithIcon}>
-            <SvgMail />
-            <View style={{ marginLeft: 20, width: "90%" }}>
-              <TextInput
-                placeholder={'example@gmail.com'}
-                value={item?.email}
-                selectionColor={Colors.Primary}
-                placeholderTextColor={Colors.Base_Medium_Grey}
-                style={styles.inputContainer}
-                keyboardType={'email-address'}
-                onChangeText={(e) => addIntoEmailId(e, 'email', index)}
-              />
-            </View>
-          </View>
-        </View>
-        <View style={[styles.width100, { marginTop: 30, zIndex: 3 }]}>
-          <Text style={styles.inputTitle}>Select Label</Text>
-          <DropDown
-            onRef={labelRef2}
-            dropDownList={labelList}
-            isEdit={formActionStatus === 'edit'}
-            placeholder={formActionStatus === 'edit' ? getUcFirstLetterString(item?.label) : 'Select Label'}
-            dropdownController={dropdownController2}
-            onSelectEvent={(e) => addIntoEmailId(e?.title, 'label', index)}
-            closeDropdown={() => closeDropdown('dropDown2')}
-            clearInput={() => null}
-          />
-        </View>
-      </View>
+      <EmailIdItem
+        labelRef={labelRef2}
+        labelList={labelList}
+        formActionStatus={formActionStatus}
+        dropdownController={dropdownController2}
+        item={item}
+        index={index}
+        addEmailIdItem={addEmailIdItem}
+        removeEmailIdItem={removeEmailIdItem}
+        addIntoEmailId={addIntoEmailId}
+        closeDropdown={closeDropdown}
+      />
     )
   }
 
+  //function to format the phone number list for storing
+  const getFormattedPhoneNumbers = () => {
+    return phoneNumbers
+      .filter(item => item?.number?.trim())
+      .map(item => ({
+        number: item.number.trim(),
+        label: item?.label?.toLowerCase() || 'mobile'
+      }));
+  }
+
+  //function to format the email list for storing
+  const getFormattedEmailAddresses = () => {
+    return emailAddresses
+      .filter(item => item?.email?.trim())
+      .map(item => ({
+        email: item.email.trim(),
+        label: item?.label?.toLowerCase() || 'other'
+      }));
+  }
+
+  //function to create the contact payload
+  const getContactPayload = () => {
+    const displayName = formValue?.displayName?.trim();
+    const phoneNumberList = getFormattedPhoneNumbers();
+    const emailAddressList = getFormattedEmailAddresses();
+
+    if (!displayName) {
+      showMessage({ message: 'Please enter a name.', description: 'sajdhkasjh', type: 'danger', icon: 'info' });
+      return null;
+    }
+
+    if (phoneNumberList.length === 0) {
+      showMessage({ message: 'Please add at least one phone number.', type: 'danger', icon: 'info' });
+      return null;
+    }
+
+    const [givenName, ...rest] = displayName.split(/\s+/);
+
+    return {
+      displayName,
+      givenName,
+      familyName: rest.join(' '),
+      phoneNumbers: phoneNumberList,
+      emailAddresses: emailAddressList
+    };
+  }
+
+  //function to save the contact
+  const handleSaveContact = async (req) => {
+    if (req !== 'save') return;
+
+    const contactPayload = getContactPayload();
+    if (!contactPayload) return;
+
+    setLoaderStatus(true);
+
+    try {
+      if (formActionStatus === 'edit' && route?.params?.info?.recordID) {
+        const updatedContact = {
+          ...route.params.info,
+          ...contactPayload,
+          recordID: route.params.info.recordID
+        };
+
+        await Contact.updateContact(updatedContact);
+        setLoaderStatus(false);
+
+        const updatedContacts = storedContacts.map(item => {
+          if (item?.recordID === updatedContact.recordID) {
+            return updatedContact;
+          }
+
+          return item;
+        });
+
+        dispatch(storeContacts(updatedContacts));
+        showMessage({ message: 'Contact updated successfully!', type: 'success', icon: 'success' });
+        navigation.navigate('ContactDetails', { info: updatedContact });
+        return;
+      }
+
+      const createdContact = await Contact.addContact(contactPayload);
+      setLoaderStatus(false);
+      dispatch(storeContacts([...storedContacts, createdContact]));
+      showMessage({ message: 'Contact created successfully!', type: 'success', icon: 'success' });
+      navigation.goBack();
+    }
+    catch (error) {
+      console.log('SAVE CONTACT ERROR:', error);
+      showMessage({ message: 'Unable to save contact right now.', type: 'danger', icon: 'info' });
+    }
+  }
+
+  //for status bar color
   useEffect(() => {
     if (isFocused && Platform.OS === 'android') {
       StatusBar.setBackgroundColor(Colors.Base_Dark_Black);
@@ -239,6 +376,7 @@ const CreateContact = ({ navigation, route }) => {
     }
   }, [isFocused]);
 
+  //for edit functionality
   useEffect(() => {
     if (route?.params?.reqType === 'edit') {
       setFormActionStatus('edit');
@@ -254,21 +392,23 @@ const CreateContact = ({ navigation, route }) => {
     }
   }, []);
 
-  useEffect(() => {
-    setAdjustResize();
-    return () => setAdjustPan();
-  }, []);
-
   return (
     <SafeAreaView style={styles.safeAreaView}>
       <View style={styles.upperCurveEffect}>
         <SvgUpperCurve width={screenDimensions?.width} />
       </View>
-      <PageHeader headerTitle={formActionStatus === 'add' ? 'Create Contact' : 'Edit Contact'} crossBtn iconArr={['saveBtn']} rightBtnClickEvent={() => null} navigation={navigation} />
-      <KeyboardAwareScrollView enableOnAndroid={false} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-        <TouchableOpacity activeOpacity={1} onPress={() => null} style={{ alignSelf: "center", marginTop: 20 }}>
+      <PageHeader
+        headerTitle={formActionStatus === 'add' ? 'Create Contact' : 'Edit Contact'}
+        crossBtn
+        loaderStatus={loaderStatus}
+        iconArr={[formActionStatus === 'add' ? 'saveBtn' : 'updateBtn']}
+        rightBtnClickEvent={handleSaveContact}
+        navigation={navigation}
+      />
+      <KeyboardAwareScrollView enableOnAndroid extraScrollHeight={150} showsVerticalScrollIndicator={false} contentContainerStyle={styles.formScrollContent}>
+        <TouchableOpacity activeOpacity={1} onPress={() => null} style={styles.avatarButton}>
           <View style={styles.userPicContainer}>
-            <Image source={Images.defaultUserPic} style={{ width: 60, height: 73 }} />
+            <Image source={Images.defaultUserPic} style={styles.avatarImage} />
           </View>
           <View style={styles.addPicContainer}>
             <SvgAddPic />
@@ -276,11 +416,11 @@ const CreateContact = ({ navigation, route }) => {
           </View>
         </TouchableOpacity>
         <View style={styles.formContainer}>
-          <View style={[styles.width100, { zIndex: 5 }]}>
+          <View style={[styles.width100, styles.nameFieldSection]}>
             <Text style={styles.inputTitle}>Name</Text>
             <View style={styles.inputWithIcon}>
               <SvgUser />
-              <View style={{ marginLeft: 20, width: "90%" }}>
+              <View style={styles.inputWithIconContent}>
                 <TextInput
                   placeholder={'Enter name'}
                   value={formValue?.displayName}
@@ -295,15 +435,15 @@ const CreateContact = ({ navigation, route }) => {
           <FlatList
             data={phoneNumbers}
             showsVerticalScrollIndicator={false}
-            renderItem={PhoneNumberItem}
-            contentContainerStyle={{ paddingBottom: 5, paddingRight: 5 }}
+            renderItem={RenderPhoneNumberItem}
+            contentContainerStyle={styles.fieldListContent}
             keyExtractor={(_, index) => index.toString()}
           />
           <FlatList
             data={emailAddresses}
             showsVerticalScrollIndicator={false}
-            renderItem={EmailIdItem}
-            contentContainerStyle={{ paddingBottom: 5, paddingRight: 5 }}
+            renderItem={RenderEmailIdItem}
+            contentContainerStyle={styles.fieldListContent}
             keyExtractor={(_, index) => index.toString()}
           />
         </View>
@@ -316,8 +456,7 @@ export default CreateContact;
 
 const styles = StyleSheet.create({
   safeAreaView: {
-    flex: 1,
-    backgroundColor: Colors.BgColor
+    flex: 1
   },
   upperCurveEffect: {
     position: 'absolute',
@@ -418,6 +557,18 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 70
   },
+  formSection: {
+    marginTop: 30,
+  },
+  phoneFieldSection: {
+    zIndex: 4,
+  },
+  dropdownSection: {
+    zIndex: 3,
+  },
+  nameFieldSection: {
+    zIndex: 5,
+  },
   width100: {
     width: '100%'
   },
@@ -425,6 +576,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: "center",
     justifyContent: "space-between"
+  },
+  inlineActionRow: {
+    flexDirection: 'row',
+    alignItems: "center",
   },
   addNumberBtn: {
     backgroundColor: Colors.Bg_Light,
@@ -440,5 +595,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: FontFamily.OutfitRegular,
     marginLeft: 10
+  },
+  removeActionText: {
+    color: Colors.Base_Red,
+  },
+  inputWithIconContent: {
+    marginLeft: 20,
+    width: "90%",
+  },
+  formScrollContent: {
+    paddingBottom: 100,
+  },
+  avatarButton: {
+    alignSelf: "center",
+    marginTop: 20,
+  },
+  avatarImage: {
+    width: 60,
+    height: 73,
+  },
+  fieldListContent: {
+    paddingBottom: 5,
+    paddingRight: 5,
   },
 })

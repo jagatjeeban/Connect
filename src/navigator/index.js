@@ -1,18 +1,20 @@
 import React from "react";
 import { NavigationContainer, DarkTheme } from "@react-navigation/native";
+import { useSelector } from "react-redux";
+
+//import all the stacks
 import AuthStackNavigator from "./stack/AuthStack";
 import HomeStackNavigator from "./stack/HomeStack";
-import { useSelector } from "react-redux";
 
 const MainStackNavigator = () => {
 
-    let authStatus = useSelector((state) => state.auth.loginStatus);
+    const authStatus = useSelector((state) => state.auth.loginStatus);
 
-    return(
+    return (
         <NavigationContainer theme={DarkTheme}>
-            {authStatus? 
+            {authStatus ?
                 <HomeStackNavigator />
-            :
+                :
                 <AuthStackNavigator />
             }
         </NavigationContainer>

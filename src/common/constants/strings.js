@@ -4,6 +4,17 @@ const Strings = {
     WelcomeToConnect: 'Welcome To Connect',
     DeleteNumberText: `Are you sure you want to delete this contact? This action can't be undone.`,
     RequireAccess: 'Connect needs to access your contacts.',
+    Contacts: 'Contacts',
+    Favourites: 'Favourites',
+    Profile: 'Profile',
+    ErrMsg: 'Something went wrong! Please try again later.',
+    Save: 'Save',
+    Saving: 'Saving..',
+    EditContact: 'Edit Contact',
+    CreateContact: 'Create Contact',
+    Update: 'Update',
+    Updating: 'Updating..',
+    Add: 'Add',
 }
 
 export default Strings;

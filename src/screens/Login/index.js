@@ -1,16 +1,12 @@
 import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { showMessage } from 'react-native-flash-message';
-import { useIsFocused } from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import { useDispatch } from 'react-redux';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 
 //import constants
 import { Colors, FontFamily, Strings } from '../../common/constants';
-
-//import config file
-import config from '../../common/config';
 
 //import svgs
 import SvgGoogleLogo from '../../assets/icons/svg/googleLogo.svg';
@@ -21,7 +17,7 @@ import { loginSuccess } from '../../store/authSlice';
 
 const Login = () => {
 
-    const isFocused = useIsFocused();
+    //hooks
     const dispatch = useDispatch();
 
     //states
@@ -34,20 +30,20 @@ const Login = () => {
             // Check if your device supports Google Play
             await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
 
-            // Get the users ID token
-            const { idToken } = await GoogleSignin.signIn();
+            // Get the signed-in user and ID token
+            const userInfo = await GoogleSignin.signIn();
+
+            if (!userInfo.idToken) {
+                throw new Error('Missing Google ID token');
+            }
 
             // Create a Google credential with the token
-            const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+            const googleCredential = auth.GoogleAuthProvider.credential(userInfo.idToken);
 
-            const currentUser = await GoogleSignin.getCurrentUser();
-            dispatch(loginSuccess(currentUser));
-            setLoaderStatus(false);
-
-            // Sign-in the user with the credential
-            return auth().signInWithCredential(googleCredential);
+            // Sign-in the user with Firebase before updating local auth state
+            await auth().signInWithCredential(googleCredential);
+            dispatch(loginSuccess(userInfo));
         } catch (error) {
-            setLoaderStatus(false);
             if (error.code === statusCodes.SIGN_IN_CANCELLED) {
                 // user cancelled the login flow
             } else if (error.code === statusCodes.IN_PROGRESS) {
@@ -57,27 +53,20 @@ const Login = () => {
                 showMessage({ message: 'Please install or update the play services on your devices to be able to sign in using google!', type: "danger", icon: 'info' })
             } else {
                 showMessage({ message: 'Sign In failed', description: 'Something wrong happened! Please check your internet connection.', type: "danger", icon: "info" });
-                console.log('SIGN IN ERROR: ', JSON.stringify(error));
+                console.log('SIGN IN ERROR: ', error);
             }
+        } finally {
+            setLoaderStatus(false);
         }
     }
-
-    //configure google sign in with web client id
-    useEffect(() => {
-        if (isFocused) {
-            GoogleSignin.configure({
-                'webClientId': config.WEB_CLIENT_ID
-            });
-        }
-    }, [isFocused]);
 
     return (
         <SafeAreaView style={styles.safeAreaView}>
             <View style={styles.mainContainer}>
-                <View style={{ marginTop: '30%' }}>
+                <View style={styles.welcomeIllustrationContainer}>
                     <SvgWelcome width={276} height={214} />
                 </View>
-                <View style={{ marginTop: 32, alignItems: 'center' }}>
+                <View style={styles.welcomeTextContainer}>
                     <Text style={styles.welcomeToConnect}>{Strings.WelcomeToConnect}</Text>
                     <Text style={styles.appDescription}>{Strings.WelcomeText}</Text>
                 </View>
@@ -100,8 +89,7 @@ export default Login;
 
 const styles = StyleSheet.create({
     safeAreaView: {
-        flex: 1,
-        backgroundColor: Colors.BgColor
+        flex: 1
     },
     mainContainer: {
         flex: 1,
@@ -119,6 +107,13 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 10,
         color: 'black'
+    },
+    welcomeIllustrationContainer: {
+        marginTop: '30%',
+    },
+    welcomeTextContainer: {
+        marginTop: 32,
+        alignItems: 'center',
     },
     loginBtn: {
         flexDirection: 'row',

@@ -2,32 +2,46 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, BackHandler } from "react-native";
 
 //import constants
-import { Colors, FontFamily } from "../common/constants";
+import { Colors, FontFamily, Strings } from "../common/constants";
 
 //import svgs
-import SvgBackArrow       from '../assets/icons/svg/backArrow.svg';
-import SvgBackGrey        from '../assets/icons/svg/backArrowGrey.svg';
-import SvgSearch          from '../assets/icons/svg/searchWhite.svg';
-import SvgCross           from '../assets/icons/svg/crossGrey.svg';
-import SvgCrossWhite      from '../assets/icons/svg/crossWhite.svg';
-import SvgWhiteStar       from '../assets/icons/svg/whiteFav.svg';
-import SvgPencil          from '../assets/icons/svg/pencil.svg';
-import SvgShare           from '../assets/icons/svg/shareWhite.svg';
-import SvgTrash           from '../assets/icons/svg/trash.svg';
-import SvgAdd             from '../assets/icons/svg/plus.svg';
+import SvgBackArrow from '../assets/icons/svg/backArrow.svg';
+import SvgBackGrey from '../assets/icons/svg/backArrowGrey.svg';
+import SvgSearch from '../assets/icons/svg/searchWhite.svg';
+import SvgCross from '../assets/icons/svg/crossGrey.svg';
+import SvgCrossWhite from '../assets/icons/svg/crossWhite.svg';
+import SvgWhiteStar from '../assets/icons/svg/whiteFav.svg';
+import SvgPencil from '../assets/icons/svg/pencil.svg';
+import SvgShare from '../assets/icons/svg/shareWhite.svg';
+import SvgTrash from '../assets/icons/svg/trash.svg';
+import SvgAdd from '../assets/icons/svg/plus.svg';
 
-const NormalHeader = ({navigation, placeholder, backBtn, crossBtn, headerTitle, headerTitleColor, iconArr, customClickEvent, rightBtnClickEvent, searchStatus, updateSearchStatus, searchBlur, textChangeEvent}) => {
-    const [ searchInput, setSearchInput ] = useState('');
+const NormalHeader = ({
+    navigation,
+    placeholder,
+    backBtn,
+    crossBtn,
+    loaderStatus,
+    headerTitle,
+    headerTitleColor,
+    iconArr,
+    customClickEvent,
+    rightBtnClickEvent,
+    searchStatus,
+    updateSearchStatus,
+    searchBlur,
+    textChangeEvent
+}) => {
+
+    //states
+    const [searchInput, setSearchInput] = useState('');
+
+    //refs
     const searchRef = useRef();
 
-    useEffect(() => {
-        if(searchStatus){
-            searchRef.current.focus();
-        }
-    }, [searchStatus]);
-
+    //function to handle the back press event
     const handleBackPress = () => {
-        if(searchStatus){
+        if (searchStatus) {
             updateSearchStatus();
             textChangeEvent('');
             setSearchInput('');
@@ -36,73 +50,89 @@ const NormalHeader = ({navigation, placeholder, backBtn, crossBtn, headerTitle, 
         return false;
     }
 
-    useEffect(()=>{
+    useEffect(() => {
+        if (searchStatus) {
+            searchRef.current.focus();
+        }
+    }, [searchStatus]);
+
+    useEffect(() => {
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
         return () => backHandler.remove();
     }, [searchStatus]);
 
-    return(
+    return (
         <View style={styles.body}>
-            {!searchStatus? 
-                <View style={{flex: 1, flexDirection:'row', alignItems:'center', justifyContent:'space-between'}}>
-                    <View style={{flexDirection:'row', alignItems:'center', maxWidth:"85%"}}>
-                        {backBtn || crossBtn? 
-                        <>
-                            <TouchableOpacity onPress={() => navigation.goBack()} style={{padding: 20}}>
-                                {backBtn? <SvgBackArrow />: crossBtn? <SvgCrossWhite />: null}
-                            </TouchableOpacity>
-                            <View style={{paddingVertical: 20}}>
-                                <Text style={{color: headerTitleColor, fontSize: 20, fontFamily: FontFamily.OutfitMedium}}>{headerTitle}</Text>
-                            </View>
-                        </>
-                        :
-                        <Text style={{color: headerTitleColor, fontSize: 20, fontFamily: FontFamily.OutfitMedium, padding: 20}}>{headerTitle}</Text>}
+            {!searchStatus ?
+                <View style={styles.headerRow}>
+                    <View style={styles.headerLeft}>
+                        {(backBtn || crossBtn) ?
+                            <>
+                                <TouchableOpacity onPress={() => customClickEvent ?? navigation.goBack()} style={styles.headerActionButton}>
+                                    {backBtn ? <SvgBackArrow /> : crossBtn ? <SvgCrossWhite /> : null}
+                                </TouchableOpacity>
+                                <View style={styles.headerTitleContainer}>
+                                    <Text style={[styles.headerTitleText, { color: headerTitleColor }]}>{headerTitle}</Text>
+                                </View>
+                            </>
+                            :
+                            <Text style={[styles.headerTitleText, styles.headerTitleStandalone, { color: headerTitleColor }]}>{headerTitle}</Text>
+                        }
                     </View>
-                    {iconArr?.length > 0? 
-                        <View style={{flexDirection:'row', alignItems:'center'}}>
-                            { iconArr.some((item) => item === 'search')?
+                    {iconArr?.length > 0 && (
+                        <View style={styles.iconRow}>
+                            {iconArr.some((item) => item === 'search') && (
                                 <TouchableOpacity style={styles.iconStyle} onPress={() => updateSearchStatus()}>
                                     <SvgSearch width={20} height={20} />
                                 </TouchableOpacity>
-                            : null }
-                            { iconArr.some((item) => item === 'whiteStar')?
+                            )}
+                            {iconArr.some((item) => item === 'whiteStar') && (
                                 <TouchableOpacity style={styles.iconStyle} onPress={() => rightBtnClickEvent('star')}>
                                     <SvgWhiteStar width={20} height={20} />
                                 </TouchableOpacity>
-                            : null }
-                            { iconArr.some((item) => item === 'pencil')?
+                            )}
+                            {iconArr.some((item) => item === 'pencil') && (
                                 <TouchableOpacity style={styles.iconStyle} onPress={() => rightBtnClickEvent('edit')}>
                                     <SvgPencil width={20} height={20} />
                                 </TouchableOpacity>
-                            : null }
-                            { iconArr.some((item) => item === 'share')?
+                            )}
+                            {iconArr.some((item) => item === 'share') && (
                                 <TouchableOpacity style={styles.iconStyle} onPress={() => rightBtnClickEvent('share')}>
                                     <SvgShare width={20} height={20} />
                                 </TouchableOpacity>
-                            : null }
-                            { iconArr.some((item) => item === 'trash')?
+                            )}
+                            {iconArr.some((item) => item === 'trash') && (
                                 <TouchableOpacity style={styles.iconStyle} onPress={() => rightBtnClickEvent('delete')}>
                                     <SvgTrash width={20} height={20} />
                                 </TouchableOpacity>
-                            : null }
-                            {iconArr.some((item) => item === 'saveBtn')? 
-                                <TouchableOpacity activeOpacity={0.7} style={styles.saveBtn} onPress={() => rightBtnClickEvent('save')}>
-                                    <Text style={{color: Colors.Base_White, fontSize: 16, fontFamily: FontFamily.OutfitMedium}}>Save</Text>
+                            )}
+                            {iconArr.some((item) => item === 'saveBtn') && (
+                                <TouchableOpacity activeOpacity={0.7} style={[styles.saveBtn, { backgroundColor: loaderStatus ? Colors.BgColor : Colors.Primary }]} onPress={() => rightBtnClickEvent('save')}>
+                                    <Text style={[styles.saveBtnText, { color: loaderStatus ? Colors.Base_Grey : Colors.Base_White }]}>{loaderStatus ? Strings.Saving : Strings.Save}</Text>
                                 </TouchableOpacity>
-                            : null}
-                            {iconArr.some((item) => item === 'addBtn')? 
+                            )}
+                            {iconArr.some((item) => item === 'updateBtn') && (
+                                <TouchableOpacity activeOpacity={0.7} disabled={loaderStatus} style={[styles.saveBtn, { backgroundColor: loaderStatus ? Colors.BgColor : Colors.Primary }]} onPress={() => rightBtnClickEvent('save')}>
+                                    <Text style={[styles.saveBtnText, { color: loaderStatus ? Colors.Base_Grey : Colors.Base_White }]}>{loaderStatus ? Strings.Updating : Strings.Update}</Text>
+                                </TouchableOpacity>
+                            )}
+                            {iconArr.some((item) => item === 'addBtn') && (
                                 <TouchableOpacity onPress={() => rightBtnClickEvent('add')} activeOpacity={0.7} style={styles.addBtn}>
                                     <SvgAdd width={15} height={15} />
-                                    <Text style={styles.addBtnText}>Add</Text>
+                                    <Text style={styles.addBtnText}>{Strings.Add}</Text>
                                 </TouchableOpacity>
-                            : null}
+                            )}
                         </View>
-                    : null}
+                    )}
                 </View>
-            :
+                :
                 <View style={styles.searchInputContainer}>
-                    <View style={{flexDirection:'row', alignItems:"center", width:"87%"}}>
-                        <TouchableOpacity onPress={() => [updateSearchStatus(), textChangeEvent(''), setSearchInput('')]} style={{padding: 20}}>
+                    <View style={styles.searchLeft}>
+                        <TouchableOpacity onPress={() => {
+                            updateSearchStatus();
+                            textChangeEvent('');
+                            setSearchInput('');
+                        }} style={styles.headerActionButton}>
                             <SvgBackGrey />
                         </TouchableOpacity>
                         <TextInput
@@ -112,26 +142,58 @@ const NormalHeader = ({navigation, placeholder, backBtn, crossBtn, headerTitle, 
                             placeholderTextColor={Colors.Base_Medium_Grey}
                             value={searchInput}
                             autoFocus={true}
-                            style={{color: Colors.Base_White, fontSize: 18, fontFamily: FontFamily.OutfitRegular, paddingVertical:20, width:'85%'}}
-                            onBlur={() => { if(searchBlur) searchBlur() }}
-                            onChange={(e) => [textChangeEvent(e.nativeEvent.text), setSearchInput(e.nativeEvent.text)]}
+                            style={styles.searchInput}
+                            onBlur={searchBlur}
+                            onChange={(e) => { textChangeEvent(e.nativeEvent.text); setSearchInput(e.nativeEvent.text); }}
                         />
                     </View>
-                    {searchInput !== ''? 
-                    <TouchableOpacity onPress={() => [textChangeEvent(''), setSearchInput('')]} style={{padding:20}}>
-                        <SvgCross />
-                    </TouchableOpacity>: null}
+                    {searchInput !== '' && (
+                        <TouchableOpacity onPress={() => { textChangeEvent(''); setSearchInput(''); }} style={styles.headerActionButton}>
+                            <SvgCross />
+                        </TouchableOpacity>
+                    )}
                 </View>
             }
         </View>
     )
 }
 
-const PageHeader = ({navigation, placeholder='Search', headerType='normalHeader', headerTitle=null, headerTitleColor=Colors.Base_White, iconArr=[], backBtn=false, crossBtn=false, customClickEvent=null, rightBtnClickEvent=null, searchBlur=null, searchEvent=null}) => {
-    const [ searchStatus, setSearchStatus ] = useState(false);
-    return(
+const PageHeader = ({
+    navigation,
+    placeholder = 'Search',
+    loaderStatus = false,
+    headerType = 'normalHeader',
+    headerTitle = null,
+    headerTitleColor = Colors.Base_White,
+    iconArr = [],
+    backBtn = false,
+    crossBtn = false,
+    customClickEvent = null,
+    rightBtnClickEvent = null,
+    searchBlur = null,
+    searchEvent = null
+}) => {
+    const [searchStatus, setSearchStatus] = useState(false);
+    return (
         <>
-            { headerType === 'normalHeader'? <NormalHeader navigation={navigation} headerTitle={headerTitle} headerTitleColor={headerTitleColor} placeholder={placeholder} backBtn={backBtn} crossBtn={crossBtn} iconArr={iconArr} customClickEvent={customClickEvent} rightBtnClickEvent={(req) => rightBtnClickEvent(req)} searchStatus={searchStatus} textChangeEvent={(val) => searchEvent? searchEvent(val): null} searchBlur={() => {if(searchBlur) searchBlur()}} updateSearchStatus={() => setSearchStatus(!searchStatus)} />: null }
+            {headerType === 'normalHeader' && (
+                <NormalHeader
+                    navigation={navigation}
+                    headerTitle={headerTitle}
+                    headerTitleColor={headerTitleColor}
+                    placeholder={placeholder}
+                    loaderStatus={loaderStatus}
+                    backBtn={backBtn}
+                    crossBtn={crossBtn}
+                    iconArr={iconArr}
+                    customClickEvent={customClickEvent}
+                    rightBtnClickEvent={rightBtnClickEvent}
+                    searchStatus={searchStatus}
+                    textChangeEvent={searchEvent}
+                    searchBlur={searchBlur}
+                    updateSearchStatus={() => setSearchStatus(status => !status)}
+                />
+            )}
         </>
     )
 }
@@ -142,44 +204,89 @@ const styles = StyleSheet.create({
     body: {
         justifyContent: 'space-between',
         flexDirection: 'row',
-        alignItems:'center',
+        alignItems: 'center',
+    },
+    headerRow: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    headerLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        maxWidth: "85%",
+    },
+    headerActionButton: {
+        padding: 20,
+    },
+    headerTitleContainer: {
+        paddingVertical: 20,
+    },
+    headerTitleText: {
+        fontSize: 20,
+        fontFamily: FontFamily.OutfitMedium,
+    },
+    headerTitleStandalone: {
+        padding: 20,
+    },
+    iconRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     iconStyle: {
-        paddingRight: 20, 
+        paddingRight: 20,
         paddingVertical: 20
     },
     searchInputContainer: {
-        flex: 1, 
-        flexDirection: 'row', 
-        alignItems:"center", 
-        justifyContent:"space-between", 
-        borderBottomWidth: 1, 
-        borderColor: Colors.Base_Grey, 
-        marginBottom:1
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: "center",
+        justifyContent: "space-between",
+        borderBottomWidth: 1,
+        borderColor: Colors.Base_Grey,
+        marginBottom: 1
     },
     saveBtn: {
-        alignItems:'center', 
-        justifyContent:'center', 
-        borderRadius: 12, 
-        paddingVertical:10, 
-        paddingHorizontal:20, 
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 12,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
         marginRight: 20,
         backgroundColor: Colors.Primary
     },
+    saveBtnText: {
+        color: Colors.Base_White,
+        fontSize: 16,
+        fontFamily: FontFamily.OutfitMedium,
+    },
     addBtnText: {
-        color: Colors.Primary, 
-        fontSize: 16, 
-        fontFamily: FontFamily.OutfitMedium, 
+        color: Colors.Primary,
+        fontSize: 16,
+        fontFamily: FontFamily.OutfitMedium,
         marginLeft: 10
     },
     addBtn: {
-        backgroundColor: Colors.Primary_Light, 
-        borderRadius:6, 
-        paddingVertical:7, 
-        paddingHorizontal:15, 
-        alignItems:'center', 
-        justifyContent:'center', 
-        flexDirection:'row',
+        backgroundColor: Colors.Primary_Light,
+        borderRadius: 6,
+        paddingVertical: 7,
+        paddingHorizontal: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row',
         marginRight: 20
+    },
+    searchLeft: {
+        flexDirection: 'row',
+        alignItems: "center",
+        width: "87%",
+    },
+    searchInput: {
+        color: Colors.Base_White,
+        fontSize: 18,
+        fontFamily: FontFamily.OutfitRegular,
+        paddingVertical: 20,
+        width: '85%',
     },
 })

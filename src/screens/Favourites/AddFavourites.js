@@ -57,7 +57,7 @@ const AddFavourites = ({ navigation }) => {
   //contact item component
   const ContactItem = ({ item, index }) => {
     return (
-      <View key={index} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+      <View key={index} style={styles.contactItemRow}>
         <View style={styles.contactItemContainer}>
           {item?.thumbnailPath !== '' ?
             <FastImage source={{ uri: item?.thumbnailPath, priority: 'high' }} style={styles.contactImg} />
@@ -68,7 +68,7 @@ const AddFavourites = ({ navigation }) => {
           }
           <Text style={styles.contactNameText}>{item?.displayName}</Text>
         </View>
-        <TouchableOpacity onPress={() => updateFavContacts(item.recordID, !item?.isSelected)} style={{ padding: 10 }}>
+        <TouchableOpacity onPress={() => updateFavContacts(item.recordID, !item?.isSelected)} style={styles.favouriteToggleBtn}>
           {item.isSelected ? <SvgPrimaryFav width={20} height={20} /> : <SvgFavourite width={20} height={20} />}
         </TouchableOpacity>
       </View>
@@ -78,7 +78,7 @@ const AddFavourites = ({ navigation }) => {
   //contacts group item component
   const ContactGroupItem = ({ item: letter, index }) => {
     return (
-      <View key={index} style={{ flexDirection: 'row' }}>
+      <View key={index} style={styles.contactGroupContainer}>
         <Text style={styles.contactInitialText}>{letter}</Text>
         <FlatList
           data={sortedContacts.filter(contact => getUcFirstLetter(contact?.displayName) === letter)}
@@ -148,14 +148,14 @@ const AddFavourites = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.safeAreaView}>
       <PageHeader headerTitle={selectedCount ? `${selectedCount} selected` : 'Select Contacts'} backBtn iconArr={['search']} placeholder='Search Contacts' searchEvent={(val) => searchEvent(val)} navigation={navigation} />
-      <View style={{ flex: 1, marginHorizontal: 20 }}>
+      <View style={styles.listContainer}>
         <FlatList
           data={uniqueLetters}
           showsVerticalScrollIndicator={false}
           renderItem={ContactGroupItem}
           keyboardDismissMode={'on-drag'}
           keyboardShouldPersistTaps={'handled'}
-          ListFooterComponent={<View style={{ height: 100 }} />}
+          ListFooterComponent={<View style={styles.listFooter} />}
           keyExtractor={(_, index) => index.toString()}
         />
       </View>
@@ -163,8 +163,8 @@ const AddFavourites = ({ navigation }) => {
         <TouchableOpacity activeOpacity={0.7} onPress={() => handleClickOnCancel()} style={styles.actionBtn}>
           <Text style={styles.actionBtnText}>Cancel</Text>
         </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.goBack()} style={[styles.actionBtn, { backgroundColor: Colors.Primary }]}>
-          <Text style={[styles.actionBtnText, { color: Colors.Base_White }]}>Done</Text>
+        <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.goBack()} style={[styles.actionBtn, styles.primaryActionBtn]}>
+          <Text style={[styles.actionBtnText, styles.primaryActionBtnText]}>Done</Text>
         </TouchableOpacity>
       </Animated.View>
     </SafeAreaView>
@@ -175,8 +175,7 @@ export default AddFavourites;
 
 const styles = StyleSheet.create({
   safeAreaView: {
-    flex: 1,
-    backgroundColor: Colors.BgColor
+    flex: 1
   },
   saveContactBtn: {
     width: "48%",
@@ -191,6 +190,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 10,
     width: '75%'
+  },
+  contactItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   contactNameText: {
     color: Colors.Base_White,
@@ -224,6 +228,19 @@ const styles = StyleSheet.create({
     marginTop: 20,
     width: 40
   },
+  contactGroupContainer: {
+    flexDirection: 'row',
+  },
+  favouriteToggleBtn: {
+    padding: 10,
+  },
+  listContainer: {
+    flex: 1,
+    marginHorizontal: 20,
+  },
+  listFooter: {
+    height: 100,
+  },
   buttonContainer: {
     backgroundColor: Colors.Bg_Light,
     position: 'absolute',
@@ -248,9 +265,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center'
   },
+  primaryActionBtn: {
+    backgroundColor: Colors.Primary,
+  },
   actionBtnText: {
     color: Colors.Primary,
     fontSize: 18,
     fontFamily: FontFamily.OutfitMedium
+  },
+  primaryActionBtnText: {
+    color: Colors.Base_White,
   },
 })

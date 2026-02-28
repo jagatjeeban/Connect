@@ -1,9 +1,13 @@
 import HomeHeader from "./HomeHeader";
 import PageHeader from "./PageHeader";
-import DropDown   from "./coreComponents/DropDown";
+
+//import core components
+import DropDown from "./coreComponents/DropDown";
+import TextComponent from "./coreComponents/TextComponent";
 
 export {
     HomeHeader,
     PageHeader,
-    DropDown
+    DropDown,
+    TextComponent
 }

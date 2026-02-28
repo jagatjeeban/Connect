@@ -1,7 +1,6 @@
-import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, Image, Platform, ScrollView } from 'react-native'
-import React, { useRef, useState, useEffect } from 'react'
+import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
+import React, { useRef, useState } from 'react'
 import { useSelector } from 'react-redux';
-import { useIsFocused } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 
 //import constants
@@ -16,14 +15,22 @@ import SvgPlus from '../../assets/icons/svg/plus.svg';
 //import custom functions
 import { getUcFirstLetter } from '../../common/helper/customFun';
 
+//import helper hooks
+import { useResponsive, useSearchFilter } from '../../common/helper/hooks';
+
+//import common functions
+import { mapDisplayContacts } from '../../common/helper/commonFun';
+
 const Favourites = ({ navigation }) => {
 
-  const dash = useSelector((state) => state.dash);
-  const isFocused = useIsFocused();
+  //redux selectors
+  const storedContacts = useSelector((state) => state.dash.contacts);
+
+  //hooks
+  const { iconSize } = useResponsive();
 
   //states
-  const [contacts, setContacts] = useState([]);
-  const [filteredContacts, setFilteredContacts] = useState([]);
+  const [searchInput, setSearchInput] = useState('');
 
   //refs
   const refProfileSheet = useRef();
@@ -41,40 +48,26 @@ const Favourites = ({ navigation }) => {
     )
   }
 
-  //function to search contacts
-  const searchEvent = (req) => {
-    if (req === '') {
-      setFilteredContacts(contacts);
-    } else {
-      setFilteredContacts(contacts.filter(item => item?.displayName?.toLowerCase()?.includes(req?.toLowerCase())));
-    }
-  }
+  const filteredContacts = useSearchFilter(mapDisplayContacts(storedContacts), 'displayName', searchInput);
 
-  useEffect(() => {
-    if (isFocused) {
-      let contactList = dash.contacts.map(item => {
-        return {
-          'recordID': item?.recordID,
-          'displayName': Platform.OS === 'android' ? item?.displayName : `${item?.givenName} ${item?.familyName}`,
-          'thumbnailPath': item?.thumbnailPath
-        }
-      });
-      setContacts(contactList);
-      setFilteredContacts(contactList);
-    }
-  }, [isFocused]);
+  //function to navigate to the contact details
+  const navigateToDetails = (contactItem) => {
+    const contactInfo = storedContacts.find(contact => contact?.recordID === contactItem?.recordID);
+    if (!contactInfo) return;
+    navigation.navigate('ContactDetails', { info: contactInfo });
+  }
 
   return (
     <SafeAreaView style={styles.safeAreaView}>
-      <HomeHeader refRBSheet={refProfileSheet} placeholder={'Search contacts'} searchEvent={(val) => searchEvent(val)} />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 130 }}>
+      <HomeHeader refRBSheet={refProfileSheet} placeholder={'Search contacts'} searchEvent={setSearchInput} />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <Header />
         <View style={styles.favContactsContainer}>
-          {filteredContacts.slice(0, 6).map((item, index) => {
+          {filteredContacts.slice(0, 6).map((item) => {
             return (
-              <TouchableOpacity key={index} activeOpacity={0.7} onPress={() => navigation.navigate('ContactDetails', { info: dash.contacts.filter(contact => contact?.recordID === item?.recordID)[0] })} style={styles.favContactItem}>
+              <TouchableOpacity key={item?.recordID} activeOpacity={0.7} onPress={() => navigateToDetails(item)} style={styles.favContactItem}>
                 {item?.thumbnailPath !== '' ?
-                  <FastImage source={{ uri: item?.thumbnailPath, priority: 'high' }} style={{ width: 70, height: 70, borderRadius: 15 }} />
+                  <FastImage source={{ uri: item?.thumbnailPath, priority: 'high' }} style={styles.favContactImage} />
                   :
                   <View style={styles.defaultContactImg}>
                     <Text style={styles.contactFirstLetter}>{getUcFirstLetter(item?.displayName)}</Text>
@@ -131,10 +124,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingBottom: 30
   },
+  scrollContent: {
+    paddingBottom: 130,
+  },
   favContactItem: {
     alignItems: 'center',
     paddingTop: 30,
     width: '25%',
+  },
+  favContactImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 15,
   },
   favContactName: {
     color: Colors.Base_White,

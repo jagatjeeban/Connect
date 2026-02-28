@@ -3,9 +3,6 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useIsFocused } from '@react-navigation/native';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import FastImage from 'react-native-fast-image';
-import vCard from 'vcards-js';
-import Share from 'react-native-share';
-import base64 from 'react-native-base64';
 import Contact from 'react-native-contacts';
 import { showMessage } from 'react-native-flash-message';
 import { useDispatch, useSelector } from 'react-redux';
@@ -15,6 +12,9 @@ import { Colors, FontFamily, Strings } from '../../common/constants';
 
 //import system statics
 import { screenDimensions } from '../../common/helper/systemStatic';
+
+//import common functions
+import { openCallApp, openMailApp, openMessagingApp, shareContact } from '../../common/helper/commonFun';
 
 //import components
 import { PageHeader } from '../../components';
@@ -34,14 +34,33 @@ import SvgTrash from '../../assets/icons/svg/trash.svg';
 //import redux slice
 import { storeContacts } from '../../store/dashSlice';
 
+//delete number bottomsheet component
+const DeleteNumberSheet = ({ refRBSheet, onClickDelete = null }) => {
+  return (
+    <RBSheet ref={refRBSheet} height={Platform.OS === 'ios' ? 250 : 230} customStyles={{ container: styles.bottomSheet, draggableIcon: styles.pillsBarStyle }} closeOnPressBack draggable dragOnContent>
+      <View style={styles.deleteTextContainer}>
+        <Text style={styles.deleteText} numberOfLines={null}>{Strings.DeleteNumberText}</Text>
+      </View>
+      <View style={styles.actionBtnContainer}>
+        <TouchableOpacity activeOpacity={0.7} onPress={() => refRBSheet.current?.close()} style={styles.actionBtn}>
+          <Text style={styles.actionBtnText}>No, Keep it!</Text>
+        </TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.7} onPress={onClickDelete} style={[styles.actionBtn, styles.primaryActionBtn]}>
+          <Text style={[styles.actionBtnText, styles.primaryActionBtnText]}>Yes, Delete!</Text>
+        </TouchableOpacity>
+      </View>
+    </RBSheet>
+  )
+}
+
 const ContactDetails = ({ navigation, route }) => {
 
-  const contact = vCard();
+  //hooks
+  const dispatch = useDispatch();
   const isFocused = useIsFocused();
 
-  //store events
-  const dispatch = useDispatch();
-  const dash = useSelector(state => state.dash);
+  //redux selectors
+  const storedContacts = useSelector(state => state.dash.contacts);
 
   //refs
   const deleteSheetRef = useRef();
@@ -49,37 +68,24 @@ const ContactDetails = ({ navigation, route }) => {
   //states
   const [contactInfo, setContactInfo] = useState(route?.params?.info);
 
+  useEffect(() => {
+    if (route?.params?.info) {
+      setContactInfo(route.params.info);
+    }
+  }, [route?.params?.info]);
+
   //contact info item component
   const ContactInfoItem = ({ item, index }) => {
     return (
-      <View key={index} style={{ flexDirection: 'row' }}>
-        <View style={{ marginTop: 5 }}>
+      <View key={index} style={styles.contactInfoRow}>
+        <View style={styles.contactInfoIconContainer}>
           <SvgCallWhite />
         </View>
-        <View style={{ marginLeft: 20 }}>
+        <View style={styles.contactInfoTextContainer}>
           <Text style={styles.mobileNumber}>{item?.number}</Text>
           <Text style={styles.contactLabel}>{getUcFirstLetterString(item?.label)}</Text>
         </View>
       </View>
-    )
-  }
-
-  //delete number bottomsheet component
-  const DeleteNumberSheet = ({ refRBSheet }) => {
-    return (
-      <RBSheet ref={refRBSheet} height={Platform.OS === 'ios' ? 250 : 230} customStyles={{ container: styles.bottomSheet, draggableIcon: styles.pillsBarStyle }} closeOnPressBack draggable dragOnContent>
-        <View style={styles.deleteTextContainer}>
-          <Text style={styles.deleteText} numberOfLines={null}>{Strings.DeleteNumberText}</Text>
-        </View>
-        <View style={styles.actionBtnContainer}>
-          <TouchableOpacity activeOpacity={0.7} onPress={() => refRBSheet.current.close()} style={styles.actionBtn}>
-            <Text style={styles.actionBtnText}>No, Keep it!</Text>
-          </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.7} onPress={() => deleteContact()} style={[styles.actionBtn, { backgroundColor: Colors.Primary }]}>
-            <Text style={[styles.actionBtnText, { color: Colors.Base_White }]}>Yes, Delete!</Text>
-          </TouchableOpacity>
-        </View>
-      </RBSheet>
     )
   }
 
@@ -88,15 +94,16 @@ const ContactDetails = ({ navigation, route }) => {
     deleteSheetRef.current.close();
     Contact.deleteContact({ recordID: contactInfo?.recordID })
       .then(() => {
-        let updatedContacts = [...dash?.contacts];
-        let index = updatedContacts.findIndex(contact => contact?.recordID === contactInfo?.recordID);
+        const updatedContacts = [...storedContacts];
+        const index = updatedContacts.findIndex(contact => contact?.recordID === contactInfo?.recordID);
+        if (index === -1) return;
         updatedContacts.splice(index, 1);
         dispatch(storeContacts(updatedContacts));
         navigation.pop();
         showMessage({ message: 'Contact deleted successfully!', type: 'danger', icon: 'success' });
       })
       .catch((error) => {
-        console.log('DELETE ERROR:', JSON.stringify(error));
+        console.log('Contact Delete Err', error);
       })
   }
 
@@ -104,96 +111,14 @@ const ContactDetails = ({ navigation, route }) => {
   const removeDuplicateNumbers = (arr) => {
     const uniqueNumbers = new Set();
     return arr?.reduce((info, current) => {
-      if (!uniqueNumbers.has(current.number.replace(/\s+/g, ''))) {
-        uniqueNumbers.add(current.number.replace(/\s+/g, ''));
+      const newNumber = current.number.replace(/\s+/g, '');
+      if (!uniqueNumbers.has(newNumber)) {
+        uniqueNumbers.add(newNumber);
         info.push(current);
       }
       return info;
     }, []);
   };
-
-  //function to open the default message app
-  const openMessagingApp = (phoneNumber) => {
-    let url = '';
-
-    if (Platform.OS === 'android') {
-      url = `sms:${phoneNumber.replace(/\s+/g, '')}`;
-    } else if (Platform.OS === 'ios') {
-      url = `sms:${phoneNumber.replace(/\s+/g, '')}`;
-    }
-
-    Linking.openURL(url);
-  };
-
-  //function to open the default mail app
-  const openMailApp = (mailId) => {
-    let url = '';
-
-    if (Platform.OS === 'android') {
-      url = `mailto:${mailId}`;
-    } else if (Platform.OS === 'ios') {
-      url = `mailto:${mailId}`;
-    }
-
-    Linking.openURL(url);
-  }
-
-  //function to open the default calling app
-  const openCallApp = (phoneNumber) => {
-    let url = '';
-
-    if (Platform.OS === 'android') {
-      url = `tel:${phoneNumber.replace(/\s+/g, '')}`;
-    } else if (Platform.OS === 'ios') {
-      url = `tel:${phoneNumber.replace(/\s+/g, '')}`;
-    }
-
-    Linking.openURL(url);
-  }
-
-  //function to generate the vCard string
-  const generateVCardString = () => {
-    contact.firstName = contactInfo?.givenName;
-    contact.middleName = contactInfo?.middleName;
-    contact.lastName = contactInfo?.familyName;
-    contactInfo?.phoneNumbers.forEach((item, index) => {
-      if (item?.label === 'main' || item?.label === 'mobile' || item?.label === 'other') {
-        contact.cellPhone = contactInfo?.phoneNumbers[index]?.number;
-      }
-      if (item?.label === 'home') {
-        contact.homePhone = contactInfo?.phoneNumbers[index]?.number;
-      }
-      if (item?.label === 'work') {
-        contact.workPhone = contactInfo?.phoneNumbers[index]?.number;
-      }
-    });
-    contactInfo?.emailAddresses.forEach((item, index) => {
-      if (item?.label === 'work') {
-        contact.workEmail = contactInfo?.emailAddresses[index]?.email;
-      } else {
-        contact.email = contactInfo?.emailAddresses[index]?.email;
-      }
-    });
-
-    const vCardString = contact.getFormattedString();
-    return vCardString;
-  }
-
-  //function to share the contact
-  const shareContact = () => {
-    const vCardString = generateVCardString();
-    const vCardBase64 = base64.encode(vCardString);
-    const vCardDataUrl = `data:text/vcard;base64,${vCardBase64}`;
-
-    const options = {
-      url: vCardDataUrl,
-      type: 'text/vcard',
-      fileName: `${contactInfo?.displayName}.vcf`
-    }
-    Share.open(options)
-      .then(() => { })
-      .catch((err) => { console.log(err) })
-  }
 
   //function to perform contact actions
   const actionClickEvent = (req) => {
@@ -209,6 +134,8 @@ const ContactDetails = ({ navigation, route }) => {
     }
   }, [isFocused]);
 
+  const phoneNumbers = removeDuplicateNumbers(contactInfo?.phoneNumbers) ?? [];
+
   return (
     <SafeAreaView style={styles.safeAreaView}>
       <View style={styles.upperCurveEffect}>
@@ -218,11 +145,11 @@ const ContactDetails = ({ navigation, route }) => {
       <FlatList
         data={[1]}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 50 }}
+        contentContainerStyle={styles.contentContainer}
         renderItem={() => {
           return (
             <View>
-              <View style={{ alignItems: 'center' }}>
+              <View style={styles.contactHeaderContainer}>
                 {contactInfo?.thumbnailPath && contactInfo?.thumbnailPath !== '' ?
                   <FastImage source={{ uri: contactInfo?.thumbnailPath }} style={styles.contactImg} />
                   :
@@ -233,27 +160,27 @@ const ContactDetails = ({ navigation, route }) => {
                 <Text style={styles.contactName}>{Platform.OS === 'android' ? contactInfo?.displayName : `${contactInfo?.givenName} ${contactInfo?.familyName}`}</Text>
               </View>
               <View style={styles.actionsContainer}>
-                <TouchableOpacity activeOpacity={0.7} onPress={() => openCallApp(contactInfo?.phoneNumbers[0]?.number)} style={{ alignItems: "center" }}>
+                <TouchableOpacity activeOpacity={0.7} onPress={() => openCallApp(contactInfo?.phoneNumbers[0]?.number)} style={styles.actionTouchTarget}>
                   <View style={styles.actionIconContainer}>
                     <SvgCall />
                   </View>
                   <Text style={styles.actionText}>Call</Text>
                 </TouchableOpacity>
-                <TouchableOpacity activeOpacity={0.7} onPress={() => openMessagingApp(contactInfo?.phoneNumbers[0]?.number)} style={{ alignItems: "center" }}>
+                <TouchableOpacity activeOpacity={0.7} onPress={() => openMessagingApp(contactInfo?.phoneNumbers[0]?.number)} style={styles.actionTouchTarget}>
                   <View style={styles.actionIconContainer}>
                     <SvgMessage />
                   </View>
                   <Text style={styles.actionText}>Message</Text>
                 </TouchableOpacity>
                 {contactInfo?.emailAddresses?.length > 0 ?
-                  <TouchableOpacity activeOpacity={0.7} onPress={() => openMailApp(contactInfo?.emailAddresses[0]?.email)} style={{ alignItems: "center" }}>
+                  <TouchableOpacity activeOpacity={0.7} onPress={() => openMailApp(contactInfo?.emailAddresses[0]?.email)} style={styles.actionTouchTarget}>
                     <View style={styles.actionIconContainer}>
                       <SvgMail />
                     </View>
                     <Text style={styles.actionText}>Email</Text>
                   </TouchableOpacity>
                   : null}
-                <TouchableOpacity activeOpacity={0.7} onPress={() => shareContact()} style={{ alignItems: "center" }}>
+                <TouchableOpacity activeOpacity={0.7} onPress={() => shareContact(contactInfo)} style={styles.actionTouchTarget}>
                   <View style={styles.actionIconContainer}>
                     <SvgShare />
                   </View>
@@ -263,23 +190,26 @@ const ContactDetails = ({ navigation, route }) => {
               <View style={styles.contactInfoContainer}>
                 <Text style={styles.contactInfoText}>Contact Info</Text>
                 <FlatList
-                  data={removeDuplicateNumbers(contactInfo?.phoneNumbers)}
+                  data={phoneNumbers}
                   showsVerticalScrollIndicator={false}
                   renderItem={ContactInfoItem}
-                  ItemSeparatorComponent={<View style={{ backgroundColor: Colors.Base_Grey, height: 1, marginVertical: 15 }} />}
+                  ItemSeparatorComponent={<View style={styles.contactInfoSeparator} />}
                   keyExtractor={(_, index) => index.toString()}
                 />
               </View>
-              <TouchableOpacity activeOpacity={0.7} onPress={() => deleteSheetRef.current.open()} style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 20, marginTop: 20, paddingVertical: 10 }}>
+              <TouchableOpacity activeOpacity={0.7} onPress={() => deleteSheetRef.current.open()} style={styles.deleteContactBtn}>
                 <SvgTrash width={18} height={18} />
-                <Text style={{ color: Colors.Base_Red, fontSize: 16, fontFamily: FontFamily.OutfitMedium, marginLeft: 15 }}>Delete contact</Text>
+                <Text style={styles.deleteContactText}>Delete contact</Text>
               </TouchableOpacity>
             </View>
           )
         }}
         keyExtractor={(_, index) => index.toString()}
       />
-      <DeleteNumberSheet refRBSheet={deleteSheetRef} />
+      <DeleteNumberSheet
+        refRBSheet={deleteSheetRef}
+        onClickDelete={deleteContact}
+      />
     </SafeAreaView>
   )
 }
@@ -288,8 +218,7 @@ export default ContactDetails;
 
 const styles = StyleSheet.create({
   safeAreaView: {
-    flex: 1,
-    backgroundColor: Colors.BgColor
+    flex: 1
   },
   upperCurveEffect: {
     position: 'absolute',
@@ -311,6 +240,48 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     borderRadius: 40,
     backgroundColor: Colors.Base_Grey
+  },
+  contactInfoRow: {
+    flexDirection: 'row',
+  },
+  contactInfoIconContainer: {
+    marginTop: 5,
+  },
+  contactInfoTextContainer: {
+    marginLeft: 20,
+  },
+  primaryActionBtn: {
+    backgroundColor: Colors.Base_Red,
+  },
+  primaryActionBtnText: {
+    color: Colors.Base_White,
+  },
+  contentContainer: {
+    paddingBottom: 50,
+  },
+  contactHeaderContainer: {
+    alignItems: 'center',
+  },
+  actionTouchTarget: {
+    alignItems: "center",
+  },
+  contactInfoSeparator: {
+    backgroundColor: Colors.Base_Grey,
+    height: 1,
+    marginVertical: 15,
+  },
+  deleteContactBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginTop: 20,
+    paddingVertical: 10,
+  },
+  deleteContactText: {
+    color: Colors.Base_Red,
+    fontSize: 16,
+    fontFamily: FontFamily.OutfitMedium,
+    marginLeft: 15,
   },
   inputContainer: {
     width: '100%',

@@ -1,15 +1,15 @@
-import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet, FlatList, Platform, PermissionsAndroid, ActivityIndicator, RefreshControl, Alert, Linking } from 'react-native'
-import React, { useEffect, useState } from 'react';
-import { useIsFocused } from '@react-navigation/native';
+import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet, FlatList, Platform, ActivityIndicator, RefreshControl, Alert } from 'react-native'
+import React, { useEffect, useRef, useState } from 'react';
 import FastImage from 'react-native-fast-image';
 import Contact from 'react-native-contacts';
 import { useDispatch, useSelector } from 'react-redux';
+import { check, request, PERMISSIONS, RESULTS, openSettings } from 'react-native-permissions';
 
 //import constants
 import { Colors, FontFamily, Strings } from '../../common/constants';
 
 //import common functions
-import { sortContacts } from '../../common/helper/commonFun';
+import { sortContacts, mapDisplayContacts } from '../../common/helper/commonFun';
 
 //import svgs
 import SvgPlus from '../../assets/icons/svg/plus.svg';
@@ -23,49 +23,72 @@ import { getUcFirstLetter } from '../../common/helper/customFun';
 //import redux actions
 import { storeContacts } from '../../store/dashSlice';
 
+//contact item component
+const ContactItem = ({ item, index, onClickEvent }) => {
+  return (
+    <TouchableOpacity key={index} activeOpacity={0.7} onPress={() => onClickEvent?.(item)} style={styles.contactItemContainer}>
+      {item?.thumbnailPath !== '' ?
+        <FastImage source={{ uri: item?.thumbnailPath, priority: 'high' }} style={styles.contactImg} />
+        :
+        <View style={styles.defaultContactImg}>
+          <Text style={styles.contactFirstLetter}>{getUcFirstLetter(item?.displayName)}</Text>
+        </View>
+      }
+      <Text style={styles.contactNameText}>{item?.displayName}</Text>
+    </TouchableOpacity>
+  )
+}
+
 const Contacts = ({ navigation }) => {
 
-  const isFocused = useIsFocused();
+  //hooks
+  const dispatch = useDispatch();
 
   //store events
-  const dispatch = useDispatch();
-  let dash = useSelector((state) => state.dash);
+  const storedContacts = useSelector((state) => state.dash.contacts);
+
+  //refs
+  const hasLoadedInitialContacts = useRef(storedContacts.length > 0);
 
   //states
-  const [contacts, setContacts] = useState([]);
-  const [filteredContacts, setFilteredContacts] = useState([]);
+  const [contacts, setContacts] = useState(() => mapDisplayContacts(storedContacts));
+  const [filteredContacts, setFilteredContacts] = useState(() => mapDisplayContacts(storedContacts));
   const [sortedContacts, setSortedContacts] = useState([]);
   const [uniqueLetters, setUniqueLetters] = useState([]);
   const [loaderStatus, setLoaderStatus] = useState(false);
   const [isGranted, setIsGranted] = useState(false);
 
-  //contact item component
-  const ContactItem = ({ item, index }) => {
+  //function to navigate to the contact details
+  const navigateToDetails = (contactItem) => {
+    if (!contactItem?.recordID) return;
+    const selectedContact = storedContacts.find(contact => contact?.recordID === contactItem?.recordID);
+    if (!selectedContact) return;
+    navigation.navigate('ContactDetails', { info: selectedContact })
+  }
+
+  //component to render the contact item
+  const RenderContactItem = ({ item, index }) => {
     return (
-      <TouchableOpacity key={index} activeOpacity={0.7} onPress={() => navigation.navigate('ContactDetails', { info: dash.contacts.filter(contact => contact?.recordID === item?.recordID)[0] })} style={styles.contactItemContainer}>
-        {item?.thumbnailPath !== '' ?
-          <FastImage source={{ uri: item?.thumbnailPath, priority: 'high' }} style={styles.contactImg} />
-          :
-          <View style={styles.defaultContactImg}>
-            <Text style={styles.contactFirstLetter}>{getUcFirstLetter(item?.displayName)}</Text>
-          </View>
-        }
-        <Text style={styles.contactNameText}>{item?.displayName}</Text>
-      </TouchableOpacity>
+      <ContactItem
+        item={item}
+        index={index}
+        onClickEvent={() => navigateToDetails(item)}
+      />
     )
   }
 
   //contacts group item component
   const ContactGroupItem = ({ item: letter, index }) => {
+    const filteredContacts = sortedContacts.filter(contact => getUcFirstLetter(contact?.displayName) === letter);
     return (
-      <View key={index} style={{ flexDirection: 'row' }}>
+      <View key={index} style={styles.contactGroupContainer}>
         <Text style={styles.contactInitialText}>{letter}</Text>
         <FlatList
-          data={sortedContacts.filter(contact => getUcFirstLetter(contact?.displayName) === letter)}
+          data={filteredContacts}
           showsVerticalScrollIndicator={false}
           nestedScrollEnabled={true}
-          renderItem={ContactItem}
-          keyExtractor={item => item?.recordID}
+          renderItem={RenderContactItem}
+          keyExtractor={(item) => item?.recordID}
         />
       </View>
     )
@@ -75,84 +98,68 @@ const Contacts = ({ navigation }) => {
   const getAllContacts = () => {
     setLoaderStatus(true);
     Contact.getAll()
-      .then((contacts) => {
-        let newList = contacts?.filter(item => item?.phoneNumbers?.length > 0);
+      .then((contactList) => {
+        const newList = contactList?.filter(item => item?.phoneNumbers?.length > 0) || [];
         dispatch(storeContacts(newList));
-        let displayList = newList.map(item => {
-          return {
-            'recordID': item?.recordID,
-            'displayName': Platform.OS === 'android' ? item?.displayName : `${item?.givenName} ${item?.familyName}`,
-            'thumbnailPath': item?.thumbnailPath
-          }
-        });
+        const displayList = mapDisplayContacts(newList);
         setContacts(displayList);
         setFilteredContacts(displayList);
-        setLoaderStatus(false);
       })
       .catch((e) => {
-        setLoaderStatus(false);
         console.log(e);
-      });
+      })
+      .finally(() => {
+        setLoaderStatus(false);
+      })
   }
 
-  //function to get the alert to open settings
-  const getOpenSettingAlert = () => {
+  //function to open the settings alert
+  const openSettingAlert = () => {
     Alert.alert(
-      'Permission Required',
+      'Connect would like to view your contacts',
       'Contacts access was denied. Please enable it from settings to continue.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Open Settings', onPress: () => Linking.openSettings() }
+        { text: 'Open Settings', onPress: async () => await openSettings('application') }
       ]
     )
   }
 
   //function to request permission to read contacts
   const requestContactsPermission = async () => {
-    if (Platform.OS === 'android') {
-      PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_CONTACTS, {
-        title: 'Connect',
-        message: 'Connect would like to view your contacts',
-        buttonPositive: 'OK',
-        buttonNeutral: 'Not now',
-        buttonNegative: 'Cancel'
-      })
-        .then((response) => {
-          if (response === 'granted') {
-            setIsGranted(true);
-          } else {
-            setIsGranted(false);
-            getOpenSettingAlert();
-          }
-        })
-        .catch((error) => {
-          console.log('Permission Error: ', error);
-        });
+    const CONTACTS_PERMISSION = Platform.OS === "ios" ? PERMISSIONS.IOS.CONTACTS : PERMISSIONS.ANDROID.READ_CONTACTS;
+    const current = await check(CONTACTS_PERMISSION);
+    if (current === RESULTS.GRANTED) {
+      setIsGranted(true);
+      return;
     }
-    else {
-      Contact.checkPermission()
-        .then((response) => {
-          if (response === 'authorized') {
-            setIsGranted(true);
-          } else {
-            setIsGranted(false);
-            getOpenSettingAlert();
-          }
-        })
-        .catch(error => {
-          console.log('Permission Error: ', error);
-        })
+    if (current === RESULTS.BLOCKED) {
+      // user denied + "Don't ask again" (Android) or denied in settings (iOS)
+      openSettingAlert();
+      setIsGranted(false);
+      return;
     }
+    const next = await request(CONTACTS_PERMISSION);
+    setIsGranted(next === RESULTS.GRANTED);
   }
 
   useEffect(() => {
     requestContactsPermission();
   }, []);
 
-  //get all the contacts on screen mounts
   useEffect(() => {
-    if (isGranted) getAllContacts();
-  }, [dash?.contacts?.length, isGranted]);
+    const displayList = mapDisplayContacts(storedContacts);
+    setContacts(displayList);
+    setFilteredContacts(displayList);
+  }, [storedContacts]);
+
+  //get all the contacts only for the initial empty-state load after permission is granted
+  useEffect(() => {
+    if (!isGranted || hasLoadedInitialContacts.current) return;
+
+    hasLoadedInitialContacts.current = true;
+    getAllContacts();
+  }, [isGranted]);
 
   //function to sort the contacts arrays in alphabetical order
   useEffect(() => {
@@ -184,17 +191,24 @@ const Contacts = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.safeAreaView}>
-      <HomeHeader clickEvent={() => refProfileSheet.current.open()} placeholder={'Search contacts'} menuBtn selectEvent={() => handleNavigationToSelectContacts()} selectAllEvent={() => handleNavigationToSelectContacts('all')} searchEvent={(val) => searchEvent(val)} />
+      <HomeHeader
+        placeholder={'Search contacts'}
+        menuBtn
+        clickEvent={() => null}
+        selectEvent={handleNavigationToSelectContacts}
+        selectAllEvent={() => handleNavigationToSelectContacts('all')}
+        searchEvent={searchEvent}
+      />
       {!isGranted ?
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <View style={styles.permissionStateContainer}>
           <Text style={styles.requireAccessTextStyle}>{Strings.RequireAccess}</Text>
           <TouchableOpacity onPress={() => requestContactsPermission()} style={styles.accessGrantBtn}>
-            <Text style={{ color: Colors.Primary, fontSize: 17, fontFamily: FontFamily.OutfitMedium }}>Grant Permission</Text>
+            <Text style={styles.grantPermissionText}>Grant Permission</Text>
           </TouchableOpacity>
         </View>
         :
         loaderStatus ?
-          <View style={{ alignItems: "center", justifyContent: "center", marginTop: '70%' }}>
+          <View style={styles.loaderContainer}>
             <ActivityIndicator size={'large'} color={Colors.Primary} />
           </View>
           :
@@ -204,15 +218,15 @@ const Contacts = ({ navigation }) => {
             refreshControl={
               <RefreshControl
                 refreshing={loaderStatus}
-                onRefresh={() => getAllContacts()}
+                onRefresh={getAllContacts}
                 colors={[Colors.Primary]}
                 progressBackgroundColor={Colors.Primary_Light}
               />
             }
-            style={{ paddingLeft: 20 }}
+            style={styles.contactsList}
             showsVerticalScrollIndicator={false}
             renderItem={ContactGroupItem}
-            ListFooterComponent={<View style={{ height: Platform.OS === 'android' ? 230 : 200 }} />}
+            ListFooterComponent={<View style={styles.listFooter} />}
             keyExtractor={(_, index) => index.toString()}
           />
       }
@@ -227,8 +241,7 @@ export default Contacts;
 
 const styles = StyleSheet.create({
   safeAreaView: {
-    flex: 1,
-    backgroundColor: Colors.BgColor
+    flex: 1
   },
   accessGrantBtn: {
     marginTop: 20,
@@ -307,6 +320,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     justifyContent: "space-between",
   },
+  contactGroupContainer: {
+    flexDirection: 'row',
+  },
   contactItemContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -349,5 +365,26 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: FontFamily.OutfitRegular,
     color: Colors.Base_Medium_Grey
+  },
+  permissionStateContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  grantPermissionText: {
+    color: Colors.Primary,
+    fontSize: 17,
+    fontFamily: FontFamily.OutfitMedium,
+  },
+  loaderContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: '70%',
+  },
+  contactsList: {
+    paddingLeft: 20,
+  },
+  listFooter: {
+    height: Platform.OS === 'android' ? 230 : 200,
   },
 })
