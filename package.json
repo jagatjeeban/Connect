@@ -23,7 +23,7 @@
     "react-native": "0.73.7",
     "react-native-autocomplete-dropdown": "2.1.1",
     "react-native-base64": "^0.2.1",
-    "react-native-config": "^1.6.1",
+    "react-native-config": "1.5.3",
     "react-native-contacts": "^8.0.1",
     "react-native-fast-image": "^8.6.3",
     "react-native-flash-message": "^0.4.2",
