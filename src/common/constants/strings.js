@@ -25,6 +25,7 @@ const Strings = {
     Stay: 'Stay',
     SignOutMsg: 'We’ll be a little sad to see you go, and your Connect space will miss you until you come back.',
     Done: 'Done',
+    SelectContacts: 'Select Contacts',
 }
 
 export default Strings;

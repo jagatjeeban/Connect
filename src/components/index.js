@@ -1,6 +1,7 @@
 import HomeHeader from "./HomeHeader";
 import PageHeader from "./PageHeader";
 import ActionBottomSheet from "./ActionBottomSheet";
+import ContactsList from "./ContactsList";
 
 //import core components
 import DropDown from "./coreComponents/DropDown";
@@ -11,5 +12,6 @@ export {
     PageHeader,
     DropDown,
     TextComponent,
-    ActionBottomSheet
+    ActionBottomSheet,
+    ContactsList,
 }

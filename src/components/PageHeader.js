@@ -72,7 +72,7 @@ const NormalHeader = ({
                     <View style={styles.headerLeft}>
                         {(backBtn || crossBtn) ?
                             <>
-                                <TouchableOpacity onPress={() => customClickEvent ?? navigation.goBack()} style={styles.headerActionButton}>
+                                <TouchableOpacity hitSlop={10} onPress={() => customClickEvent ?? navigation.goBack()} style={styles.headerActionButton}>
                                     {backBtn === true && <SvgBackArrow />}
                                     {crossBtn === true && <SvgCrossWhite />}
                                 </TouchableOpacity>

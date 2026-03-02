@@ -1,47 +1,29 @@
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, ActivityIndicator, RefreshControl, Alert } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, Platform, Alert } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react';
-import FastImage from 'react-native-fast-image';
 import Contact from 'react-native-contacts';
 import { useDispatch, useSelector } from 'react-redux';
 import { check, request, PERMISSIONS, RESULTS, openSettings } from 'react-native-permissions';
-import { PressableScale } from 'pressto';
+import { showMessage } from 'react-native-flash-message';
 
 //import constants
 import { Colors, FontFamily, Strings } from '../../common/constants';
 
 //import common functions
-import { sortContacts, mapDisplayContacts } from '../../common/helper/commonFun';
+import { mapDisplayContacts } from '../../common/helper/commonFun';
 
 //import svgs
 import SvgPlus from '../../assets/icons/svg/plus.svg';
 
 //import components
-import { HomeHeader } from '../../components';
+import { ContactsList, HomeHeader } from '../../components';
 
 //import custom functions
-import { getUcFirstLetter } from '../../common/helper/customFun';
 
 //import redux actions
 import { storeContacts } from '../../store/dashSlice';
 
 //import helper hooks
-import { useResponsive } from '../../common/helper/hooks';
-
-//contact item component
-const ContactItem = ({ item, index, onClickEvent }) => {
-  return (
-    <TouchableOpacity key={index} activeOpacity={0.7} onPress={() => onClickEvent?.(item)} style={styles.contactItemContainer}>
-      {item?.thumbnailPath !== '' ?
-        <FastImage source={{ uri: item?.thumbnailPath, priority: 'high' }} style={styles.contactImg} />
-        :
-        <View style={styles.defaultContactImg}>
-          <Text style={styles.contactFirstLetter}>{getUcFirstLetter(item?.displayName)}</Text>
-        </View>
-      }
-      <Text style={styles.contactNameText}>{item?.displayName}</Text>
-    </TouchableOpacity>
-  )
-}
+import { useResponsive, useSearchFilter } from '../../common/helper/hooks';
 
 const Contacts = ({ navigation }) => {
 
@@ -57,11 +39,12 @@ const Contacts = ({ navigation }) => {
 
   //states
   const [contacts, setContacts] = useState(() => mapDisplayContacts(storedContacts));
-  const [filteredContacts, setFilteredContacts] = useState(() => mapDisplayContacts(storedContacts));
-  const [sortedContacts, setSortedContacts] = useState([]);
-  const [uniqueLetters, setUniqueLetters] = useState([]);
   const [loaderStatus, setLoaderStatus] = useState(false);
   const [isGranted, setIsGranted] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
+
+  //filtered contacts based on the search input
+  const filteredContacts = useSearchFilter(contacts, 'displayName', searchInput);
 
   //function to navigate to the contact details
   const navigateToDetails = (contactItem) => {
@@ -69,34 +52,6 @@ const Contacts = ({ navigation }) => {
     const selectedContact = storedContacts.find(contact => contact?.recordID === contactItem?.recordID);
     if (!selectedContact) return;
     navigation.navigate('ContactDetails', { info: selectedContact })
-  }
-
-  //component to render the contact item
-  const RenderContactItem = ({ item, index }) => {
-    return (
-      <ContactItem
-        item={item}
-        index={index}
-        onClickEvent={() => navigateToDetails(item)}
-      />
-    )
-  }
-
-  //contacts group item component
-  const ContactGroupItem = ({ item: letter, index }) => {
-    const filteredContacts = sortedContacts.filter(contact => getUcFirstLetter(contact?.displayName) === letter);
-    return (
-      <View key={index} style={styles.contactGroupContainer}>
-        <Text style={styles.contactInitialText}>{letter}</Text>
-        <FlatList
-          data={filteredContacts}
-          showsVerticalScrollIndicator={false}
-          nestedScrollEnabled={true}
-          renderItem={RenderContactItem}
-          keyExtractor={(item) => item?.recordID}
-        />
-      </View>
-    )
   }
 
   //function to get all the contacts
@@ -108,10 +63,14 @@ const Contacts = ({ navigation }) => {
         dispatch(storeContacts(newList));
         const displayList = mapDisplayContacts(newList);
         setContacts(displayList);
-        setFilteredContacts(displayList);
       })
       .catch((e) => {
-        console.log(e);
+        console.log('Contact fetch Err', e);
+        showMessage({
+          message: Strings.ErrMsg,
+          type: 'danger',
+          icon: 'info'
+        });
       })
       .finally(() => {
         setLoaderStatus(false);
@@ -148,14 +107,15 @@ const Contacts = ({ navigation }) => {
     setIsGranted(next === RESULTS.GRANTED);
   }
 
+  //request contacts permission on mount
   useEffect(() => {
     requestContactsPermission();
   }, []);
 
   useEffect(() => {
-    const displayList = mapDisplayContacts(storedContacts);
-    setContacts(displayList);
-    setFilteredContacts(displayList);
+    if (storedContacts) {
+      setContacts(mapDisplayContacts(storedContacts));
+    }
   }, [storedContacts]);
 
   //get all the contacts only for the initial empty-state load after permission is granted
@@ -166,32 +126,9 @@ const Contacts = ({ navigation }) => {
     getAllContacts();
   }, [isGranted]);
 
-  //function to sort the contacts arrays in alphabetical order
-  useEffect(() => {
-    setSortedContacts(sortContacts(filteredContacts));
-  }, [filteredContacts]);
-
-  //function to extract unique first letters from the sorted contacts array
-  useEffect(() => {
-    setUniqueLetters([...new Set(sortedContacts.map(contact => getUcFirstLetter(contact?.displayName)))]);
-  }, [sortedContacts]);
-
-  //function to search contacts
-  const searchEvent = (req) => {
-    if (req === '') {
-      setFilteredContacts(contacts);
-    } else {
-      setFilteredContacts(contacts.filter(item => item?.displayName?.toLowerCase()?.includes(req?.toLowerCase())));
-    }
-  }
-
   //function to handle the navigation to select contacts screen
   const handleNavigationToSelectContacts = (type) => {
-    if (type === 'all') {
-      navigation.navigate('SelectContacts', { type: 'all', letters: uniqueLetters, contacts: sortedContacts });
-    } else {
-      navigation.navigate('SelectContacts', { letters: uniqueLetters, contacts: sortedContacts });
-    }
+    navigation.navigate('SelectContacts', { type, contacts });
   }
 
   return (
@@ -201,7 +138,7 @@ const Contacts = ({ navigation }) => {
         menuBtn
         selectEvent={handleNavigationToSelectContacts}
         selectAllEvent={() => handleNavigationToSelectContacts('all')}
-        searchEvent={searchEvent}
+        searchEvent={setSearchInput}
       />
       {!isGranted ?
         <View style={styles.permissionStateContainer}>
@@ -211,28 +148,11 @@ const Contacts = ({ navigation }) => {
           </TouchableOpacity>
         </View>
         :
-        loaderStatus ?
-          <View style={styles.loaderContainer}>
-            <ActivityIndicator size={'large'} color={Colors.Primary} />
-          </View>
-          :
-          <FlatList
-            data={uniqueLetters}
-            nestedScrollEnabled={true}
-            refreshControl={
-              <RefreshControl
-                refreshing={loaderStatus}
-                onRefresh={getAllContacts}
-                colors={[Colors.Primary]}
-                progressBackgroundColor={Colors.Primary_Light}
-              />
-            }
-            style={styles.contactsList}
-            showsVerticalScrollIndicator={false}
-            renderItem={ContactGroupItem}
-            ListFooterComponent={<View style={styles.listFooter} />}
-            keyExtractor={(_, index) => index.toString()}
-          />
+        <ContactsList
+          contacts={filteredContacts}
+          loaderStatus={loaderStatus}
+          onClickContact={navigateToDetails}
+        />
       }
       <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('CreateContact')} style={[styles.addContactBtn, { bottom: rh(20) }]}>
         <SvgPlus />
@@ -323,47 +243,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     justifyContent: "space-between",
   },
-  contactGroupContainer: {
-    flexDirection: 'row',
-  },
-  contactItemContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 10,
-  },
-  contactNameText: {
-    color: Colors.Base_White,
-    fontSize: 18,
-    fontFamily: FontFamily.OutfitRegular,
-    marginLeft: 20,
-    width: '75%',
-  },
-  contactInitialText: {
-    color: Colors.Base_Medium_Grey,
-    fontSize: 20,
-    fontWeight: '500',
-    fontFamily: FontFamily.OutfitMedium,
-    marginTop: 20,
-    width: 40,
-  },
-  contactImg: {
-    width: 44,
-    height: 44,
-    borderRadius: 10
-  },
-  defaultContactImg: {
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: "center",
-    borderRadius: 10,
-    backgroundColor: Colors.Primary_Light
-  },
-  contactFirstLetter: {
-    color: Colors.Primary,
-    fontSize: 20,
-    fontFamily: FontFamily.OutfitMedium
-  },
   requireAccessTextStyle: {
     fontSize: 20,
     fontFamily: FontFamily.OutfitRegular,
@@ -378,16 +257,5 @@ const styles = StyleSheet.create({
     color: Colors.Primary,
     fontSize: 17,
     fontFamily: FontFamily.OutfitMedium,
-  },
-  loaderContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: '70%',
-  },
-  contactsList: {
-    paddingLeft: 20,
-  },
-  listFooter: {
-    height: Platform.OS === 'android' ? 230 : 200,
   },
 })

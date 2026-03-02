@@ -1,134 +1,116 @@
-import { View, Text, SafeAreaView, StyleSheet, FlatList, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, Platform, InteractionManager } from 'react-native';
+import React, { useRef, useState, useEffect, startTransition } from 'react';
 import { useIsFocused } from '@react-navigation/native';
-import FastImage from 'react-native-fast-image';
 
 //import constants
-import { Colors, FontFamily, Images } from '../../common/constants';
+import { Colors, FontFamily, Strings } from '../../common/constants';
 
 //import components
-import { PageHeader } from '../../components';
+import { PageHeader, ContactsList } from '../../components';
 
-//import custom functions
-import { getUcFirstLetter } from '../../common/helper/customFun';
+const buildSelectableContacts = (contactList = [], shouldSelectAll = false) => {
+  const nextContacts = contactList.slice();
+  const nextSelectedIds = new Set();
 
-//import svg
-import SvgCheck from './../../assets/icons/svg/check.svg';
+  if (!shouldSelectAll) {
+    return {
+      nextContacts,
+      nextSelectedIds,
+      nextSelectedCount: 0
+    };
+  }
+
+  for (let index = 0; index < nextContacts.length; index += 1) {
+    const recordId = nextContacts[index]?.recordID;
+    if (recordId) {
+      nextSelectedIds.add(recordId);
+    }
+  }
+
+  return {
+    nextContacts,
+    nextSelectedIds,
+    nextSelectedCount: nextSelectedIds.size
+  };
+};
 
 const SelectContacts = ({ navigation, route }) => {
 
+  //hooks
   const isFocused = useIsFocused();
 
   //states
   const [contacts, setContacts] = useState([]);
-  const [filteredContacts, setFilteredContacts] = useState([]);
-  const [letters, setLetters] = useState([]);
-  const [selectedCount, setSelectedCount] = useState(null);
+  const [selectedCount, setSelectedCount] = useState(0);
   const [loaderStatus, setLoaderStatus] = useState(false);
+  const [selectionVersion, setSelectionVersion] = useState(0);
+
+  //refs
+  const selectedContactIdsRef = useRef(new Set());
 
   //funtion to select contacts
   const selectContacts = (id, value) => {
-    let updatedList = [...contacts];
-    let prevIndex = updatedList.findIndex(item => item?.recordID === id);
-    if (prevIndex !== -1) {
-      updatedList[prevIndex].isSelected = value;
-      setContacts(updatedList);
-      setSelectedCount(updatedList.filter(item => item.isSelected && item?.isSelected === true)?.length);
+    if (!id) return;
+
+    const selectedIds = selectedContactIdsRef.current;
+    const isSelected = selectedIds.has(id);
+    if (isSelected === value) return;
+
+    if (value) {
+      selectedIds.add(id);
+    } else {
+      selectedIds.delete(id);
     }
-  }
 
-  //contact item component
-  const ContactItem = ({ item, index }) => {
-    return (
-      <TouchableOpacity key={index} activeOpacity={0.7} onPress={() => selectContacts(item?.recordID, !item?.isSelected)} style={styles.contactItemContainer}>
-        <View style={styles.contactItemLeft}>
-          {item?.thumbnailPath !== '' ?
-            <FastImage source={{ uri: item?.thumbnailPath, priority: 'high' }} style={styles.contactImg} />
-            :
-            <View style={styles.defaultContactImg}>
-              <Text style={styles.contactFirstLetter}>{getUcFirstLetter(item?.displayName)}</Text>
-            </View>
-          }
-          <Text style={styles.contactNameText}>{item?.displayName}</Text>
-        </View>
-        {!item.isSelected ?
-          <View style={styles.checkBtn} />
-          :
-          <View style={styles.checkedBtn}>
-            <SvgCheck width={13} height={13} />
-          </View>
-        }
-      </TouchableOpacity>
-    )
-  }
-
-  //contacts group item component
-  const ContactGroupItem = ({ item: letter, index }) => {
-    return (
-      <View key={index} style={styles.contactGroupContainer}>
-        <Text style={styles.contactInitialText}>{letter}</Text>
-        <FlatList
-          data={contacts.filter(contact => getUcFirstLetter(contact?.displayName) === letter)}
-          showsVerticalScrollIndicator={false}
-          nestedScrollEnabled={true}
-          renderItem={ContactItem}
-        />
-      </View>
-    )
+    setSelectedCount(selectedIds.size);
+    setSelectionVersion(prevVersion => prevVersion + 1);
   }
 
   //function to get the contacts list
   const getContactList = () => {
     setLoaderStatus(true);
-    let { contacts, type } = route?.params || {};
-    if (!contacts) return;
+    const routeContacts = Array.isArray(route?.params?.contacts) ? route?.params?.contacts : [];
+    const shouldSelectAll = route?.params?.type !== undefined;
 
-    const isTypeUndefined = type === undefined;
+    const interactionTask = InteractionManager.runAfterInteractions(() => {
+      const { nextContacts, nextSelectedIds, nextSelectedCount } = buildSelectableContacts(routeContacts, shouldSelectAll);
 
-    contacts.forEach(item => {
-      if (isTypeUndefined) {
-        if (item.isSelected) delete item.isSelected;
-      } else {
-        item.isSelected = true;
-      }
+      selectedContactIdsRef.current = nextSelectedIds;
+
+      startTransition(() => {
+        setContacts(nextContacts);
+        setSelectedCount(nextSelectedCount);
+        setSelectionVersion(prevVersion => prevVersion + 1);
+        setLoaderStatus(false);
+      });
     });
 
-    if (isTypeUndefined) {
-      setContacts(contacts);
-    } else {
-      setSelectedCount(contacts.length);
-      setContacts(contacts);
-    }
-    setTimeout(() => setLoaderStatus(false), 50);
+    return () => interactionTask.cancel();
   }
 
   useEffect(() => {
-    if (isFocused) {
-      getContactList();
-      setLetters(route?.params?.letters);
-    }
-  }, [isFocused]);
+    if (!isFocused) return;
+
+    return getContactList();
+  }, [isFocused, route?.params?.contacts, route?.params?.type]);
 
   return (
-    <SafeAreaView style={styles.safeAreaView}>
-      <PageHeader headerTitle={selectedCount ? `${selectedCount} selected` : 'Select Contacts'} backBtn iconArr={selectedCount ? ['trash', 'share'] : null} searchEvent={(req) => searchEvent(req)} navigation={navigation} />
-      <View style={styles.listContainer}>
-        {loaderStatus ?
-          <View style={styles.loaderContainer}>
-            <ActivityIndicator size={'large'} color={Colors.Primary} />
-          </View>
-          :
-          <FlatList
-            data={letters}
-            nestedScrollEnabled={true}
-            showsVerticalScrollIndicator={false}
-            renderItem={ContactGroupItem}
-            ListFooterComponent={<View style={styles.listFooter} />}
-            keyExtractor={(_, index) => index.toString()}
-          />
-        }
-      </View>
-    </SafeAreaView>
+    <View style={styles.safeAreaView}>
+      <PageHeader
+        headerTitle={selectedCount > 0 ? `${selectedCount} selected` : Strings.SelectContacts}
+        backBtn
+        iconArr={selectedCount > 0 && ['trash', 'share']}
+        navigation={navigation}
+      />
+      <ContactsList
+        contacts={contacts}
+        loaderStatus={loaderStatus}
+        isSelectEvent
+        selectedContactIds={selectedContactIdsRef.current}
+        selectionVersion={selectionVersion}
+        onClickContact={(contact) => selectContacts(contact?.recordID, !selectedContactIdsRef.current.has(contact?.recordID))}
+      />
+    </View>
   )
 }
 
@@ -177,11 +159,6 @@ export const styles = StyleSheet.create({
     paddingVertical: 10,
     width: "100%"
   },
-  contactItemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: "87%",
-  },
   contactGroupContainer: {
     flexDirection: 'row',
   },
@@ -195,20 +172,5 @@ export const styles = StyleSheet.create({
   },
   listFooter: {
     height: Platform.OS === 'android' ? 230 : 200,
-  },
-  checkBtn: {
-    width: 20,
-    height: 20,
-    borderWidth: 1,
-    borderColor: Colors.Base_Grey,
-    borderRadius: 6
-  },
-  checkedBtn: {
-    alignItems: "center",
-    justifyContent: 'center',
-    width: 20,
-    height: 20,
-    borderRadius: 6,
-    backgroundColor: Colors.Primary
   },
 })
