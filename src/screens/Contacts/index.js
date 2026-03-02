@@ -1,9 +1,10 @@
-import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet, FlatList, Platform, ActivityIndicator, RefreshControl, Alert } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, ActivityIndicator, RefreshControl, Alert } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react';
 import FastImage from 'react-native-fast-image';
 import Contact from 'react-native-contacts';
 import { useDispatch, useSelector } from 'react-redux';
 import { check, request, PERMISSIONS, RESULTS, openSettings } from 'react-native-permissions';
+import { PressableScale } from 'pressto';
 
 //import constants
 import { Colors, FontFamily, Strings } from '../../common/constants';
@@ -22,6 +23,9 @@ import { getUcFirstLetter } from '../../common/helper/customFun';
 
 //import redux actions
 import { storeContacts } from '../../store/dashSlice';
+
+//import helper hooks
+import { useResponsive } from '../../common/helper/hooks';
 
 //contact item component
 const ContactItem = ({ item, index, onClickEvent }) => {
@@ -43,6 +47,7 @@ const Contacts = ({ navigation }) => {
 
   //hooks
   const dispatch = useDispatch();
+  const { rh } = useResponsive();
 
   //store events
   const storedContacts = useSelector((state) => state.dash.contacts);
@@ -190,11 +195,10 @@ const Contacts = ({ navigation }) => {
   }
 
   return (
-    <SafeAreaView style={styles.safeAreaView}>
+    <View style={styles.safeAreaView}>
       <HomeHeader
         placeholder={'Search contacts'}
         menuBtn
-        clickEvent={() => null}
         selectEvent={handleNavigationToSelectContacts}
         selectAllEvent={() => handleNavigationToSelectContacts('all')}
         searchEvent={searchEvent}
@@ -230,10 +234,10 @@ const Contacts = ({ navigation }) => {
             keyExtractor={(_, index) => index.toString()}
           />
       }
-      <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('CreateContact')} style={styles.addContactBtn}>
+      <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('CreateContact')} style={[styles.addContactBtn, { bottom: rh(20) }]}>
         <SvgPlus />
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   )
 }
 
@@ -255,7 +259,6 @@ const styles = StyleSheet.create({
   addContactBtn: {
     position: "absolute",
     right: 20,
-    bottom: Platform.OS === 'android' ? 115 : 135,
     backgroundColor: Colors.Primary_Light,
     padding: 17,
     borderRadius: 15,

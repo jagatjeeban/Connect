@@ -1,9 +1,10 @@
-import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
 import { showMessage } from 'react-native-flash-message';
 import auth from '@react-native-firebase/auth';
 import { useDispatch } from 'react-redux';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 //import constants
 import { Colors, FontFamily, Strings } from '../../common/constants';
@@ -15,10 +16,15 @@ import SvgWelcome from '../../assets/images/svg/welcome.svg';
 //import redux actions
 import { loginSuccess } from '../../store/authSlice';
 
+//import helper hooks
+import { useResponsive } from '../../common/helper/hooks';
+
 const Login = () => {
 
     //hooks
     const dispatch = useDispatch();
+    const insets = useSafeAreaInsets();
+    const { rh } = useResponsive();
 
     //states
     const [loaderStatus, setLoaderStatus] = useState(false);
@@ -61,16 +67,16 @@ const Login = () => {
     }
 
     return (
-        <SafeAreaView style={styles.safeAreaView}>
+        <View style={styles.safeAreaView}>
             <View style={styles.mainContainer}>
-                <View style={styles.welcomeIllustrationContainer}>
-                    <SvgWelcome width={276} height={214} />
+                <View style={{ marginTop: rh(20) }}>
+                    <SvgWelcome />
                 </View>
                 <View style={styles.welcomeTextContainer}>
                     <Text style={styles.welcomeToConnect}>{Strings.WelcomeToConnect}</Text>
                     <Text style={styles.appDescription}>{Strings.WelcomeText}</Text>
                 </View>
-                <TouchableOpacity activeOpacity={1} onPress={() => signIn()} style={styles.loginBtn}>
+                <TouchableOpacity activeOpacity={1} onPress={() => signIn()} style={[styles.loginBtn, { bottom: insets.bottom + 20 }]}>
                     {loaderStatus ?
                         <ActivityIndicator size={'small'} color={Colors.Base_White} />
                         :
@@ -81,7 +87,7 @@ const Login = () => {
                     }
                 </TouchableOpacity>
             </View>
-        </SafeAreaView>
+        </View>
     )
 }
 
@@ -108,9 +114,6 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         color: 'black'
     },
-    welcomeIllustrationContainer: {
-        marginTop: '30%',
-    },
     welcomeTextContainer: {
         marginTop: 32,
         alignItems: 'center',
@@ -119,7 +122,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         position: 'absolute',
-        bottom: 20,
         backgroundColor: Colors.Bg_Light,
         alignItems: 'center',
         justifyContent: "center",

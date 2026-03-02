@@ -26,9 +26,6 @@ const Favourites = ({ navigation }) => {
   //redux selectors
   const storedContacts = useSelector((state) => state.dash.contacts);
 
-  //hooks
-  const { iconSize } = useResponsive();
-
   //states
   const [searchInput, setSearchInput] = useState('');
 
@@ -58,7 +55,7 @@ const Favourites = ({ navigation }) => {
   }
 
   return (
-    <SafeAreaView style={styles.safeAreaView}>
+    <View style={styles.safeAreaView}>
       <HomeHeader refRBSheet={refProfileSheet} placeholder={'Search contacts'} searchEvent={setSearchInput} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <Header />
@@ -79,7 +76,7 @@ const Favourites = ({ navigation }) => {
           })}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   )
 }
 
@@ -87,8 +84,7 @@ export default Favourites;
 
 const styles = StyleSheet.create({
   safeAreaView: {
-    flex: 1,
-    backgroundColor: Colors.BgColor
+    flex: 1
   },
   addFavouriteBtn: {
     backgroundColor: Colors.Primary_Light,

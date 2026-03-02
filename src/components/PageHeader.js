@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, BackHandler } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 //import constants
 import { Colors, FontFamily, Strings } from "../common/constants";
@@ -33,6 +34,9 @@ const NormalHeader = ({
     textChangeEvent
 }) => {
 
+    //hooks
+    const insets = useSafeAreaInsets();
+
     //states
     const [searchInput, setSearchInput] = useState('');
 
@@ -62,18 +66,17 @@ const NormalHeader = ({
     }, [searchStatus]);
 
     return (
-        <View style={styles.body}>
+        <View style={[styles.body, { paddingTop: insets.top + 10 }]}>
             {!searchStatus ?
                 <View style={styles.headerRow}>
                     <View style={styles.headerLeft}>
                         {(backBtn || crossBtn) ?
                             <>
                                 <TouchableOpacity onPress={() => customClickEvent ?? navigation.goBack()} style={styles.headerActionButton}>
-                                    {backBtn ? <SvgBackArrow /> : crossBtn ? <SvgCrossWhite /> : null}
+                                    {backBtn === true && <SvgBackArrow />}
+                                    {crossBtn === true && <SvgCrossWhite />}
                                 </TouchableOpacity>
-                                <View style={styles.headerTitleContainer}>
-                                    <Text style={[styles.headerTitleText, { color: headerTitleColor }]}>{headerTitle}</Text>
-                                </View>
+                                <Text style={[styles.headerTitleText, { color: headerTitleColor }]}>{headerTitle}</Text>
                             </>
                             :
                             <Text style={[styles.headerTitleText, styles.headerTitleStandalone, { color: headerTitleColor }]}>{headerTitle}</Text>
@@ -82,7 +85,7 @@ const NormalHeader = ({
                     {iconArr?.length > 0 && (
                         <View style={styles.iconRow}>
                             {iconArr.some((item) => item === 'search') && (
-                                <TouchableOpacity style={styles.iconStyle} onPress={() => updateSearchStatus()}>
+                                <TouchableOpacity style={styles.iconStyle} onPress={updateSearchStatus}>
                                     <SvgSearch width={20} height={20} />
                                 </TouchableOpacity>
                             )}
@@ -128,11 +131,14 @@ const NormalHeader = ({
                 :
                 <View style={styles.searchInputContainer}>
                     <View style={styles.searchLeft}>
-                        <TouchableOpacity onPress={() => {
-                            updateSearchStatus();
-                            textChangeEvent('');
-                            setSearchInput('');
-                        }} style={styles.headerActionButton}>
+                        <TouchableOpacity
+                            onPress={() => {
+                                updateSearchStatus();
+                                textChangeEvent('');
+                                setSearchInput('');
+                            }}
+                            style={styles.headerActionButton}
+                        >
                             <SvgBackGrey />
                         </TouchableOpacity>
                         <TextInput
@@ -204,13 +210,14 @@ const styles = StyleSheet.create({
     body: {
         justifyContent: 'space-between',
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'center'
     },
     headerRow: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        paddingBottom: 20
     },
     headerLeft: {
         flexDirection: 'row',
@@ -218,7 +225,7 @@ const styles = StyleSheet.create({
         maxWidth: "85%",
     },
     headerActionButton: {
-        padding: 20,
+        paddingHorizontal: 20,
     },
     headerTitleContainer: {
         paddingVertical: 20,
@@ -228,15 +235,14 @@ const styles = StyleSheet.create({
         fontFamily: FontFamily.OutfitMedium,
     },
     headerTitleStandalone: {
-        padding: 20,
+        paddingHorizontal: 20,
     },
     iconRow: {
         flexDirection: 'row',
         alignItems: 'center',
     },
     iconStyle: {
-        paddingRight: 20,
-        paddingVertical: 20
+        paddingRight: 20
     },
     searchInputContainer: {
         flex: 1,
@@ -245,7 +251,6 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         borderBottomWidth: 1,
         borderColor: Colors.Base_Grey,
-        marginBottom: 1
     },
     saveBtn: {
         alignItems: 'center',
@@ -286,7 +291,7 @@ const styles = StyleSheet.create({
         color: Colors.Base_White,
         fontSize: 18,
         fontFamily: FontFamily.OutfitRegular,
-        paddingVertical: 20,
+        paddingHorizontal: 20,
         width: '85%',
     },
 })

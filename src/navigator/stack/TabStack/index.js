@@ -3,9 +3,13 @@ import React from "react";
 import { useSelector } from "react-redux";
 import FastImage from "react-native-fast-image";
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 //import constants
 import { Colors, FontFamily, Strings } from "../../../common/constants";
+
+//import helper hooks
+import { useResponsive } from "../../../common/helper/hooks";
 
 //import svgs
 import SvgContacts from '../../../assets/icons/svg/contacts.svg';
@@ -14,7 +18,7 @@ import SvgFavourites from "../../../assets/icons/svg/favourites.svg";
 import SvgActiveFav from '../../../assets/icons/svg/primaryFav.svg';
 
 //import tab screens
-import Contacts from "../../../screens/Home";
+import Contacts from "../../../screens/Contacts";
 import Favourites from "../../../screens/Favourites";
 import Accounts from "../../../screens/Accounts";
 
@@ -25,7 +29,12 @@ const TabStackNavigator = () => {
     //redux selectors
     const userInfo = useSelector((state) => state.auth.userInfo);
 
+    //hooks
+    const insets = useSafeAreaInsets();
+    const { adaptiveSize } = useResponsive();
+
     const TabOption = (props) => {
+
         const activeScreen = props.state.routeNames[props.state.index];
         const navigateToContacts = () => {
             props.navigation.navigate('Contacts');
@@ -37,14 +46,16 @@ const TabStackNavigator = () => {
             props.navigation.navigate('Accounts');
         }
 
+        const iconSize = adaptiveSize(5);
+
         return (
-            <View style={styles.mainContainer}>
+            <View style={[styles.mainContainer, { paddingBottom: insets.bottom }]}>
                 <TouchableOpacity activeOpacity={1} onPress={navigateToContacts} style={styles.tabButton}>
                     <View style={[styles.tabIconContainer, activeScreen === 'Contacts' && styles.activeTabIconContainer]}>
                         {activeScreen === 'Contacts' ?
-                            <SvgActiveContacts width={20} height={20} />
+                            <SvgActiveContacts width={iconSize} height={iconSize} />
                             :
-                            <SvgContacts width={20} height={20} />
+                            <SvgContacts width={iconSize} height={iconSize} />
                         }
                     </View>
                     <Text style={[styles.tabTitle, activeScreen === 'Contacts' ? styles.activeTabTitle : styles.inactiveTabTitle]}>{Strings.Contacts}</Text>
@@ -52,9 +63,9 @@ const TabStackNavigator = () => {
                 <TouchableOpacity activeOpacity={1} onPress={navigateToFavourites} style={styles.tabButton}>
                     <View style={[styles.tabIconContainer, activeScreen === 'Favourites' && styles.activeTabIconContainer]}>
                         {activeScreen === 'Favourites' ?
-                            <SvgActiveFav width={20} height={20} />
+                            <SvgActiveFav width={iconSize} height={iconSize} />
                             :
-                            <SvgFavourites width={20} height={20} />
+                            <SvgFavourites width={iconSize} height={iconSize} />
                         }
                     </View>
                     <Text style={[styles.tabTitle, activeScreen === 'Favourites' ? styles.activeTabTitle : styles.inactiveTabTitle]}>{Strings.Favourites}</Text>
@@ -68,7 +79,11 @@ const TabStackNavigator = () => {
     }
 
     return (
-        <Tab.Navigator screenOptions={{ headerShown: false }} tabBar={(props) => <TabOption {...props} />}>
+        <Tab.Navigator
+            screenOptions={{ headerShown: false }}
+            sceneContainerStyle={{ backgroundColor: Colors.BgColor }}
+            tabBar={(props) => <TabOption {...props} />}
+        >
             <Tab.Screen name="Contacts" component={Contacts} />
             <Tab.Screen name="Favourites" component={Favourites} />
             <Tab.Screen name="Accounts" component={Accounts} />

@@ -1,5 +1,5 @@
-import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, FlatList, Alert } from 'react-native';
-import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useRef } from 'react';
 import auth from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,22 +7,29 @@ import FastImage from 'react-native-fast-image';
 import { showMessage } from 'react-native-flash-message';
 
 //import constants
-import { Colors, FontFamily } from '../../common/constants';
+import { Colors, FontFamily, Strings } from '../../common/constants';
 
 //import components
-import { PageHeader } from '../../components';
+import { PageHeader, ActionBottomSheet } from '../../components';
 
 //import redux actions
 import { logOutEvent } from '../../store/authSlice';
+
+//import helper hooks
+import { useResponsive } from '../../common/helper/hooks';
 
 const Accounts = () => {
 
     //hooks
     const dispatch = useDispatch();
+    const { adaptiveSize } = useResponsive();
+
+    //refs
+    const actionSheetRef = useRef(null);
 
     //store events
     const userInfo = useSelector(state => state.auth.userInfo);
-    const dash = useSelector(state => state.dash);
+    const storedContacts = useSelector(state => state.dash.contacts);
 
     //function to sign out the user
     const signOut = async () => {
@@ -48,54 +55,35 @@ const Accounts = () => {
         dispatch(logOutEvent());
     }
 
-    //function to show alert for sign out confirmation
-    const showConfirmationAlert = () => {
-        Alert.alert(
-            'Sign Out',
-            'Are you sure you want to sign out of Connect?',
-            [
-                { text: 'Cancel', onPress: () => null },
-                { text: 'Sign Out', onPress: () => signOut() }
-            ],
-            {
-                'cancelable': true,
-                'userInterfaceStyle': 'dark'
-            }
-        )
-    }
-
     return (
-        <SafeAreaView style={styles.safeAreaView}>
+        <View style={styles.safeAreaView}>
             <PageHeader headerTitle={'Profile'} />
-            <View>
-                <FlatList
-                    data={[1]}
-                    showsVerticalScrollIndicator={false}
-                    renderItem={() => {
-                        return (
-                            <View style={styles.mainContainer}>
-                                <FastImage source={{ uri: userInfo?.user?.photo, priority: 'high' }} style={styles.contactImg} />
-                                <Text style={styles.userName}>{userInfo?.user?.name}</Text>
-                                <Text style={styles.userEmail}>{userInfo?.user?.email}</Text>
-                                <Text style={styles.userContacts}>{dash?.contacts?.length + ' contacts'}</Text>
-                                <TouchableOpacity onPress={() => showConfirmationAlert()} style={styles.signOutBtn}>
-                                    <Text style={styles.signOutText}>Sign Out</Text>
-                                </TouchableOpacity>
-                            </View>
-                        )
-                    }}
-                    ItemSeparatorComponent={<View style={styles.lineSeparator} />}
-                    keyExtractor={(_, index) => index.toString()}
-                />
+            <View style={styles.mainContainer}>
+                <FastImage source={{ uri: userInfo?.user?.photo, priority: 'high' }} style={styles.contactImg} />
+                <Text style={styles.userName}>{userInfo?.user?.name}</Text>
+                <Text style={styles.userEmail}>{userInfo?.user?.email}</Text>
+                <Text style={styles.userContacts}>{storedContacts?.length + (storedContacts?.length > 1 ? ' contacts' : ' contact')}</Text>
+                <TouchableOpacity activeOpacity={0.7} onPress={() => actionSheetRef.current?.open()} style={styles.signOutBtn}>
+                    <Text style={styles.signOutText}>{Strings.SignOut}</Text>
+                </TouchableOpacity>
             </View>
-        </SafeAreaView>
+            <ActionBottomSheet
+                refRBSheet={actionSheetRef}
+                primaryTitle={Strings.Leave}
+                secondaryTitle={Strings.Stay}
+                sheetHeight={adaptiveSize(70)}
+                primaryDescription={'Are you sure you want to leave?'}
+                secondaryDescription={Strings.SignOutMsg}
+                reqType={'delete'}
+                onClickPrimaryBtn={signOut}
+            />
+        </View>
     )
 }
 
 const styles = StyleSheet.create({
     safeAreaView: {
-        flex: 1,
-        backgroundColor: Colors.BgColor
+        flex: 1
     },
     mainContainer: {
         flex: 1,
@@ -124,13 +112,12 @@ const styles = StyleSheet.create({
         color: Colors.Base_Medium_Grey,
         fontSize: 20,
         fontFamily: FontFamily.OutfitRegular,
-        marginTop: 20
     },
     userContacts: {
         color: Colors.Base_Medium_Grey,
         fontSize: 20,
         fontFamily: FontFamily.OutfitRegular,
-        marginTop: 5
+        marginTop: 20
     },
     lineSeparator: {
         height: 1,

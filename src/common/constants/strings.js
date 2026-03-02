@@ -15,6 +15,16 @@ const Strings = {
     Update: 'Update',
     Updating: 'Updating..',
     Add: 'Add',
+    SignOut: 'Sign Out',
+    Select: 'Select',
+    SelectAll: 'Select all',
+    Cancel: 'Cancel',
+    Okay: 'Okay',
+    ConfirmationMsg: 'Are you sure you want to do this?',
+    Leave: 'Leave',
+    Stay: 'Stay',
+    SignOutMsg: 'We’ll be a little sad to see you go, and your Connect space will miss you until you come back.',
+    Done: 'Done',
 }
 
 export default Strings;

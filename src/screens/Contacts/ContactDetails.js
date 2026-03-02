@@ -1,7 +1,5 @@
-import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, StatusBar, FlatList, Platform, Linking } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Platform } from 'react-native'
 import React, { useRef, useState, useEffect } from 'react';
-import { useIsFocused } from '@react-navigation/native';
-import RBSheet from 'react-native-raw-bottom-sheet';
 import FastImage from 'react-native-fast-image';
 import Contact from 'react-native-contacts';
 import { showMessage } from 'react-native-flash-message';
@@ -17,7 +15,7 @@ import { screenDimensions } from '../../common/helper/systemStatic';
 import { openCallApp, openMailApp, openMessagingApp, shareContact } from '../../common/helper/commonFun';
 
 //import components
-import { PageHeader } from '../../components';
+import { PageHeader, ActionBottomSheet } from '../../components';
 
 //import custom functions
 import { getUcFirstLetterString, getUcFirstLetter } from '../../common/helper/customFun';
@@ -34,30 +32,10 @@ import SvgTrash from '../../assets/icons/svg/trash.svg';
 //import redux slice
 import { storeContacts } from '../../store/dashSlice';
 
-//delete number bottomsheet component
-const DeleteNumberSheet = ({ refRBSheet, onClickDelete = null }) => {
-  return (
-    <RBSheet ref={refRBSheet} height={Platform.OS === 'ios' ? 250 : 230} customStyles={{ container: styles.bottomSheet, draggableIcon: styles.pillsBarStyle }} closeOnPressBack draggable dragOnContent>
-      <View style={styles.deleteTextContainer}>
-        <Text style={styles.deleteText} numberOfLines={null}>{Strings.DeleteNumberText}</Text>
-      </View>
-      <View style={styles.actionBtnContainer}>
-        <TouchableOpacity activeOpacity={0.7} onPress={() => refRBSheet.current?.close()} style={styles.actionBtn}>
-          <Text style={styles.actionBtnText}>No, Keep it!</Text>
-        </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.7} onPress={onClickDelete} style={[styles.actionBtn, styles.primaryActionBtn]}>
-          <Text style={[styles.actionBtnText, styles.primaryActionBtnText]}>Yes, Delete!</Text>
-        </TouchableOpacity>
-      </View>
-    </RBSheet>
-  )
-}
-
 const ContactDetails = ({ navigation, route }) => {
 
   //hooks
   const dispatch = useDispatch();
-  const isFocused = useIsFocused();
 
   //redux selectors
   const storedContacts = useSelector(state => state.dash.contacts);
@@ -91,7 +69,6 @@ const ContactDetails = ({ navigation, route }) => {
 
   //function to delete the contact
   const deleteContact = () => {
-    deleteSheetRef.current.close();
     Contact.deleteContact({ recordID: contactInfo?.recordID })
       .then(() => {
         const updatedContacts = [...storedContacts];
@@ -127,21 +104,19 @@ const ContactDetails = ({ navigation, route }) => {
     }
   }
 
-  useEffect(() => {
-    if (isFocused && Platform.OS === 'android') {
-      StatusBar.setBackgroundColor(Colors.Base_Dark_Black);
-      return () => StatusBar.setBackgroundColor(Colors.BgColor);
-    }
-  }, [isFocused]);
-
   const phoneNumbers = removeDuplicateNumbers(contactInfo?.phoneNumbers) ?? [];
 
   return (
-    <SafeAreaView style={styles.safeAreaView}>
+    <View style={styles.safeAreaView}>
       <View style={styles.upperCurveEffect}>
         <SvgUpperCurve width={screenDimensions?.width} />
       </View>
-      <PageHeader backBtn iconArr={['whiteStar', 'pencil']} rightBtnClickEvent={(req) => actionClickEvent(req)} navigation={navigation} />
+      <PageHeader
+        backBtn
+        iconArr={['whiteStar', 'pencil']}
+        rightBtnClickEvent={actionClickEvent}
+        navigation={navigation}
+      />
       <FlatList
         data={[1]}
         showsVerticalScrollIndicator={false}
@@ -206,11 +181,15 @@ const ContactDetails = ({ navigation, route }) => {
         }}
         keyExtractor={(_, index) => index.toString()}
       />
-      <DeleteNumberSheet
+      <ActionBottomSheet
         refRBSheet={deleteSheetRef}
-        onClickDelete={deleteContact}
+        primaryTitle={'Yes, Delete!'}
+        secondaryTitle={'No, Keep it!'}
+        reqType={'delete'}
+        secondaryDescription={Strings.DeleteNumberText}
+        onClickPrimaryBtn={deleteContact}
       />
-    </SafeAreaView>
+    </View>
   )
 }
 
@@ -225,22 +204,6 @@ const styles = StyleSheet.create({
     top: Platform.OS === 'ios' ? -47 : -90,
     alignSelf: 'center'
   },
-  bottomSheet: {
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    borderTopWidth: 1,
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderColor: Colors.Base_Grey,
-    backgroundColor: Colors.Bg_Light
-  },
-  pillsBarStyle: {
-    width: 80,
-    height: 3.5,
-    marginVertical: 20,
-    borderRadius: 40,
-    backgroundColor: Colors.Base_Grey
-  },
   contactInfoRow: {
     flexDirection: 'row',
   },
@@ -249,12 +212,6 @@ const styles = StyleSheet.create({
   },
   contactInfoTextContainer: {
     marginLeft: 20,
-  },
-  primaryActionBtn: {
-    backgroundColor: Colors.Base_Red,
-  },
-  primaryActionBtnText: {
-    color: Colors.Base_White,
   },
   contentContainer: {
     paddingBottom: 50,
@@ -309,15 +266,6 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 60,
     backgroundColor: Colors.Primary_Light
-  },
-  actionBtnContainer: {
-    position: "absolute",
-    bottom: Platform.OS === 'ios' ? 50 : 20,
-    paddingHorizontal: 20,
-    alignItems: "center",
-    justifyContent: "space-between",
-    flexDirection: "row",
-    width: '100%'
   },
   actionsContainer: {
     flexDirection: 'row',

@@ -1,4 +1,4 @@
-import { View, SafeAreaView, StyleSheet, Platform, TouchableOpacity, Image, Text, TextInput, StatusBar, FlatList } from 'react-native'
+import { View, SafeAreaView, StyleSheet, Platform, TouchableOpacity, Image, Text, TextInput, FlatList } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react';
 import { useIsFocused } from '@react-navigation/native';
 import Contact from 'react-native-contacts';
@@ -7,7 +7,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { useDispatch, useSelector } from 'react-redux';
 
 //import constants
-import { Colors, FontFamily, Images } from '../../common/constants';
+import { Colors, FontFamily, Images, Strings } from '../../common/constants';
 
 //import system statics
 import { screenDimensions } from '../../common/helper/systemStatic';
@@ -302,7 +302,7 @@ const CreateContact = ({ navigation, route }) => {
     const emailAddressList = getFormattedEmailAddresses();
 
     if (!displayName) {
-      showMessage({ message: 'Please enter a name.', description: 'sajdhkasjh', type: 'danger', icon: 'info' });
+      showMessage({ message: 'Please enter a name.', type: 'danger', icon: 'info' });
       return null;
     }
 
@@ -368,14 +368,6 @@ const CreateContact = ({ navigation, route }) => {
     }
   }
 
-  //for status bar color
-  useEffect(() => {
-    if (isFocused && Platform.OS === 'android') {
-      StatusBar.setBackgroundColor(Colors.Base_Dark_Black);
-      return () => StatusBar.setBackgroundColor(Colors.BgColor);
-    }
-  }, [isFocused]);
-
   //for edit functionality
   useEffect(() => {
     if (route?.params?.reqType === 'edit') {
@@ -398,7 +390,7 @@ const CreateContact = ({ navigation, route }) => {
         <SvgUpperCurve width={screenDimensions?.width} />
       </View>
       <PageHeader
-        headerTitle={formActionStatus === 'add' ? 'Create Contact' : 'Edit Contact'}
+        headerTitle={formActionStatus === 'add' ? Strings.CreateContact : Strings.EditContact}
         crossBtn
         loaderStatus={loaderStatus}
         iconArr={[formActionStatus === 'add' ? 'saveBtn' : 'updateBtn']}

@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, FlatList, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Platform } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useIsFocused } from '@react-navigation/native';
@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import FastImage from 'react-native-fast-image';
 
 //import constants
-import { Colors, FontFamily } from '../../common/constants';
+import { Colors, FontFamily, Strings } from '../../common/constants';
 
 //import components
 import { PageHeader } from '../../components';
@@ -19,19 +19,27 @@ import SvgFavourite from '../../assets/icons/svg/favourites.svg';
 import SvgPrimaryFav from '../../assets/icons/svg/primaryFav.svg';
 
 //import common functions
-import { sortContacts } from '../../common/helper/commonFun';
+import { mapDisplayContacts, sortContacts } from '../../common/helper/commonFun';
+
+//import helper hooks
+import { useSearchFilter } from '../../common/helper/hooks';
 
 const AddFavourites = ({ navigation }) => {
 
-  const dash = useSelector((state) => state.dash);
+  //redux selectors
+  const storedContacts = useSelector((state) => state.dash.contacts);
+
+  //hooks
   const isFocused = useIsFocused();
 
   //states
-  const [contacts, setContacts] = useState([]);
-  const [filteredContacts, setFilteredContacts] = useState([]);
   const [sortedContacts, setSortedContacts] = useState([]);
   const [uniqueLetters, setUniqueLetters] = useState([]);
   const [selectedCount, setSelectedCount] = useState(null);
+  const [searchInput, setSearchInput] = useState('');
+  const [filteredContacts, setFilteredContacts] = useState([...mapDisplayContacts(storedContacts)]);
+
+  const updatedContacts = useSearchFilter(mapDisplayContacts(storedContacts), 'displayName', searchInput);
 
   //animated shared value
   const actionTabY = useSharedValue(120);
@@ -90,24 +98,16 @@ const AddFavourites = ({ navigation }) => {
     )
   }
 
-  useEffect(() => {
-    if (isFocused) {
-      let contactList = dash.contacts.map(item => {
-        return {
-          'recordID': item?.recordID,
-          'displayName': Platform.OS === 'android' ? item?.displayName : `${item?.givenName} ${item?.familyName}`,
-          'thumbnailPath': item?.thumbnailPath
-        }
-      });
-      setContacts(contactList);
-      setFilteredContacts(contactList);
-    }
-  }, [isFocused]);
-
   //sorted contacts arrays in alphabetical order
   useEffect(() => {
     setSortedContacts(sortContacts(filteredContacts));
   }, [filteredContacts]);
+
+  useEffect(() => {
+    if (updatedContacts.length > 0) {
+      setFilteredContacts(updatedContacts);
+    }
+  }, [updatedContacts.length]);
 
   //extract unique first letters from the sorted contacts array
   useEffect(() => {
@@ -125,15 +125,6 @@ const AddFavourites = ({ navigation }) => {
     }
   }, [isFocused, filteredContacts]);
 
-  //function to search contacts
-  const searchEvent = (req) => {
-    if (req === '') {
-      setFilteredContacts(contacts);
-    } else {
-      setFilteredContacts(contacts.filter(item => item?.displayName?.toLowerCase()?.includes(req?.toLowerCase())));
-    }
-  }
-
   //function to handle click on cancel button
   const handleClickOnCancel = () => {
     let updatedList = [...filteredContacts];
@@ -146,8 +137,15 @@ const AddFavourites = ({ navigation }) => {
   }
 
   return (
-    <SafeAreaView style={styles.safeAreaView}>
-      <PageHeader headerTitle={selectedCount ? `${selectedCount} selected` : 'Select Contacts'} backBtn iconArr={['search']} placeholder='Search Contacts' searchEvent={(val) => searchEvent(val)} navigation={navigation} />
+    <View style={styles.safeAreaView}>
+      <PageHeader
+        headerTitle={selectedCount ? `${selectedCount} selected` : 'Select Contacts'}
+        backBtn
+        iconArr={['search']}
+        placeholder={'Search Contacts'}
+        searchEvent={setSearchInput}
+        navigation={navigation}
+      />
       <View style={styles.listContainer}>
         <FlatList
           data={uniqueLetters}
@@ -160,14 +158,14 @@ const AddFavourites = ({ navigation }) => {
         />
       </View>
       <Animated.View style={[styles.buttonContainer, animatedTabStyle]}>
-        <TouchableOpacity activeOpacity={0.7} onPress={() => handleClickOnCancel()} style={styles.actionBtn}>
-          <Text style={styles.actionBtnText}>Cancel</Text>
+        <TouchableOpacity activeOpacity={0.7} onPress={handleClickOnCancel} style={styles.actionBtn}>
+          <Text style={styles.actionBtnText}>{Strings.Cancel}</Text>
         </TouchableOpacity>
         <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.goBack()} style={[styles.actionBtn, styles.primaryActionBtn]}>
-          <Text style={[styles.actionBtnText, styles.primaryActionBtnText]}>Done</Text>
+          <Text style={[styles.actionBtnText, styles.primaryActionBtnText]}>{Strings.Done}</Text>
         </TouchableOpacity>
       </Animated.View>
-    </SafeAreaView>
+    </View>
   )
 }
 
