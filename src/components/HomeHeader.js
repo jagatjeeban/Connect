@@ -157,6 +157,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     borderBottomWidth: 1,
     borderColor: Colors.Base_Grey,
+    paddingBottom: 20
   },
   activeSearchLeft: {
     flexDirection: 'row',

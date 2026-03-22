@@ -1,32 +1,44 @@
-import { View, Text, TouchableOpacity, StyleSheet, Platform, Alert } from 'react-native'
-import React, { useEffect, useRef, useState } from 'react';
-import Contact from 'react-native-contacts';
-import { useDispatch, useSelector } from 'react-redux';
-import { check, request, PERMISSIONS, RESULTS, openSettings } from 'react-native-permissions';
-import { showMessage } from 'react-native-flash-message';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Platform,
+  Alert,
+} from "react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import Contact from "react-native-contacts";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  check,
+  request,
+  PERMISSIONS,
+  RESULTS,
+  openSettings,
+} from "react-native-permissions";
+import { showMessage } from "react-native-flash-message";
 
 //import constants
-import { Colors, FontFamily, Strings } from '../../common/constants';
+import { Colors, FontFamily, Strings } from "../../common/constants";
 
 //import common functions
-import { mapDisplayContacts } from '../../common/helper/commonFun';
+import { mapDisplayContacts } from "../../common/helper/commonFun";
 
 //import svgs
-import SvgPlus from '../../assets/icons/svg/plus.svg';
+import SvgPlus from "../../assets/icons/svg/plus.svg";
 
 //import components
-import { ContactsList, HomeHeader } from '../../components';
+import { ContactsList, HomeHeader } from "../../components";
 
 //import custom functions
 
 //import redux actions
-import { storeContacts } from '../../store/dashSlice';
+import { storeContacts } from "../../store/dashSlice";
 
 //import helper hooks
-import { useResponsive, useSearchFilter } from '../../common/helper/hooks';
+import { useResponsive, useSearchFilter } from "../../common/helper/hooks";
 
 const Contacts = ({ navigation }) => {
-
   //hooks
   const dispatch = useDispatch();
   const { rh } = useResponsive();
@@ -38,60 +50,79 @@ const Contacts = ({ navigation }) => {
   const hasLoadedInitialContacts = useRef(storedContacts.length > 0);
 
   //states
-  const [contacts, setContacts] = useState(() => mapDisplayContacts(storedContacts));
+  const [contacts, setContacts] = useState(() =>
+    mapDisplayContacts(storedContacts)
+  );
   const [loaderStatus, setLoaderStatus] = useState(false);
   const [isGranted, setIsGranted] = useState(false);
-  const [searchInput, setSearchInput] = useState('');
+  const [searchInput, setSearchInput] = useState("");
 
   //filtered contacts based on the search input
-  const filteredContacts = useSearchFilter(contacts, 'displayName', searchInput);
+  const filteredContacts = useSearchFilter(
+    contacts,
+    "displayName",
+    searchInput
+  );
 
   //function to navigate to the contact details
   const navigateToDetails = (contactItem) => {
-    if (!contactItem?.recordID) return;
-    const selectedContact = storedContacts.find(contact => contact?.recordID === contactItem?.recordID);
-    if (!selectedContact) return;
-    navigation.navigate('ContactDetails', { info: selectedContact })
-  }
+    if (!contactItem?.recordID) {
+      return;
+    }
+    const selectedContact = storedContacts.find(
+      (contact) => contact?.recordID === contactItem?.recordID
+    );
+    if (!selectedContact) {
+      return;
+    }
+    navigation.navigate("ContactDetails", { info: selectedContact });
+  };
 
   //function to get all the contacts
-  const getAllContacts = () => {
+  const getAllContacts = useCallback(() => {
     setLoaderStatus(true);
     Contact.getAll()
       .then((contactList) => {
-        const newList = contactList?.filter(item => item?.phoneNumbers?.length > 0) || [];
+        const newList =
+          contactList?.filter((item) => item?.phoneNumbers?.length > 0) || [];
         dispatch(storeContacts(newList));
         const displayList = mapDisplayContacts(newList);
         setContacts(displayList);
       })
       .catch((e) => {
-        console.log('Contact fetch Err', e);
+        console.log("Contact fetch Err", e);
         showMessage({
           message: Strings.ErrMsg,
-          type: 'danger',
-          icon: 'info'
+          type: "danger",
+          icon: "info",
         });
       })
       .finally(() => {
         setLoaderStatus(false);
-      })
-  }
+      });
+  }, [dispatch]);
 
   //function to open the settings alert
-  const openSettingAlert = () => {
+  const openSettingAlert = useCallback(() => {
     Alert.alert(
-      'Connect would like to view your contacts',
-      'Contacts access was denied. Please enable it from settings to continue.',
+      "Connect would like to view your contacts",
+      "Contacts access was denied. Please enable it from settings to continue.",
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Open Settings', onPress: async () => await openSettings('application') }
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Open Settings",
+          onPress: async () => await openSettings("application"),
+        },
       ]
-    )
-  }
+    );
+  }, []);
 
   //function to request permission to read contacts
-  const requestContactsPermission = async () => {
-    const CONTACTS_PERMISSION = Platform.OS === "ios" ? PERMISSIONS.IOS.CONTACTS : PERMISSIONS.ANDROID.READ_CONTACTS;
+  const requestContactsPermission = useCallback(async () => {
+    const CONTACTS_PERMISSION =
+      Platform.OS === "ios"
+        ? PERMISSIONS.IOS.CONTACTS
+        : PERMISSIONS.ANDROID.READ_CONTACTS;
     const current = await check(CONTACTS_PERMISSION);
     if (current === RESULTS.GRANTED) {
       setIsGranted(true);
@@ -105,12 +136,12 @@ const Contacts = ({ navigation }) => {
     }
     const next = await request(CONTACTS_PERMISSION);
     setIsGranted(next === RESULTS.GRANTED);
-  }
+  }, [openSettingAlert]);
 
   //request contacts permission on mount
   useEffect(() => {
     requestContactsPermission();
-  }, []);
+  }, [requestContactsPermission]);
 
   useEffect(() => {
     if (storedContacts) {
@@ -120,52 +151,65 @@ const Contacts = ({ navigation }) => {
 
   //get all the contacts only for the initial empty-state load after permission is granted
   useEffect(() => {
-    if (!isGranted || hasLoadedInitialContacts.current) return;
+    if (!isGranted || hasLoadedInitialContacts.current) {
+      return;
+    }
 
     hasLoadedInitialContacts.current = true;
     getAllContacts();
-  }, [isGranted]);
+  }, [getAllContacts, isGranted]);
 
   //function to handle the navigation to select contacts screen
   const handleNavigationToSelectContacts = (type) => {
-    navigation.navigate('SelectContacts', { type, contacts });
-  }
+    navigation.navigate("SelectContacts", { type, contacts });
+  };
 
   return (
     <View style={styles.safeAreaView}>
       <HomeHeader
-        placeholder={'Search contacts'}
+        placeholder={"Search contacts"}
         menuBtn
         selectEvent={handleNavigationToSelectContacts}
-        selectAllEvent={() => handleNavigationToSelectContacts('all')}
+        selectAllEvent={() => handleNavigationToSelectContacts("all")}
         searchEvent={setSearchInput}
       />
-      {!isGranted ?
+      {!isGranted ? (
         <View style={styles.permissionStateContainer}>
-          <Text style={styles.requireAccessTextStyle}>{Strings.RequireAccess}</Text>
-          <TouchableOpacity onPress={() => requestContactsPermission()} style={styles.accessGrantBtn}>
+          <Text style={styles.requireAccessTextStyle}>
+            {Strings.RequireAccess}
+          </Text>
+          <TouchableOpacity
+            onPress={() => requestContactsPermission()}
+            style={styles.accessGrantBtn}
+          >
             <Text style={styles.grantPermissionText}>Grant Permission</Text>
           </TouchableOpacity>
         </View>
-        :
+      ) : (
         <ContactsList
           contacts={filteredContacts}
           loaderStatus={loaderStatus}
           onClickContact={navigateToDetails}
+          searchText={searchInput}
+          totalContactsCount={contacts.length}
         />
-      }
-      <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('CreateContact')} style={[styles.addContactBtn, { bottom: rh(20) }]}>
+      )}
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={() => navigation.navigate("CreateContact")}
+        style={[styles.addContactBtn, { bottom: rh(20) }]}
+      >
         <SvgPlus />
       </TouchableOpacity>
     </View>
-  )
-}
+  );
+};
 
 export default Contacts;
 
 const styles = StyleSheet.create({
   safeAreaView: {
-    flex: 1
+    flex: 1,
   },
   accessGrantBtn: {
     marginTop: 20,
@@ -173,8 +217,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center'
+    alignItems: "center",
+    justifyContent: "center",
   },
   addContactBtn: {
     position: "absolute",
@@ -182,8 +226,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.Primary_Light,
     padding: 17,
     borderRadius: 15,
-    alignItems: 'center',
-    justifyContent: 'center'
+    alignItems: "center",
+    justifyContent: "center",
   },
   pillsBarStyle: {
     backgroundColor: Colors.Base_Grey,
@@ -196,47 +240,47 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     backgroundColor: Colors.Bg_Light,
     borderWidth: 1,
-    borderColor: Colors.Base_Grey
+    borderColor: Colors.Base_Grey,
   },
   userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between'
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   userName: {
     color: Colors.Base_White,
     fontSize: 18,
-    fontWeight: '500',
-    fontFamily: FontFamily.OutfitMedium
+    fontWeight: "500",
+    fontFamily: FontFamily.OutfitMedium,
   },
   userEmail: {
     color: Colors.Base_Medium_Grey,
     fontSize: 14,
     fontFamily: FontFamily.OutfitRegular,
-    marginTop: 5
+    marginTop: 5,
   },
   activeUser: {
     backgroundColor: Colors.Primary_Light,
     borderRadius: 6,
     paddingVertical: 7,
     paddingHorizontal: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row'
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
   },
   lineSeparator: {
     height: 1,
     backgroundColor: Colors.Base_Grey,
-    marginVertical: 20
+    marginVertical: 20,
   },
   addAccountBtn: {
     flexDirection: "row",
     marginBottom: 20,
     backgroundColor: Colors.Primary,
     alignItems: "center",
-    justifyContent: 'center',
+    justifyContent: "center",
     borderRadius: 12,
-    paddingVertical: 15
+    paddingVertical: 15,
   },
   bottomSheetContainer: {
     flex: 1,
@@ -246,16 +290,16 @@ const styles = StyleSheet.create({
   requireAccessTextStyle: {
     fontSize: 20,
     fontFamily: FontFamily.OutfitRegular,
-    color: Colors.Base_Medium_Grey
+    color: Colors.Base_Medium_Grey,
   },
   permissionStateContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   grantPermissionText: {
     color: Colors.Primary,
     fontSize: 17,
     fontFamily: FontFamily.OutfitMedium,
   },
-})
+});

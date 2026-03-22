@@ -26,10 +26,7 @@ const HomeStackNavigator = () => {
         }}>
             {/* Contacts screen starts here */}
             <Stack.Screen name="Home" component={TabStackNavigator} />
-            <Stack.Screen name="CreateContact" component={CreateContact} options={{
-                presentation: 'formSheet',
-                animation: 'slide_from_bottom'
-            }} />
+            <Stack.Screen name="CreateContact" component={CreateContact} />
             <Stack.Screen name="ContactDetails" component={ContactDetails} />
             <Stack.Screen name="SelectContacts" component={SelectContacts} options={{ navigationBarHidden: true }} />
 

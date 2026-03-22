@@ -1,10 +1,12 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import React, { useRef } from 'react';
 import auth from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { useDispatch, useSelector } from 'react-redux';
+import DeviceInfo from 'react-native-device-info';
 import FastImage from 'react-native-fast-image';
 import { showMessage } from 'react-native-flash-message';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 //import constants
 import { Colors, FontFamily, Strings } from '../../common/constants';
@@ -23,6 +25,7 @@ const Accounts = () => {
     //hooks
     const dispatch = useDispatch();
     const { adaptiveSize } = useResponsive();
+    const insets = useSafeAreaInsets();
 
     //refs
     const actionSheetRef = useRef(null);
@@ -30,6 +33,9 @@ const Accounts = () => {
     //store events
     const userInfo = useSelector(state => state.auth.userInfo);
     const storedContacts = useSelector(state => state.dash.contacts);
+
+    const appVersion = `v${DeviceInfo.getVersion()}`;
+    const versionBottomOffset = insets.bottom + (Platform.OS === 'ios' ? 96 : 88) + 50;
 
     //function to sign out the user
     const signOut = async () => {
@@ -57,15 +63,25 @@ const Accounts = () => {
 
     return (
         <View style={styles.safeAreaView}>
-            <PageHeader headerTitle={'Profile'} />
+            <PageHeader headerTitle={Strings.Profile} />
             <View style={styles.mainContainer}>
-                <FastImage source={{ uri: userInfo?.user?.photo, priority: 'high' }} style={styles.contactImg} />
-                <Text style={styles.userName}>{userInfo?.user?.name}</Text>
-                <Text style={styles.userEmail}>{userInfo?.user?.email}</Text>
-                <Text style={styles.userContacts}>{storedContacts?.length + (storedContacts?.length > 1 ? ' contacts' : ' contact')}</Text>
-                <TouchableOpacity activeOpacity={0.7} onPress={() => actionSheetRef.current?.open()} style={styles.signOutBtn}>
-                    <Text style={styles.signOutText}>{Strings.SignOut}</Text>
-                </TouchableOpacity>
+                <View style={styles.profileContent}>
+                    <FastImage source={{ uri: userInfo?.user?.photo, priority: 'high' }} style={styles.contactImg} />
+                    <Text style={styles.userName}>{userInfo?.user?.name}</Text>
+                    <Text style={styles.userEmail}>{userInfo?.user?.email}</Text>
+                    {storedContacts?.length > 0 && (
+                        <View style={styles.contactsCountContainer}>
+                            <Text style={[styles.userContacts, { fontFamily: FontFamily.OutfitMedium }]}>{storedContacts?.length}</Text>
+                            <Text style={styles.userContacts}>{storedContacts?.length > 1 ? 'contacts' : 'contact'}</Text>
+                        </View>
+                    )}
+                    <TouchableOpacity activeOpacity={0.7} onPress={() => actionSheetRef.current?.open()} style={styles.signOutBtn}>
+                        <Text style={styles.signOutText}>{Strings.SignOut}</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={[styles.appVersionContainer, { bottom: versionBottomOffset }]}>
+                    <Text style={styles.appVersionText}>{appVersion}</Text>
+                </View>
             </View>
             <ActionBottomSheet
                 refRBSheet={actionSheetRef}
@@ -87,6 +103,12 @@ const styles = StyleSheet.create({
     },
     mainContainer: {
         flex: 1,
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        position: 'relative'
+    },
+    profileContent: {
+        width: '100%',
         alignItems: 'center'
     },
     headerStyle: {
@@ -142,6 +164,22 @@ const styles = StyleSheet.create({
         color: Colors.Base_Red,
         fontSize: 20,
         fontFamily: FontFamily.OutfitMedium
+    },
+    contactsCountContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 5
+    },
+    appVersionContainer: {
+        width: '100%',
+        alignItems: 'center',
+        position: 'absolute'
+    },
+    appVersionText: {
+        color: Colors.Base_Medium_Grey,
+        fontSize: 16,
+        fontFamily: FontFamily.OutfitRegular,
+        textAlign: 'center'
     },
 })
 

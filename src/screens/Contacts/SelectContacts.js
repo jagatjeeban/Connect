@@ -1,12 +1,15 @@
-import { View, StyleSheet, Platform, InteractionManager } from 'react-native';
-import React, { useRef, useState, useEffect, startTransition } from 'react';
+import { View, StyleSheet, InteractionManager } from 'react-native';
+import React, { useRef, useState, useEffect, useCallback, startTransition } from 'react';
 import { useIsFocused } from '@react-navigation/native';
 
 //import constants
-import { Colors, FontFamily, Strings } from '../../common/constants';
+import { Strings, Colors, FontFamily } from '../../common/constants';
 
 //import components
 import { PageHeader, ContactsList } from '../../components';
+
+//import helper hooks
+import { useSearchFilter } from '../../common/helper/hooks';
 
 const buildSelectableContacts = (contactList = [], shouldSelectAll = false) => {
   const nextContacts = contactList.slice();
@@ -44,9 +47,11 @@ const SelectContacts = ({ navigation, route }) => {
   const [selectedCount, setSelectedCount] = useState(0);
   const [loaderStatus, setLoaderStatus] = useState(false);
   const [selectionVersion, setSelectionVersion] = useState(0);
+  const [searchInput, setSearchInput] = useState('');
 
   //refs
   const selectedContactIdsRef = useRef(new Set());
+  const filteredContacts = useSearchFilter(contacts, 'displayName', searchInput);
 
   //funtion to select contacts
   const selectContacts = (id, value) => {
@@ -67,7 +72,7 @@ const SelectContacts = ({ navigation, route }) => {
   }
 
   //function to get the contacts list
-  const getContactList = () => {
+  const getContactList = useCallback(() => {
     setLoaderStatus(true);
     const routeContacts = Array.isArray(route?.params?.contacts) ? route?.params?.contacts : [];
     const shouldSelectAll = route?.params?.type !== undefined;
@@ -86,28 +91,31 @@ const SelectContacts = ({ navigation, route }) => {
     });
 
     return () => interactionTask.cancel();
-  }
+  }, [route?.params?.contacts, route?.params?.type]);
 
   useEffect(() => {
     if (!isFocused) return;
 
     return getContactList();
-  }, [isFocused, route?.params?.contacts, route?.params?.type]);
+  }, [getContactList, isFocused]);
 
   return (
     <View style={styles.safeAreaView}>
       <PageHeader
         headerTitle={selectedCount > 0 ? `${selectedCount} selected` : Strings.SelectContacts}
         backBtn
-        iconArr={selectedCount > 0 && ['trash', 'share']}
+        iconArr={selectedCount > 0 ? ['search', 'trash', 'share'] : ['search']}
         navigation={navigation}
+        searchEvent={setSearchInput}
       />
       <ContactsList
-        contacts={contacts}
+        contacts={filteredContacts}
         loaderStatus={loaderStatus}
         isSelectEvent
         selectedContactIds={selectedContactIdsRef.current}
         selectionVersion={selectionVersion}
+        searchText={searchInput}
+        totalContactsCount={contacts.length}
         onClickContact={(contact) => selectContacts(contact?.recordID, !selectedContactIdsRef.current.has(contact?.recordID))}
       />
     </View>

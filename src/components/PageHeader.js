@@ -43,12 +43,16 @@ const NormalHeader = ({
     //refs
     const searchRef = useRef();
 
+    const handleSearchInputChange = (value = '') => {
+        textChangeEvent?.(value);
+        setSearchInput(value);
+    };
+
     //function to handle the back press event
     const handleBackPress = () => {
         if (searchStatus) {
             updateSearchStatus();
-            textChangeEvent('');
-            setSearchInput('');
+            handleSearchInputChange('');
             return true;
         }
         return false;
@@ -56,7 +60,7 @@ const NormalHeader = ({
 
     useEffect(() => {
         if (searchStatus) {
-            searchRef.current.focus();
+            searchRef.current?.focus?.();
         }
     }, [searchStatus]);
 
@@ -72,7 +76,7 @@ const NormalHeader = ({
                     <View style={styles.headerLeft}>
                         {(backBtn || crossBtn) ?
                             <>
-                                <TouchableOpacity hitSlop={10} onPress={() => customClickEvent ?? navigation.goBack()} style={styles.headerActionButton}>
+                                <TouchableOpacity hitSlop={10} onPress={() => customClickEvent ? customClickEvent() : navigation?.goBack?.()} style={styles.headerActionButton}>
                                     {backBtn === true && <SvgBackArrow />}
                                     {crossBtn === true && <SvgCrossWhite />}
                                 </TouchableOpacity>
@@ -90,37 +94,37 @@ const NormalHeader = ({
                                 </TouchableOpacity>
                             )}
                             {iconArr.some((item) => item === 'whiteStar') && (
-                                <TouchableOpacity style={styles.iconStyle} onPress={() => rightBtnClickEvent('star')}>
+                                <TouchableOpacity style={styles.iconStyle} onPress={() => rightBtnClickEvent?.('star')}>
                                     <SvgWhiteStar width={20} height={20} />
                                 </TouchableOpacity>
                             )}
                             {iconArr.some((item) => item === 'pencil') && (
-                                <TouchableOpacity style={styles.iconStyle} onPress={() => rightBtnClickEvent('edit')}>
+                                <TouchableOpacity style={styles.iconStyle} onPress={() => rightBtnClickEvent?.('edit')}>
                                     <SvgPencil width={20} height={20} />
                                 </TouchableOpacity>
                             )}
                             {iconArr.some((item) => item === 'share') && (
-                                <TouchableOpacity style={styles.iconStyle} onPress={() => rightBtnClickEvent('share')}>
+                                <TouchableOpacity style={styles.iconStyle} onPress={() => rightBtnClickEvent?.('share')}>
                                     <SvgShare width={20} height={20} />
                                 </TouchableOpacity>
                             )}
                             {iconArr.some((item) => item === 'trash') && (
-                                <TouchableOpacity style={styles.iconStyle} onPress={() => rightBtnClickEvent('delete')}>
+                                <TouchableOpacity style={styles.iconStyle} onPress={() => rightBtnClickEvent?.('delete')}>
                                     <SvgTrash width={20} height={20} />
                                 </TouchableOpacity>
                             )}
                             {iconArr.some((item) => item === 'saveBtn') && (
-                                <TouchableOpacity activeOpacity={0.7} style={[styles.saveBtn, { backgroundColor: loaderStatus ? Colors.BgColor : Colors.Primary }]} onPress={() => rightBtnClickEvent('save')}>
+                                <TouchableOpacity activeOpacity={0.7} style={[styles.saveBtn, { backgroundColor: loaderStatus ? Colors.BgColor : Colors.Primary }]} onPress={() => rightBtnClickEvent?.('save')}>
                                     <Text style={[styles.saveBtnText, { color: loaderStatus ? Colors.Base_Grey : Colors.Base_White }]}>{loaderStatus ? Strings.Saving : Strings.Save}</Text>
                                 </TouchableOpacity>
                             )}
                             {iconArr.some((item) => item === 'updateBtn') && (
-                                <TouchableOpacity activeOpacity={0.7} disabled={loaderStatus} style={[styles.saveBtn, { backgroundColor: loaderStatus ? Colors.BgColor : Colors.Primary }]} onPress={() => rightBtnClickEvent('save')}>
+                                <TouchableOpacity activeOpacity={0.7} disabled={loaderStatus} style={[styles.saveBtn, { backgroundColor: loaderStatus ? Colors.BgColor : Colors.Primary }]} onPress={() => rightBtnClickEvent?.('save')}>
                                     <Text style={[styles.saveBtnText, { color: loaderStatus ? Colors.Base_Grey : Colors.Base_White }]}>{loaderStatus ? Strings.Updating : Strings.Update}</Text>
                                 </TouchableOpacity>
                             )}
                             {iconArr.some((item) => item === 'addBtn') && (
-                                <TouchableOpacity onPress={() => rightBtnClickEvent('add')} activeOpacity={0.7} style={styles.addBtn}>
+                                <TouchableOpacity onPress={() => rightBtnClickEvent?.('add')} activeOpacity={0.7} style={styles.addBtn}>
                                     <SvgAdd width={15} height={15} />
                                     <Text style={styles.addBtnText}>{Strings.Add}</Text>
                                 </TouchableOpacity>
@@ -134,8 +138,7 @@ const NormalHeader = ({
                         <TouchableOpacity
                             onPress={() => {
                                 updateSearchStatus();
-                                textChangeEvent('');
-                                setSearchInput('');
+                                handleSearchInputChange('');
                             }}
                             style={styles.headerActionButton}
                         >
@@ -150,11 +153,11 @@ const NormalHeader = ({
                             autoFocus={true}
                             style={styles.searchInput}
                             onBlur={searchBlur}
-                            onChange={(e) => { textChangeEvent(e.nativeEvent.text); setSearchInput(e.nativeEvent.text); }}
+                            onChange={(e) => handleSearchInputChange(e.nativeEvent.text)}
                         />
                     </View>
                     {searchInput !== '' && (
-                        <TouchableOpacity onPress={() => { textChangeEvent(''); setSearchInput(''); }} style={styles.headerActionButton}>
+                        <TouchableOpacity onPress={() => handleSearchInputChange('')} style={styles.headerActionButton}>
                             <SvgCross />
                         </TouchableOpacity>
                     )}
@@ -251,6 +254,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         borderBottomWidth: 1,
         borderColor: Colors.Base_Grey,
+        paddingBottom: 20
     },
     saveBtn: {
         alignItems: 'center',

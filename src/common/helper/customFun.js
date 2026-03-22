@@ -4,6 +4,7 @@ import vCard from 'vcards-js';
  * function to get the first character of a string in uppercase
  * @param {string} string 
  * @returns {string}
+ * @example jagat -> J
  */
 export const getUcFirstLetter = (string) => {
     if (string && string !== '') {
@@ -17,6 +18,7 @@ export const getUcFirstLetter = (string) => {
  * function to get a string with its first character in uppercase
  * @param {string} string 
  * @returns {string}
+ * @example jagat -> Jagat
  */
 export const getUcFirstLetterString = (string) => {
     if (string && string !== '') {
@@ -29,7 +31,7 @@ export const getUcFirstLetterString = (string) => {
 /**
  * function to generate the vCard string for contact sharing
  * @param {Object} contactInfo Contact details
- * @returns {string}
+ * @returns {string} v card string
  */
 export const generateVCardString = (contactInfo) => {
     const contact = vCard();

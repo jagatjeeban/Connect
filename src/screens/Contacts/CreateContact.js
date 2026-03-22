@@ -385,7 +385,7 @@ const CreateContact = ({ navigation, route }) => {
   }, []);
 
   return (
-    <SafeAreaView style={styles.safeAreaView}>
+    <View style={styles.safeAreaView}>
       <View style={styles.upperCurveEffect}>
         <SvgUpperCurve width={screenDimensions?.width} />
       </View>
@@ -426,6 +426,7 @@ const CreateContact = ({ navigation, route }) => {
           </View>
           <FlatList
             data={phoneNumbers}
+            scrollEnabled={false}
             showsVerticalScrollIndicator={false}
             renderItem={RenderPhoneNumberItem}
             contentContainerStyle={styles.fieldListContent}
@@ -433,6 +434,7 @@ const CreateContact = ({ navigation, route }) => {
           />
           <FlatList
             data={emailAddresses}
+            scrollEnabled={false}
             showsVerticalScrollIndicator={false}
             renderItem={RenderEmailIdItem}
             contentContainerStyle={styles.fieldListContent}
@@ -440,7 +442,7 @@ const CreateContact = ({ navigation, route }) => {
           />
         </View>
       </KeyboardAwareScrollView>
-    </SafeAreaView>
+    </View>
   )
 }
 
