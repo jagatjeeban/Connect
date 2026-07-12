@@ -1,0 +1,33 @@
+const Strings = {
+  WelcomeText:
+    "Manage, search, and secure your contacts effortlessly, syncing across devices for quick communication and simplifying connections.",
+  ContinueWithGoogle: "Continue with Google",
+  WelcomeToConnect: "Welcome To Connect",
+  DeleteNumberText: `Are you sure you want to delete this contact? This action can't be undone.`,
+  RequireAccess: "Connect needs to access your contacts.",
+  Contacts: "Contacts",
+  Favorites: "Favorites",
+  Profile: "Profile",
+  ErrMsg: "Something went wrong! Please try again later.",
+  Save: "Save",
+  Saving: "Saving..",
+  EditContact: "Edit Contact",
+  CreateContact: "Create Contact",
+  Update: "Update",
+  Updating: "Updating..",
+  Add: "Add",
+  SignOut: "Sign Out",
+  Select: "Select",
+  SelectAll: "Select all",
+  Cancel: "Cancel",
+  Okay: "Okay",
+  ConfirmationMsg: "Are you sure you want to do this?",
+  Leave: "Leave",
+  Stay: "Stay",
+  SignOutMsg:
+    "We’ll be a little sad to see you go, and your Connect space will miss you until you come back.",
+  Done: "Done",
+  SelectContacts: "Select Contacts",
+} as const;
+
+export default Strings;
