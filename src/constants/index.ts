@@ -1,9 +1,8 @@
-import Colors from "./colors";
-import FontFamily from "./fontFamily";
-import FontSize from "./fontSize";
-import FontWeight from "./fontWeight";
-import Images from "./images";
-import Strings from "./strings";
+import colors from "./colors";
+import fontFamily from "./font-family";
+import fontSize from "./font-size";
+import fontWeight from "./font-weight";
+import images from "./images";
+import strings from "./strings";
 
-export { Colors, FontFamily, FontSize, FontWeight, Images, Strings };
-
+export { colors, fontFamily, fontSize, fontWeight, images, strings };

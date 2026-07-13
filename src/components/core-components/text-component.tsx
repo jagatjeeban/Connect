@@ -1,17 +1,17 @@
 import type {
-    PressableProps,
-    StyleProp,
-    TextProps,
-    TextStyle,
-    ViewStyle,
+  PressableProps,
+  StyleProp,
+  TextProps,
+  TextStyle,
+  ViewStyle,
 } from "react-native";
 import { Pressable, Text } from "react-native";
 
 //import constants
-import { Colors } from "@/constants";
+import { colors } from "@/constants";
 
 //import themes
-import textTheme, { TextThemeName } from "@/themes/textTheme";
+import textTheme, { type TextThemeName } from "@/themes/text-theme";
 
 //import hooks
 import { useResponsive } from "@/hooks";
@@ -68,7 +68,7 @@ const TextComponent = ({
         onTextLayout={onTextLayout}
         style={{
           textAlign: textAlign,
-          color: color ?? Colors.Base_White,
+          color: color ?? colors.baseWhite,
           flexWrap: "wrap",
           marginVertical: margin,
           fontSize: resolvedFontSize,
@@ -80,7 +80,7 @@ const TextComponent = ({
       >
         {text}
         {required ? (
-          <Text style={{ color: Colors.Base_Red }}>{"*"}</Text>
+          <Text style={{ color: colors.baseRed }}>{"*"}</Text>
         ) : null}
       </Text>
     </Pressable>

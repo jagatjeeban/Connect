@@ -1,4 +1,4 @@
-import { useResponsive } from "./useResponsive";
-import { useSearchFilter } from "./useSearchFilter";
+import { useResponsive } from "./use-responsive";
+import { useSearchFilter } from "./use-search-filter";
 
 export { useResponsive, useSearchFilter };

@@ -39,6 +39,15 @@ const getValidatedNumericValue = (
   );
 };
 
+//constants
+const DESIGN_WIDTH = 375;
+const DESIGN_HEIGHT = 812;
+const designWidthDim = Math.min(DESIGN_WIDTH, DESIGN_HEIGHT);
+const designAspectHeight = (16 / 9) * designWidthDim;
+const DESIGN_DIAGONAL = Math.sqrt(
+  designAspectHeight ** 2 + designWidthDim ** 2,
+);
+
 /**
  * Custom hook for responsive layout across devices
  * @returns
@@ -46,20 +55,15 @@ const getValidatedNumericValue = (
 export const useResponsive = () => {
   const { width, height } = useWindowDimensions();
 
-  const DESIGN_WIDTH = 375;
-  const DESIGN_HEIGHT = 812;
-  const designWidthDim = Math.min(DESIGN_WIDTH, DESIGN_HEIGHT);
-  const designAspectHeight = (16 / 9) * designWidthDim;
-  const DESIGN_DIAGONAL = Math.sqrt(
-    designAspectHeight ** 2 + designWidthDim ** 2,
-  );
-
+  //returns responsive width
   const rw = (percent: PercentValue): number =>
     (width * getValidatedNumericValue(percent, "rw")) / 100;
 
+  //returns responsive height
   const rh = (percent: PercentValue): number =>
     (height * getValidatedNumericValue(percent, "rh")) / 100;
 
+  //returns responsive font size
   const rf = (percent: PercentValue): number => {
     const validatedPercent = getValidatedNumericValue(percent, "rf");
     const widthDimension = Math.min(width, height);
@@ -68,13 +72,16 @@ export const useResponsive = () => {
     return (diagonal * validatedPercent) / 100;
   };
 
-  const isLandscape = width > height;
+  //current device orientation
+  const isLandscape: boolean = width > height;
 
+  //returns responsive size based on device orientation (for icons, image dimensions e.t.c.)
   const adaptiveSize = (percent: PercentValue) => {
     if (isLandscape) return rh(percent);
     else return rw(percent);
   };
 
+  //converts and returns fixed font size to responsive font size
   const fontSizeToRf = (fontSize: number) => {
     const validatedFontSize = getValidatedNumericValue(
       fontSize,

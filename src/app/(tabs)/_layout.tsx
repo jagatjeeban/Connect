@@ -1,42 +1,61 @@
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 
 //import constants
-import { Colors, Strings } from "@/constants";
+import { colors, fontFamily, strings } from "@/constants";
 
 export default function TabLayout() {
   return (
-    <NativeTabs>
+    <NativeTabs labelStyle={{ fontFamily: fontFamily.outfitMedium }}>
       <NativeTabs.Trigger
-        name="index"
-        contentStyle={{ backgroundColor: Colors.BgColor }}
+        name="contacts"
+        contentStyle={{ backgroundColor: colors.backgroundColor }}
       >
-        <NativeTabs.Trigger.Label>{Strings.Contacts}</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label
+          selectedStyle={{
+            color: colors.primary,
+            fontFamily: fontFamily.outfitRegular,
+          }}
+        >
+          {strings.contacts}
+        </NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           sf={{ default: "phone", selected: "phone.fill" }}
-          md="contacts"
-          selectedColor={Colors.Primary}
+          md={{ default: "phone", selected: "phone" }}
+          selectedColor={colors.primary}
         />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger
         name="favorites"
-        contentStyle={{ backgroundColor: Colors.BgColor }}
+        contentStyle={{ backgroundColor: colors.backgroundColor }}
       >
-        <NativeTabs.Trigger.Label>{Strings.Favorites}</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label
+          selectedStyle={{
+            color: colors.primary,
+          }}
+        >
+          {strings.favorites}
+        </NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           sf={{ default: "star", selected: "star.fill" }}
           md="person_heart"
-          selectedColor={Colors.Primary}
+          selectedColor={colors.primary}
         />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger
         name="profile"
-        contentStyle={{ backgroundColor: Colors.BgColor }}
+        contentStyle={{ backgroundColor: colors.backgroundColor }}
       >
-        <NativeTabs.Trigger.Label>{Strings.Profile}</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label
+          selectedStyle={{
+            color: colors.primary,
+          }}
+        >
+          {strings.profile}
+        </NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           sf={{ default: "person", selected: "person.fill" }}
           md="person"
-          selectedColor={Colors.Primary}
+          selectedColor={colors.primary}
         />
       </NativeTabs.Trigger>
     </NativeTabs>

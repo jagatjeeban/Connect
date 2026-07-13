@@ -1,4 +1,4 @@
-const FontWeight = {
+const fontWeight = {
   100: "100",
   200: "200",
   300: "300",
@@ -9,4 +9,4 @@ const FontWeight = {
   800: "800",
 } as const;
 
-export default FontWeight;
+export default fontWeight;
