@@ -11,3 +11,25 @@ export const CONTACT_FIELDS = [
 ] as const;
 
 export type DeviceContact = PartialContactDetails<typeof CONTACT_FIELDS>;
+
+export type ContactHeaderItem = {
+  id: string;
+  type: "header";
+  letter: string;
+};
+
+export type ContactRowItem = {
+  id: string;
+  type: "contact";
+  letter: string;
+  contact: DeviceContact;
+};
+
+export type ContactListItem = ContactHeaderItem | ContactRowItem;
+
+export type PreparedContacts = {
+  listItems: ContactListItem[];
+  stickyHeaderIndices: number[];
+  scrubberLetters: string[];
+  letterToHeaderIndex: Record<string, number>;
+};

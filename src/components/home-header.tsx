@@ -15,8 +15,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, fontFamily } from "@/constants";
 
 //import svgs
-import SvgBackGrey from "@/assets/icons/backArrowGrey.svg";
-import SvgCross from "@/assets/icons/crossGrey.svg";
+import SvgBackGrey from "@/assets/icons/back-arrow-grey.svg";
+import SvgCross from "@/assets/icons/cross-grey.svg";
 import SvgSearch from "@/assets/icons/search.svg";
 
 type HomeHeaderProps = {

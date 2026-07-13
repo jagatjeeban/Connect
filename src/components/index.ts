@@ -2,6 +2,8 @@
 import TextComponent from "./core-components/text-component";
 
 //import other common components
+import AlphabetScrubber from "./alphabet-scrubber";
 import HomeHeader from "./home-header";
 
-export { HomeHeader, TextComponent };
+export { AlphabetScrubber, HomeHeader, TextComponent };
+

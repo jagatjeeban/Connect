@@ -1,29 +1,27 @@
 import { useMemo } from "react";
 
 /**
- * Custom hook to search dynamic lists with dynamic search keys
- * @param {Array<Object>} list Original list to search inside
- * @param {string} searchKey Key on value of which the filter operation to be performed (Optional)
- * @param {string} searchText Search input (Optional)
- * @returns {Array<Object>} The required filtered list
+ * Filters a typed list by the string representation of a selected property.
+ *
+ * @param list - Original list to search.
+ * @param searchKey - Property whose value should be searched.
+ * @param searchText - Case-insensitive search input.
+ * @returns A filtered copy of the original list.
  */
-export const useSearchFilter = (
-  list: Array<object>,
-  searchKey: string = "",
-  searchText: string = "",
-): Array<object> => {
+export const useSearchFilter = <Item extends object>(
+  list: readonly Item[],
+  searchKey: keyof Item,
+  searchText = "",
+): Item[] => {
   return useMemo(() => {
-    if (!Array.isArray(list)) return [];
-
     const originalArr = [...list];
     const input = searchText.trim().toLowerCase();
-    const key: string = searchKey ?? "";
 
-    if (!input || input === "") return originalArr;
+    if (!input) return originalArr;
 
-    return originalArr.filter((item: any) => {
-      const value = item?.[key];
-      if (!value) return false;
+    return originalArr.filter((item) => {
+      const value = item[searchKey];
+      if (value === null || value === undefined) return false;
       return String(value).toLowerCase().includes(input);
     });
   }, [list, searchKey, searchText]);

@@ -17,16 +17,16 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import SvgBackArrow from "@/assets/icons/svg/backArrow.svg";
-import SvgBackGrey from "@/assets/icons/svg/backArrowGrey.svg";
-import SvgCross from "@/assets/icons/svg/crossGrey.svg";
-import SvgCrossWhite from "@/assets/icons/svg/crossWhite.svg";
-import SvgPencil from "@/assets/icons/svg/pencil.svg";
-import SvgAdd from "@/assets/icons/svg/plus.svg";
-import SvgSearch from "@/assets/icons/svg/searchWhite.svg";
-import SvgShare from "@/assets/icons/svg/shareWhite.svg";
-import SvgTrash from "@/assets/icons/svg/trash.svg";
-import SvgWhiteStar from "@/assets/icons/svg/whiteFav.svg";
+import SvgBackArrow from "@/assets/icons/back-arrow.svg";
+import SvgBackGrey from "@/assets/icons/back-arrow-grey.svg";
+import SvgCross from "@/assets/icons/cross-grey.svg";
+import SvgCrossWhite from "@/assets/icons/cross-white.svg";
+import SvgPencil from "@/assets/icons/pencil.svg";
+import SvgAdd from "@/assets/icons/plus.svg";
+import SvgSearch from "@/assets/icons/search-white.svg";
+import SvgShare from "@/assets/icons/share-white.svg";
+import SvgTrash from "@/assets/icons/trash.svg";
+import SvgWhiteStar from "@/assets/icons/white-favorite.svg";
 import { colors, fontFamily, strings } from "@/constants";
 
 import type {
