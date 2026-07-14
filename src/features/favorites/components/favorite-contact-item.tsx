@@ -20,7 +20,7 @@ type FavoriteContactItemProps = {
 
 const FavoriteContactItem = ({ item, onPress }: FavoriteContactItemProps) => {
   const contactName = getContactName(item);
-  const thumbnail = item.thumbnail?.trim();
+  const thumbnail = item.thumbnail?.trim() || item.image?.trim();
 
   return (
     <Pressable

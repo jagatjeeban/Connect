@@ -1,7 +1,10 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+
+//import components
+import TextComponent from "@/components/core-components/text-component";
 
 //import constants
-import { colors, fontFamily, strings } from "@/constants";
+import { colors, strings } from "@/constants";
 
 //import svgs
 import SvgPlus from "@/assets/icons/plus.svg";
@@ -12,7 +15,11 @@ type FavoritesHeaderProps = {
 
 const FavoritesHeader = ({ onPressAdd }: FavoritesHeaderProps) => (
   <View style={styles.container}>
-    <Text style={styles.title}>{strings.favorites}</Text>
+    <TextComponent
+      color={colors.baseWhite}
+      styleProfile="large3"
+      text={strings.favorites}
+    />
     <Pressable
       accessibilityLabel="Add favorite"
       accessibilityRole="button"
@@ -24,7 +31,12 @@ const FavoritesHeader = ({ onPressAdd }: FavoritesHeaderProps) => (
       ]}
     >
       <SvgPlus width={15} height={15} />
-      <Text style={styles.addButtonText}>{strings.add}</Text>
+      <TextComponent
+        color={colors.primary}
+        containerStyle={styles.addButtonTextContainer}
+        styleProfile="large1"
+        text={strings.add}
+      />
     </Pressable>
   </View>
 );
@@ -39,11 +51,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 20,
   },
-  title: {
-    color: colors.baseWhite,
-    fontSize: 20,
-    fontFamily: fontFamily.outfitMedium,
-  },
   addButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -56,10 +63,7 @@ const styles = StyleSheet.create({
   buttonPressed: {
     opacity: 0.7,
   },
-  addButtonText: {
+  addButtonTextContainer: {
     marginLeft: 10,
-    color: colors.primary,
-    fontSize: 16,
-    fontFamily: fontFamily.outfitMedium,
   },
 });

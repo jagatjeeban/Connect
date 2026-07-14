@@ -1,4 +1,7 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+
+//import components
+import TextComponent from "@/components/core-components/text-component";
 
 //import constants
 import { colors, fontFamily } from "@/constants";
@@ -26,8 +29,20 @@ const EmptyState = ({ isSearchResultState = false }: EmptyStateProps) => {
           <SvgFavorite width={34} height={30} />
         )}
       </View>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.description}>{description}</Text>
+      <TextComponent
+        color={colors.baseWhite}
+        styleProfile="large4"
+        text={title}
+        textAlign="center"
+      />
+      <TextComponent
+        color={colors.baseMediumGrey}
+        containerStyle={styles.descriptionContainer}
+        fontFamily={fontFamily.outfitRegular}
+        styleProfile="large1"
+        text={description}
+        textAlign="center"
+      />
     </View>
   );
 };
@@ -51,19 +66,8 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     backgroundColor: colors.backgroundLight,
   },
-  title: {
-    color: colors.baseWhite,
-    fontSize: 22,
-    fontFamily: fontFamily.outfitMedium,
-    textAlign: "center",
-  },
-  description: {
+  descriptionContainer: {
     maxWidth: 300,
     marginTop: 10,
-    color: colors.baseMediumGrey,
-    fontSize: 16,
-    lineHeight: 24,
-    fontFamily: fontFamily.outfitRegular,
-    textAlign: "center",
   },
 });

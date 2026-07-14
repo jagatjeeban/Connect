@@ -1,6 +1,7 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
-import { colors, fontFamily } from "@/constants";
+import TextComponent from "@/components/core-components/text-component";
+import { colors } from "@/constants";
 
 const SCRUBBER_CONTENT_GUTTER = 60;
 
@@ -22,7 +23,12 @@ const ContactSectionHeader = ({
       isSticky && styles.stickyContainer,
     ]}
   >
-    <Text style={styles.initial}>{letter}</Text>
+    <TextComponent
+      color={colors.baseMediumGrey}
+      containerStyle={styles.initialContainer}
+      styleProfile="large3"
+      text={letter}
+    />
   </View>
 );
 
@@ -45,10 +51,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     zIndex: 2,
   },
-  initial: {
+  initialContainer: {
     width: 40,
-    color: colors.baseMediumGrey,
-    fontSize: 20,
-    fontFamily: fontFamily.outfitMedium,
   },
 });

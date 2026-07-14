@@ -71,7 +71,7 @@ const ContactDetailsContent = ({
 
   const curveHeight = rh(20);
   const contactName = contact ? getContactName(contact) : "";
-  const thumbnail = contact?.thumbnail?.trim();
+  const thumbnail = contact?.thumbnail?.trim() || contact?.image?.trim();
 
   return (
     <View style={styles.container}>

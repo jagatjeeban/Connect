@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
 
 //import constants
-import { colors, fontFamily } from "@/constants";
+import { colors } from "@/constants";
 
 //import components
 import { TextComponent } from "@/components";
@@ -30,16 +30,17 @@ const EmptyState = ({ isSearchResultState = false }: EmptyStateProps) => {
         )}
       </View>
       <TextComponent
-        text={title}
         color={colors.baseWhite}
-        textAlign={"center"}
-        styleProfile={"large2"}
+        styleProfile="large4"
+        text={title}
+        textAlign="center"
       />
       <TextComponent
-        text={description}
         color={colors.baseMediumGrey}
-        textAlign={"center"}
-        styleProfile={"large1"}
+        containerStyle={styles.descriptionContainer}
+        styleProfile="large1"
+        text={description}
+        textAlign="center"
       />
     </View>
   );
@@ -66,24 +67,8 @@ const styles = StyleSheet.create({
     borderColor: colors.baseGrey,
     marginBottom: 20,
   },
-  emptyStateIconText: {
-    color: colors.primary,
-    fontSize: 24,
-    fontFamily: fontFamily.outfitBold,
-  },
-  emptyStateTitle: {
-    color: colors.baseWhite,
-    fontSize: 22,
-    fontFamily: fontFamily.outfitMedium,
-    textAlign: "center",
-  },
-  emptyStateDescription: {
+  descriptionContainer: {
     marginTop: 10,
-    color: colors.baseMediumGrey,
-    fontSize: 16,
-    lineHeight: 24,
-    fontFamily: fontFamily.outfitRegular,
-    textAlign: "center",
     maxWidth: 280,
   },
 });

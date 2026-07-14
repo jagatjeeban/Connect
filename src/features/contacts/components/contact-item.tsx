@@ -1,6 +1,7 @@
 import { Image } from "expo-image";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
+import TextComponent from "@/components/core-components/text-component";
 import { colors, fontFamily } from "@/constants";
 import type { DeviceContact } from "@/features/contacts/model";
 import { getContactInitial, getContactName } from "@/helpers/customFun";
@@ -23,7 +24,7 @@ const ContactItem = ({
   hasScrubber = false,
 }: ContactItemProps) => {
   const contactName = getContactName(item);
-  const thumbnail = item.thumbnail?.trim();
+  const thumbnail = item.thumbnail?.trim() || item.image?.trim();
 
   return (
     <Pressable
@@ -52,20 +53,34 @@ const ContactItem = ({
           />
         ) : (
           <View style={styles.defaultContactImage}>
-            <Text style={styles.contactFirstLetter}>
-              {getContactInitial(contactName)}
-            </Text>
+            <TextComponent
+              color={colors.primary}
+              styleProfile="large3"
+              text={getContactInitial(contactName)}
+              textAlign="center"
+            />
           </View>
         )}
-        <Text numberOfLines={1} style={styles.contactNameText}>
-          {contactName}
-        </Text>
+        <TextComponent
+          color={colors.baseWhite}
+          containerStyle={styles.contactNameContainer}
+          fontFamily={fontFamily.outfitRegular}
+          numOfLine={1}
+          styleProfile="large2"
+          text={contactName}
+        />
       </View>
 
       {isSelectEvent &&
         (isSelected ? (
           <View style={styles.checkedButton}>
-            <Text style={styles.checkMark}>✓</Text>
+            <TextComponent
+              color={colors.baseWhite}
+              fontFamily={fontFamily.outfitBold}
+              styleProfile="normal2"
+              text="✓"
+              textAlign="center"
+            />
           </View>
         ) : (
           <View style={styles.checkButton} />
@@ -109,17 +124,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: colors.primaryLight,
   },
-  contactFirstLetter: {
-    color: colors.primary,
-    fontSize: 20,
-    fontFamily: fontFamily.outfitMedium,
-  },
-  contactNameText: {
+  contactNameContainer: {
     flex: 1,
     marginLeft: 20,
-    color: colors.baseWhite,
-    fontSize: 18,
-    fontFamily: fontFamily.outfitRegular,
   },
   checkButton: {
     width: 20,
@@ -135,11 +142,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: 6,
     backgroundColor: colors.primary,
-  },
-  checkMark: {
-    color: colors.baseWhite,
-    fontSize: 13,
-    lineHeight: 16,
-    fontFamily: fontFamily.outfitBold,
   },
 });

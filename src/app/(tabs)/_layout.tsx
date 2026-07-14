@@ -2,10 +2,19 @@ import { NativeTabs } from "expo-router/unstable-native-tabs";
 
 //import constants
 import { colors, fontFamily, strings } from "@/constants";
+import { Platform } from "react-native";
 
 export default function TabLayout() {
   return (
-    <NativeTabs labelStyle={{ fontFamily: fontFamily.outfitMedium }}>
+    <NativeTabs
+      disableTransparentOnScrollEdge
+      minimizeBehavior={
+        Platform.OS === "ios" && Number(Platform.Version) >= 26
+          ? "onScrollDown"
+          : undefined
+      }
+      labelStyle={{ fontFamily: fontFamily.outfitMedium }}
+    >
       <NativeTabs.Trigger
         name="contacts"
         contentStyle={{ backgroundColor: colors.backgroundColor }}
@@ -20,7 +29,7 @@ export default function TabLayout() {
         </NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           sf={{ default: "phone", selected: "phone.fill" }}
-          md={{ default: "phone", selected: "phone" }}
+          md={{ default: "contacts", selected: "contacts" }}
           selectedColor={colors.primary}
         />
       </NativeTabs.Trigger>

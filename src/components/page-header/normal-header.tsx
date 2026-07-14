@@ -1,21 +1,17 @@
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BackHandler,
   type ColorValue,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   type TextInputProps,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+//import components
+import TextComponent from "@/components/core-components/text-component";
 
 import SvgBackArrow from "@/assets/icons/back-arrow.svg";
 import SvgBackGrey from "@/assets/icons/back-arrow-grey.svg";
@@ -41,7 +37,7 @@ export interface NormalHeaderProps {
   backBtn: boolean;
   crossBtn: boolean;
   loaderStatus: boolean;
-  headerTitle: ReactNode;
+  headerTitle: string;
   headerTitleColor: ColorValue;
   iconArr: readonly PageHeaderIcon[];
   customClickEvent?: () => void;
@@ -128,22 +124,19 @@ const NormalHeader = ({
                   {backBtn === true && <SvgBackArrow />}
                   {crossBtn === true && <SvgCrossWhite />}
                 </Pressable>
-                <Text
-                  style={[styles.headerTitleText, { color: headerTitleColor }]}
-                >
-                  {headerTitle}
-                </Text>
+                <TextComponent
+                  color={headerTitleColor}
+                  styleProfile="large3"
+                  text={headerTitle}
+                />
               </>
             ) : (
-              <Text
-                style={[
-                  styles.headerTitleText,
-                  styles.headerTitleStandalone,
-                  { color: headerTitleColor },
-                ]}
-              >
-                {headerTitle}
-              </Text>
+              <TextComponent
+                color={headerTitleColor}
+                containerStyle={styles.headerTitleStandalone}
+                styleProfile="large3"
+                text={headerTitle}
+              />
             )}
           </View>
           {iconArr?.length > 0 && (
@@ -201,18 +194,14 @@ const NormalHeader = ({
                   ]}
                   onPress={() => rightBtnClickEvent?.("save")}
                 >
-                  <Text
-                    style={[
-                      styles.saveBtnText,
-                      {
-                        color: loaderStatus
-                          ? colors.baseGrey
-                          : colors.baseWhite,
-                      },
-                    ]}
-                  >
-                    {loaderStatus ? strings.saving : strings.save}
-                  </Text>
+                  <TextComponent
+                    color={
+                      loaderStatus ? colors.baseGrey : colors.baseWhite
+                    }
+                    styleProfile="large1"
+                    text={loaderStatus ? strings.saving : strings.save}
+                    textAlign="center"
+                  />
                 </Pressable>
               )}
               {iconArr.includes("updateBtn") && (
@@ -229,18 +218,14 @@ const NormalHeader = ({
                   ]}
                   onPress={() => rightBtnClickEvent?.("save")}
                 >
-                  <Text
-                    style={[
-                      styles.saveBtnText,
-                      {
-                        color: loaderStatus
-                          ? colors.baseGrey
-                          : colors.baseWhite,
-                      },
-                    ]}
-                  >
-                    {loaderStatus ? strings.updating : strings.update}
-                  </Text>
+                  <TextComponent
+                    color={
+                      loaderStatus ? colors.baseGrey : colors.baseWhite
+                    }
+                    styleProfile="large1"
+                    text={loaderStatus ? strings.updating : strings.update}
+                    textAlign="center"
+                  />
                 </Pressable>
               )}
               {iconArr.includes("addBtn") && (
@@ -252,7 +237,12 @@ const NormalHeader = ({
                   ]}
                 >
                   <SvgAdd width={15} height={15} />
-                  <Text style={styles.addBtnText}>{strings.add}</Text>
+                  <TextComponent
+                    color={colors.primary}
+                    containerStyle={styles.addBtnTextContainer}
+                    styleProfile="large1"
+                    text={strings.add}
+                  />
                 </Pressable>
               )}
             </View>
@@ -319,10 +309,6 @@ const styles = StyleSheet.create({
   headerActionButton: {
     paddingHorizontal: 20,
   },
-  headerTitleText: {
-    fontSize: 20,
-    fontFamily: fontFamily.outfitMedium,
-  },
   headerTitleStandalone: {
     paddingHorizontal: 20,
   },
@@ -351,15 +337,7 @@ const styles = StyleSheet.create({
     marginRight: 20,
     backgroundColor: colors.primary,
   },
-  saveBtnText: {
-    color: colors.baseWhite,
-    fontSize: 16,
-    fontFamily: fontFamily.outfitMedium,
-  },
-  addBtnText: {
-    color: colors.primary,
-    fontSize: 16,
-    fontFamily: fontFamily.outfitMedium,
+  addBtnTextContainer: {
     marginLeft: 10,
   },
   addBtn: {

@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     paddingBottom: 36,
     justifyContent: "center",
     gap: 28,
-    backgroundColor: colors.backgroundLight,
+    // backgroundColor: colors.backgroundLight,
   },
   actionsContainer: {
     gap: 12,

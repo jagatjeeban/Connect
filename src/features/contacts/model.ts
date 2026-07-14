@@ -7,6 +7,9 @@ export const CONTACT_FIELDS = [
   ContactField.FULL_NAME,
   ContactField.PHONES,
   ContactField.EMAILS,
+  // Expo Contacts 57's iOS thumbnail mapper reads imageData internally.
+  // Fetch IMAGE with THUMBNAIL so that native access is always available.
+  ContactField.IMAGE,
   ContactField.THUMBNAIL,
 ] as const;
 

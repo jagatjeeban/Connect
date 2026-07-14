@@ -6,6 +6,14 @@ import type {
 } from "@/features/contacts/model";
 
 const UNKNOWN_SECTION = "#";
+const APPLE_CONTACT_LABEL_PATTERN = /^_\$!<([^>]+)>!\$_$/;
+const APPLE_CONTACT_LABEL_OVERRIDES: Readonly<Record<string, string>> = {
+  HomeFAX: "Home Fax",
+  WorkFAX: "Work Fax",
+  OtherFAX: "Other Fax",
+  iPhone: "iPhone",
+  iCloud: "iCloud",
+};
 
 /**
  * Returns a contact's trimmed display name with a fallback for unnamed contacts.
@@ -53,13 +61,22 @@ export const getUniqueContactPhones = (
  *
  * @param label - Label returned by the device contacts API.
  * @param fallback - Text used when the label is unavailable.
- * @returns A trimmed label with an uppercase first character.
+ * @returns A readable label with native Apple tokens normalized for display.
  */
 export const formatContactLabel = (
   label?: string,
   fallback: string = "Phone",
 ): string => {
-  const normalizedLabel = label?.trim() || fallback;
+  const rawLabel = label?.trim();
+  const appleLabelToken = rawLabel?.match(APPLE_CONTACT_LABEL_PATTERN)?.[1];
+  const normalizedLabel = appleLabelToken
+    ? (APPLE_CONTACT_LABEL_OVERRIDES[appleLabelToken] ?? appleLabelToken)
+    : rawLabel || fallback;
+
+  if (normalizedLabel === "iPhone" || normalizedLabel === "iCloud") {
+    return normalizedLabel;
+  }
+
   const [firstCharacter, ...remainingCharacters] = Array.from(normalizedLabel);
 
   return `${firstCharacter?.toLocaleUpperCase() ?? ""}${remainingCharacters.join("")}`;

@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import type { ColorValue, TextInputProps } from "react-native";
 
 export type PageHeaderIcon =
@@ -28,7 +27,7 @@ export interface PageHeaderProps {
   placeholder?: string;
   loaderStatus?: boolean;
   headerType?: "normalHeader";
-  headerTitle?: ReactNode;
+  headerTitle?: string;
   headerTitleColor?: ColorValue;
   iconArr?: readonly PageHeaderIcon[];
   backBtn?: boolean;

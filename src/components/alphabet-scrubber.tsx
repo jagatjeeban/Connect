@@ -3,17 +3,19 @@ import {
   type LayoutRectangle,
   type StyleProp,
   StyleSheet,
-  Text,
   View,
   type ViewProps,
   type ViewStyle,
 } from "react-native";
 
+//import components
+import TextComponent from "@/components/core-components/text-component";
+
 //import constants
 import { colors, fontFamily } from "@/constants";
 
 //CONSTANTS
-const SCRUBBER_TOP_OFFSET = 20;
+const SCRUBBER_IOS_VERTICAL_OFFSET = 20;
 const SCRUBBER_RIGHT_OFFSET = 6;
 
 export type AlphabetScrubberProps = {
@@ -56,9 +58,10 @@ const AlphabetScrubber = ({
       style={[
         styles.alphabetScrubberContainer,
         {
-          // top: SCRUBBER_TOP_OFFSET,
           right: SCRUBBER_RIGHT_OFFSET,
-          bottom: scrubberBottomOffset,
+          bottom:
+            scrubberBottomOffset +
+            (process.env.EXPO_OS === "ios" ? SCRUBBER_IOS_VERTICAL_OFFSET : 0),
         },
       ]}
     >
@@ -82,15 +85,21 @@ const AlphabetScrubber = ({
               onLetterLayout?.(letter, event.nativeEvent.layout)
             }
           >
-            <Text
-              style={[
-                styles.alphabetScrubberText,
-                highlightedLetter === letter &&
-                  styles.alphabetScrubberTextActive,
-              ]}
-            >
-              {letter}
-            </Text>
+            <TextComponent
+              color={
+                highlightedLetter === letter
+                  ? colors.primary
+                  : colors.baseMediumGrey
+              }
+              fontFamily={
+                highlightedLetter === letter
+                  ? fontFamily.outfitBold
+                  : fontFamily.outfitMedium
+              }
+              styleProfile="small3"
+              text={letter}
+              textAlign="center"
+            />
           </View>
         ))}
       </View>
@@ -103,7 +112,12 @@ const AlphabetScrubber = ({
           (!isScrubbing || !bubbleLetter) && styles.scrubberPreviewBubbleHidden,
         ]}
       >
-        <Text style={styles.scrubberPreviewText}>{bubbleLetter ?? ""}</Text>
+        <TextComponent
+          color={colors.primary}
+          styleProfile="largest2"
+          text={bubbleLetter ?? ""}
+          textAlign="center"
+        />
       </View>
     </View>
   );
@@ -134,15 +148,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 1,
   },
-  alphabetScrubberText: {
-    color: colors.baseMediumGrey,
-    fontSize: 10,
-    fontFamily: fontFamily.outfitMedium,
-  },
-  alphabetScrubberTextActive: {
-    color: colors.primary,
-    fontFamily: fontFamily.outfitBold,
-  },
   scrubberPreviewBubble: {
     position: "absolute",
     width: 70,
@@ -157,10 +162,5 @@ const styles = StyleSheet.create({
   },
   scrubberPreviewBubbleHidden: {
     opacity: 0,
-  },
-  scrubberPreviewText: {
-    color: colors.primary,
-    fontSize: 34,
-    fontFamily: fontFamily.outfitBold,
   },
 });

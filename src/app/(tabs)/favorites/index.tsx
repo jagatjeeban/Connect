@@ -27,13 +27,9 @@ import { useAppStore } from "@/store/use-app-store";
 
 //import types
 import type { DeviceContact } from "@/features/contacts/model";
+import { router } from "expo-router";
 
 const MAX_VISIBLE_FAVORITES = 6;
-
-// Renders one favorite in the four-column grid.
-const renderFavoriteContact = ({ item }: ListRenderItemInfo<DeviceContact>) => (
-  <FavoriteContactItem item={item} />
-);
 
 const Favorites = () => {
   //store events
@@ -65,6 +61,25 @@ const Favorites = () => {
 
   // Add-favorites navigation will be implemented with its dedicated route.
   const handleAddFavorite = useCallback(() => undefined, []);
+
+  //opens the contact-details route for the selected contact
+  const openContactDetails = useCallback(
+    (contact: DeviceContact) => {
+      router.push({
+        pathname: "/contacts/[contactId]",
+        params: { contactId: contact.id },
+      });
+    },
+    [router],
+  );
+
+  // Renders one favorite in the four-column grid.
+  const renderFavoriteContact = useCallback(
+    ({ item }: ListRenderItemInfo<DeviceContact>) => (
+      <FavoriteContactItem item={item} onPress={openContactDetails} />
+    ),
+    [],
+  );
 
   return (
     <View style={styles.container}>

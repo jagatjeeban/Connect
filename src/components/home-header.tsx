@@ -3,13 +3,15 @@ import {
   BackHandler,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from "react-native";
 // import { Menu, MenuItem } from 'react-native-material-menu';
 import { useIsFocused } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+//import components
+import TextComponent from "@/components/core-components/text-component";
 
 //import constants
 import { colors, fontFamily } from "@/constants";
@@ -105,7 +107,13 @@ const HomeHeader = ({
         >
           <View style={styles.searchRow}>
             <SvgSearch />
-            <Text style={styles.searchText}>{placeholder}</Text>
+            <TextComponent
+              color={colors.baseMediumGrey}
+              containerStyle={styles.searchTextContainer}
+              fontFamily={fontFamily.outfitRegular}
+              styleProfile="large1"
+              text={placeholder}
+            />
           </View>
           {/* {menuBtn === true && (
             <Menu
@@ -202,10 +210,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  searchText: {
-    color: colors.baseMediumGrey,
-    fontSize: 16,
-    fontFamily: fontFamily.outfitRegular,
+  searchTextContainer: {
     marginLeft: 10,
   },
   menuItemText: {

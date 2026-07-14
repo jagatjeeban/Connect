@@ -13,6 +13,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 //import components
 import { HomeHeader } from "@/components";
@@ -37,10 +38,13 @@ import type { DeviceContact } from "@/features/contacts/model";
 //import svgs
 import SvgPlus from "@/assets/icons/plus.svg";
 
+const IOS_ADD_BUTTON_TAB_BAR_CLEARANCE = 24;
+
 const Contacts = () => {
   //hooks
   const router = useRouter();
   const { rh } = useResponsive();
+  const insets = useSafeAreaInsets();
 
   //store events
   const storedContacts = useAppStore((state) => state.contacts);
@@ -198,7 +202,15 @@ const Contacts = () => {
         accessibilityLabel="Create contact"
         accessibilityRole="button"
         onPress={() => void createContact()}
-        style={[styles.addContactButton, { bottom: rh(10) }]}
+        style={[
+          styles.addContactButton,
+          {
+            bottom:
+              process.env.EXPO_OS === "ios"
+                ? insets.bottom + IOS_ADD_BUTTON_TAB_BAR_CLEARANCE
+                : rh(10),
+          },
+        ]}
       >
         <SvgPlus />
       </Pressable>
