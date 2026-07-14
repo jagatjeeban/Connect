@@ -12,7 +12,8 @@ import {
 //import constants
 import { colors, fontFamily } from "@/constants";
 
-const SCRUBBER_TOP_OFFSET = 16;
+//CONSTANTS
+const SCRUBBER_TOP_OFFSET = 20;
 const SCRUBBER_RIGHT_OFFSET = 6;
 
 export type AlphabetScrubberProps = {
@@ -55,7 +56,7 @@ const AlphabetScrubber = ({
       style={[
         styles.alphabetScrubberContainer,
         {
-          top: SCRUBBER_TOP_OFFSET,
+          // top: SCRUBBER_TOP_OFFSET,
           right: SCRUBBER_RIGHT_OFFSET,
           bottom: scrubberBottomOffset,
         },

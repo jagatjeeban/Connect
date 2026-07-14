@@ -1,6 +1,7 @@
 import type {
   ContactListItem,
   DeviceContact,
+  DevicePhone,
   PreparedContacts,
 } from "@/features/contacts/model";
 
@@ -14,6 +15,91 @@ const UNKNOWN_SECTION = "#";
  */
 export const getContactName = (contact: DeviceContact): string =>
   contact.fullName?.trim() || "Unnamed contact";
+
+/**
+ * Returns the uppercase initial used when a contact has no thumbnail.
+ *
+ * @param name - Contact display name.
+ * @returns The first character of the trimmed name, or `#` when unavailable.
+ */
+export const getContactInitial = (name: string): string =>
+  Array.from(name.trim())[0]?.toLocaleUpperCase() ?? UNKNOWN_SECTION;
+
+/**
+ * Removes contacts phone entries that resolve to the same numeric value.
+ *
+ * @param phones - Phone entries returned by the device contacts API.
+ * @returns Phone entries with blank and duplicate numbers removed.
+ */
+export const getUniqueContactPhones = (
+  phones: readonly DevicePhone[],
+): DevicePhone[] => {
+  const seenNumbers = new Set<string>();
+
+  return phones.filter((phone) => {
+    const normalizedNumber = phone.number?.replace(/\D/g, "") ?? "";
+
+    if (!normalizedNumber || seenNumbers.has(normalizedNumber)) {
+      return false;
+    }
+
+    seenNumbers.add(normalizedNumber);
+    return true;
+  });
+};
+
+/**
+ * Formats an optional contact field label for display.
+ *
+ * @param label - Label returned by the device contacts API.
+ * @param fallback - Text used when the label is unavailable.
+ * @returns A trimmed label with an uppercase first character.
+ */
+export const formatContactLabel = (
+  label?: string,
+  fallback: string = "Phone",
+): string => {
+  const normalizedLabel = label?.trim() || fallback;
+  const [firstCharacter, ...remainingCharacters] = Array.from(normalizedLabel);
+
+  return `${firstCharacter?.toLocaleUpperCase() ?? ""}${remainingCharacters.join("")}`;
+};
+
+/**
+ * Builds the plain-text payload used by the native contact share sheet.
+ *
+ * @param contact - Contact whose available details should be shared.
+ * @returns The contact name followed by phone numbers and email addresses.
+ */
+export const buildContactShareMessage = (contact: DeviceContact): string => {
+  const phoneLines = getUniqueContactPhones(contact.phones).map(
+    (phone) =>
+      `${formatContactLabel(phone.label)}: ${phone.number?.trim() ?? ""}`,
+  );
+  const emailLines = contact.emails
+    .filter((email) => Boolean(email.address?.trim()))
+    .map(
+      (email) =>
+        `${formatContactLabel(email.label, "Email")}: ${email.address?.trim() ?? ""}`,
+    );
+
+  return [getContactName(contact), ...phoneLines, ...emailLines].join("\n");
+};
+
+/**
+ * Resolves stored contact records that are currently marked as favorites.
+ *
+ * @param contacts - Contacts available in the application store.
+ * @param favoriteContactIds - Contact IDs marked as favorites.
+ * @returns Favorite contacts in their original contact-list order.
+ */
+export const getFavoriteContacts = (
+  contacts: readonly DeviceContact[],
+  favoriteContactIds: readonly string[],
+): DeviceContact[] => {
+  const favoriteIds = new Set(favoriteContactIds);
+  return contacts.filter((contact) => favoriteIds.has(contact.id));
+};
 
 /**
  * Resolves the alphabetical section used to group a contact.

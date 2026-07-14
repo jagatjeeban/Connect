@@ -12,6 +12,8 @@ export const CONTACT_FIELDS = [
 
 export type DeviceContact = PartialContactDetails<typeof CONTACT_FIELDS>;
 
+export type DevicePhone = DeviceContact["phones"][number];
+
 export type ContactHeaderItem = {
   id: string;
   type: "header";

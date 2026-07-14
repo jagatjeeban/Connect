@@ -22,6 +22,7 @@ type TextComponentProps = {
   margin?: TextStyle["marginVertical"];
   required?: boolean;
   onTextLayout?: TextProps["onTextLayout"];
+  selectable?: TextProps["selectable"];
   clickEvent?: PressableProps["onPress"];
   numOfLine?: TextProps["numberOfLines"];
   textAlign?: TextStyle["textAlign"];
@@ -39,6 +40,7 @@ const TextComponent = ({
   margin,
   required = false,
   onTextLayout,
+  selectable = false,
   clickEvent,
   numOfLine,
   textAlign,
@@ -66,6 +68,7 @@ const TextComponent = ({
       <Text
         numberOfLines={numOfLine}
         onTextLayout={onTextLayout}
+        selectable={selectable}
         style={{
           textAlign: textAlign,
           color: color ?? colors.baseWhite,

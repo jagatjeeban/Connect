@@ -37,7 +37,7 @@ export default function TabLayout() {
         </NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           sf={{ default: "star", selected: "star.fill" }}
-          md="person_heart"
+          md={"star"}
           selectedColor={colors.primary}
         />
       </NativeTabs.Trigger>

@@ -4,18 +4,19 @@ import {
   getPermissionsAsync,
   requestPermissionsAsync,
 } from "expo-contacts";
+import { useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   Linking,
+  Pressable,
   StyleSheet,
-  Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 
 //import components
 import { HomeHeader } from "@/components";
+import TextComponent from "@/components/core-components/text-component";
 import ContactsList from "@/features/contacts/components/contacts-list";
 
 //import constants
@@ -38,6 +39,7 @@ import SvgPlus from "@/assets/icons/plus.svg";
 
 const Contacts = () => {
   //hooks
+  const router = useRouter();
   const { rh } = useResponsive();
 
   //store events
@@ -115,21 +117,15 @@ const Contacts = () => {
     }
   }, [openSettingsAlert]);
 
-  //opens the native contact form for the selected contact
+  //opens the contact-details route for the selected contact
   const openContactDetails = useCallback(
-    async (contact: DeviceContact) => {
-      try {
-        const wasUpdated = await new Contact(contact.id).editWithForm();
-
-        if (wasUpdated) {
-          await getAllContacts();
-        }
-      } catch (error) {
-        console.error("Contact details error", error);
-        Alert.alert("Unable to open contact", strings.errorMessage);
-      }
+    (contact: DeviceContact) => {
+      router.push({
+        pathname: "/contacts/[contactId]",
+        params: { contactId: contact.id },
+      });
     },
-    [getAllContacts],
+    [router],
   );
 
   //opens the native create-contact form and refreshes after a successful save
@@ -169,35 +165,43 @@ const Contacts = () => {
 
       {!isGranted ? (
         <View style={styles.permissionStateContainer}>
-          <Text style={styles.requireAccessText}>{strings.requireAccess}</Text>
-          <TouchableOpacity
+          <TextComponent
+            color={colors.baseMediumGrey}
+            fontFamily={fontFamily.outfitRegular}
+            styleProfile="large3"
+            text={strings.requireAccess}
+            textAlign="center"
+          />
+          <Pressable
             accessibilityRole="button"
-            activeOpacity={0.7}
             onPress={() => void requestContactsPermission()}
             style={styles.grantAccessButton}
           >
-            <Text style={styles.grantPermissionText}>Grant Permission</Text>
-          </TouchableOpacity>
+            <TextComponent
+              color={colors.primary}
+              styleProfile="large1"
+              text="Grant Permission"
+            />
+          </Pressable>
         </View>
       ) : (
         <ContactsList
           contacts={filteredContacts}
           loaderStatus={loaderStatus}
-          onClickContact={(contact) => void openContactDetails(contact)}
+          onClickContact={openContactDetails}
           searchText={searchInput}
           totalContactsCount={storedContacts.length}
         />
       )}
 
-      <TouchableOpacity
+      <Pressable
         accessibilityLabel="Create contact"
         accessibilityRole="button"
-        activeOpacity={0.7}
         onPress={() => void createContact()}
-        style={[styles.addContactButton, { bottom: rh(20) }]}
+        style={[styles.addContactButton, { bottom: rh(10) }]}
       >
         <SvgPlus />
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 };
@@ -215,12 +219,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 24,
   },
-  requireAccessText: {
-    color: colors.baseMediumGrey,
-    fontSize: 20,
-    fontFamily: fontFamily.outfitRegular,
-    textAlign: "center",
-  },
   grantAccessButton: {
     marginTop: 20,
     paddingHorizontal: 20,
@@ -229,11 +227,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: 30,
     backgroundColor: colors.primaryLight,
-  },
-  grantPermissionText: {
-    color: colors.primary,
-    fontSize: 17,
-    fontFamily: fontFamily.outfitMedium,
   },
   addContactButton: {
     position: "absolute",

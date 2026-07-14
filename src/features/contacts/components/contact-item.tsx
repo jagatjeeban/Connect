@@ -3,9 +3,9 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { colors, fontFamily } from "@/constants";
 import type { DeviceContact } from "@/features/contacts/model";
+import { getContactInitial, getContactName } from "@/helpers/customFun";
 
 const SCRUBBER_CONTENT_GUTTER = 60;
-const UNNAMED_CONTACT_LABEL = "Unnamed contact";
 
 export type ContactItemProps = {
   item: DeviceContact;
@@ -15,9 +15,6 @@ export type ContactItemProps = {
   hasScrubber?: boolean;
 };
 
-const getContactInitial = (name: string): string =>
-  Array.from(name.trim())[0]?.toLocaleUpperCase() ?? "#";
-
 const ContactItem = ({
   item,
   isSelectEvent = false,
@@ -25,7 +22,7 @@ const ContactItem = ({
   onClickEvent,
   hasScrubber = false,
 }: ContactItemProps) => {
-  const contactName = item.fullName?.trim() || UNNAMED_CONTACT_LABEL;
+  const contactName = getContactName(item);
   const thumbnail = item.thumbnail?.trim();
 
   return (
