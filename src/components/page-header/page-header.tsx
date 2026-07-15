@@ -1,20 +1,20 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState } from 'react';
 
 //import constants
-import { colors } from "@/constants";
+import { colors } from '@/constants';
 
 //import types
-import type { PageHeaderProps } from "./types";
+import type { PageHeaderProps } from './types';
 
 //import different headers
-import NormalHeader from "./normal-header";
+import NormalHeader from './normal-header';
 
 const PageHeader = ({
   navigation,
-  placeholder = "Search",
+  placeholder = 'Search',
   loaderStatus = false,
-  headerType = "normalHeader",
-  headerTitle = "",
+  headerType = 'normalHeader',
+  headerTitle = '',
   headerTitleColor = colors.baseWhite,
   iconArr = [],
   backBtn = false,
@@ -31,7 +31,7 @@ const PageHeader = ({
 
   return (
     <>
-      {headerType === "normalHeader" && (
+      {headerType === 'normalHeader' && (
         <NormalHeader
           navigation={navigation}
           headerTitle={headerTitle}

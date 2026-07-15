@@ -1,7 +1,4 @@
-import {
-  ContactField,
-  type PartialContactDetails,
-} from "expo-contacts";
+import { ContactField, type PartialContactDetails } from 'expo-contacts';
 
 export const CONTACT_FIELDS = [
   ContactField.FULL_NAME,
@@ -15,17 +12,17 @@ export const CONTACT_FIELDS = [
 
 export type DeviceContact = PartialContactDetails<typeof CONTACT_FIELDS>;
 
-export type DevicePhone = DeviceContact["phones"][number];
+export type DevicePhone = DeviceContact['phones'][number];
 
 export type ContactHeaderItem = {
   id: string;
-  type: "header";
+  type: 'header';
   letter: string;
 };
 
 export type ContactRowItem = {
   id: string;
-  type: "contact";
+  type: 'contact';
   letter: string;
   contact: DeviceContact;
 };

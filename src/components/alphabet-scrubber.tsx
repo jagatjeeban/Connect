@@ -1,18 +1,11 @@
-import type { Ref } from "react";
-import {
-  type LayoutRectangle,
-  type StyleProp,
-  StyleSheet,
-  View,
-  type ViewProps,
-  type ViewStyle,
-} from "react-native";
+import type { Ref } from 'react';
+import { type LayoutRectangle, type StyleProp, StyleSheet, View, type ViewProps, type ViewStyle } from 'react-native';
 
 //import components
-import TextComponent from "@/components/core-components/text-component";
+import TextComponent from '@/components/core-components/text-component';
 
 //import constants
-import { colors, fontFamily } from "@/constants";
+import { colors, fontFamily } from '@/constants';
 
 //CONSTANTS
 const SCRUBBER_IOS_VERTICAL_OFFSET = 20;
@@ -26,12 +19,12 @@ export type AlphabetScrubberProps = {
   scrubberBottomOffset?: number;
   scrubberRailRef?: Ref<View>;
   previewBubbleStyle?: StyleProp<ViewStyle>;
-  onRailLayout?: ViewProps["onLayout"];
+  onRailLayout?: ViewProps['onLayout'];
   onLetterLayout?: (letter: string, layout: LayoutRectangle) => void;
-  onPreviewBubbleLayout?: ViewProps["onLayout"];
-  onScrubStart?: ViewProps["onResponderGrant"];
-  onScrubMove?: ViewProps["onResponderMove"];
-  onScrubEnd?: ViewProps["onResponderRelease"];
+  onPreviewBubbleLayout?: ViewProps['onLayout'];
+  onScrubStart?: ViewProps['onResponderGrant'];
+  onScrubMove?: ViewProps['onResponderMove'];
+  onScrubEnd?: ViewProps['onResponderRelease'];
 };
 
 const AlphabetScrubber = ({
@@ -59,9 +52,7 @@ const AlphabetScrubber = ({
         styles.alphabetScrubberContainer,
         {
           right: SCRUBBER_RIGHT_OFFSET,
-          bottom:
-            scrubberBottomOffset +
-            (process.env.EXPO_OS === "ios" ? SCRUBBER_IOS_VERTICAL_OFFSET : 0),
+          bottom: scrubberBottomOffset + (process.env.EXPO_OS === 'ios' ? SCRUBBER_IOS_VERTICAL_OFFSET : 0),
         },
       ]}
     >
@@ -81,30 +72,20 @@ const AlphabetScrubber = ({
           <View
             key={letter}
             style={styles.alphabetScrubberSlot}
-            onLayout={(event) =>
-              onLetterLayout?.(letter, event.nativeEvent.layout)
-            }
+            onLayout={(event) => onLetterLayout?.(letter, event.nativeEvent.layout)}
           >
             <TextComponent
-              color={
-                highlightedLetter === letter
-                  ? colors.primary
-                  : colors.baseMediumGrey
-              }
-              fontFamily={
-                highlightedLetter === letter
-                  ? fontFamily.outfitBold
-                  : fontFamily.outfitMedium
-              }
-              styleProfile="small3"
+              color={highlightedLetter === letter ? colors.primary : colors.baseMediumGrey}
+              fontFamily={highlightedLetter === letter ? fontFamily.outfitBold : fontFamily.outfitMedium}
+              styleProfile='small3'
               text={letter}
-              textAlign="center"
+              textAlign='center'
             />
           </View>
         ))}
       </View>
       <View
-        pointerEvents="none"
+        pointerEvents='none'
         onLayout={onPreviewBubbleLayout}
         style={[
           styles.scrubberPreviewBubble,
@@ -112,12 +93,7 @@ const AlphabetScrubber = ({
           (!isScrubbing || !bubbleLetter) && styles.scrubberPreviewBubbleHidden,
         ]}
       >
-        <TextComponent
-          color={colors.primary}
-          styleProfile="largest2"
-          text={bubbleLetter ?? ""}
-          textAlign="center"
-        />
+        <TextComponent color={colors.primary} styleProfile='largest2' text={bubbleLetter ?? ''} textAlign='center' />
       </View>
     </View>
   );
@@ -127,15 +103,15 @@ export default AlphabetScrubber;
 
 const styles = StyleSheet.create({
   alphabetScrubberContainer: {
-    position: "absolute",
+    position: 'absolute',
     width: 34,
     zIndex: 4,
-    alignItems: "flex-end",
-    justifyContent: "center",
+    alignItems: 'flex-end',
+    justifyContent: 'center',
   },
   alphabetScrubberRail: {
-    width: "100%",
-    alignItems: "center",
+    width: '100%',
+    alignItems: 'center',
     backgroundColor: colors.backgroundLight,
     borderRadius: 18,
     borderWidth: 1,
@@ -143,18 +119,18 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   alphabetScrubberSlot: {
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: 1,
   },
   scrubberPreviewBubble: {
-    position: "absolute",
+    position: 'absolute',
     width: 70,
     height: 70,
     borderRadius: 22,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: colors.backgroundLight,
     borderWidth: 1,
     borderColor: colors.baseGrey,

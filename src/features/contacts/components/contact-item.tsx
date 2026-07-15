@@ -1,10 +1,10 @@
-import { Image } from "expo-image";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Image } from 'expo-image';
+import { Pressable, StyleSheet, View } from 'react-native';
 
-import TextComponent from "@/components/core-components/text-component";
-import { colors, fontFamily } from "@/constants";
-import type { DeviceContact } from "@/features/contacts/model";
-import { getContactInitial, getContactName } from "@/helpers/customFun";
+import TextComponent from '@/components/core-components/text-component';
+import { colors, fontFamily } from '@/constants';
+import type { DeviceContact } from '@/features/contacts/model';
+import { getContactInitial, getContactName } from '@/helpers/customFun';
 
 const SCRUBBER_CONTENT_GUTTER = 60;
 
@@ -29,7 +29,7 @@ const ContactItem = ({
   return (
     <Pressable
       accessibilityLabel={contactName}
-      accessibilityRole="button"
+      accessibilityRole='button'
       accessibilityState={isSelectEvent ? { selected: isSelected } : undefined}
       disabled={!onClickEvent}
       onPress={() => onClickEvent?.(item)}
@@ -43,9 +43,9 @@ const ContactItem = ({
         {thumbnail ? (
           <Image
             accessibilityLabel={`${contactName} contact photo`}
-            cachePolicy="memory-disk"
-            contentFit="cover"
-            priority="high"
+            cachePolicy='memory-disk'
+            contentFit='cover'
+            priority='high'
             recyclingKey={item.id}
             source={thumbnail}
             style={styles.contactImage}
@@ -55,9 +55,9 @@ const ContactItem = ({
           <View style={styles.defaultContactImage}>
             <TextComponent
               color={colors.primary}
-              styleProfile="large3"
+              styleProfile='large3'
               text={getContactInitial(contactName)}
-              textAlign="center"
+              textAlign='center'
             />
           </View>
         )}
@@ -66,7 +66,7 @@ const ContactItem = ({
           containerStyle={styles.contactNameContainer}
           fontFamily={fontFamily.outfitRegular}
           numOfLine={1}
-          styleProfile="large2"
+          styleProfile='large2'
           text={contactName}
         />
       </View>
@@ -77,9 +77,9 @@ const ContactItem = ({
             <TextComponent
               color={colors.baseWhite}
               fontFamily={fontFamily.outfitBold}
-              styleProfile="normal2"
-              text="✓"
-              textAlign="center"
+              styleProfile='normal2'
+              text='✓'
+              textAlign='center'
             />
           </View>
         ) : (
@@ -93,9 +93,9 @@ export default ContactItem;
 
 const styles = StyleSheet.create({
   contactItemContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 10,
   },
@@ -107,8 +107,8 @@ const styles = StyleSheet.create({
   },
   contactItemLeft: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginRight: 12,
   },
   contactImage: {
@@ -119,8 +119,8 @@ const styles = StyleSheet.create({
   defaultContactImage: {
     width: 44,
     height: 44,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 10,
     backgroundColor: colors.primaryLight,
   },
@@ -138,8 +138,8 @@ const styles = StyleSheet.create({
   checkedButton: {
     width: 20,
     height: 20,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 6,
     backgroundColor: colors.primary,
   },

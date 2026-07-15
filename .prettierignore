@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Expo-generated output
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Generated native projects
+android/
+ios/
+
+# Tooling and reports
+.vscode/
+coverage/
+
+# Local and generated configuration
+.env*
+integrate-lock.json

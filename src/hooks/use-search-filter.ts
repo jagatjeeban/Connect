@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo } from 'react';
 
 /**
  * Filters a typed list by the string representation of a selected property.
@@ -11,7 +11,7 @@ import { useMemo } from "react";
 export const useSearchFilter = <Item extends object>(
   list: readonly Item[],
   searchKey: keyof Item,
-  searchText = "",
+  searchText = '',
 ): Item[] => {
   return useMemo(() => {
     const originalArr = [...list];

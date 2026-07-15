@@ -1,4 +1,4 @@
-import { useWindowDimensions } from "react-native";
+import { useWindowDimensions } from 'react-native';
 
 /**
  * Normalizes a numeric input that may be passed as a number, numeric string,
@@ -12,21 +12,16 @@ import { useWindowDimensions } from "react-native";
 
 type PercentValue = string | number;
 
-const getValidatedNumericValue = (
-  value: PercentValue,
-  inputName: string,
-): number => {
-  if (typeof value === "number" && Number.isFinite(value)) {
+const getValidatedNumericValue = (value: PercentValue, inputName: string): number => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
     return value;
   }
 
-  if (typeof value === "string") {
+  if (typeof value === 'string') {
     const trimmedValue = value.trim();
-    const normalizedValue = trimmedValue.endsWith("%")
-      ? trimmedValue.slice(0, -1).trim()
-      : trimmedValue;
+    const normalizedValue = trimmedValue.endsWith('%') ? trimmedValue.slice(0, -1).trim() : trimmedValue;
 
-    if (normalizedValue !== "") {
+    if (normalizedValue !== '') {
       const parsedValue = Number(normalizedValue);
       if (Number.isFinite(parsedValue)) {
         return parsedValue;
@@ -34,9 +29,7 @@ const getValidatedNumericValue = (
     }
   }
 
-  throw new TypeError(
-    `useResponsive expected a number or numeric string for ${inputName}, received ${String(value)}`,
-  );
+  throw new TypeError(`useResponsive expected a number or numeric string for ${inputName}, received ${String(value)}`);
 };
 
 //constants
@@ -44,9 +37,7 @@ const DESIGN_WIDTH = 375;
 const DESIGN_HEIGHT = 812;
 const designWidthDim = Math.min(DESIGN_WIDTH, DESIGN_HEIGHT);
 const designAspectHeight = (16 / 9) * designWidthDim;
-const DESIGN_DIAGONAL = Math.sqrt(
-  designAspectHeight ** 2 + designWidthDim ** 2,
-);
+const DESIGN_DIAGONAL = Math.sqrt(designAspectHeight ** 2 + designWidthDim ** 2);
 
 /**
  * Custom hook for responsive layout across devices
@@ -56,16 +47,14 @@ export const useResponsive = () => {
   const { width, height } = useWindowDimensions();
 
   //returns responsive width
-  const rw = (percent: PercentValue): number =>
-    (width * getValidatedNumericValue(percent, "rw")) / 100;
+  const rw = (percent: PercentValue): number => (width * getValidatedNumericValue(percent, 'rw')) / 100;
 
   //returns responsive height
-  const rh = (percent: PercentValue): number =>
-    (height * getValidatedNumericValue(percent, "rh")) / 100;
+  const rh = (percent: PercentValue): number => (height * getValidatedNumericValue(percent, 'rh')) / 100;
 
   //returns responsive font size
   const rf = (percent: PercentValue): number => {
-    const validatedPercent = getValidatedNumericValue(percent, "rf");
+    const validatedPercent = getValidatedNumericValue(percent, 'rf');
     const widthDimension = Math.min(width, height);
     const aspectHeight = (16 / 9) * widthDimension;
     const diagonal = Math.sqrt(aspectHeight ** 2 + widthDimension ** 2);
@@ -83,10 +72,7 @@ export const useResponsive = () => {
 
   //converts and returns fixed font size to responsive font size
   const fontSizeToRf = (fontSize: number) => {
-    const validatedFontSize = getValidatedNumericValue(
-      fontSize,
-      "fontSizeToRf",
-    );
+    const validatedFontSize = getValidatedNumericValue(fontSize, 'fontSizeToRf');
     const percentage = (validatedFontSize * 100) / DESIGN_DIAGONAL;
     return rf(percentage);
   };

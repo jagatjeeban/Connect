@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   BackHandler,
   type ColorValue,
@@ -7,29 +7,25 @@ import {
   TextInput,
   type TextInputProps,
   View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 //import components
-import TextComponent from "@/components/core-components/text-component";
+import TextComponent from '@/components/core-components/text-component';
 
-import SvgBackArrow from "@/assets/icons/back-arrow.svg";
-import SvgBackGrey from "@/assets/icons/back-arrow-grey.svg";
-import SvgCross from "@/assets/icons/cross-grey.svg";
-import SvgCrossWhite from "@/assets/icons/cross-white.svg";
-import SvgPencil from "@/assets/icons/pencil.svg";
-import SvgAdd from "@/assets/icons/plus.svg";
-import SvgSearch from "@/assets/icons/search-white.svg";
-import SvgShare from "@/assets/icons/share-white.svg";
-import SvgTrash from "@/assets/icons/trash.svg";
-import SvgWhiteStar from "@/assets/icons/white-favorite.svg";
-import { colors, fontFamily, strings } from "@/constants";
+import SvgBackArrow from '@/assets/icons/back-arrow.svg';
+import SvgBackGrey from '@/assets/icons/back-arrow-grey.svg';
+import SvgCross from '@/assets/icons/cross-grey.svg';
+import SvgCrossWhite from '@/assets/icons/cross-white.svg';
+import SvgPencil from '@/assets/icons/pencil.svg';
+import SvgAdd from '@/assets/icons/plus.svg';
+import SvgSearch from '@/assets/icons/search-white.svg';
+import SvgShare from '@/assets/icons/share-white.svg';
+import SvgTrash from '@/assets/icons/trash.svg';
+import SvgWhiteStar from '@/assets/icons/white-favorite.svg';
+import { colors, fontFamily, strings } from '@/constants';
 
-import type {
-  HeaderNavigation,
-  PageHeaderAction,
-  PageHeaderIcon,
-} from "./types";
+import type { HeaderNavigation, PageHeaderAction, PageHeaderIcon } from './types';
 
 export interface NormalHeaderProps {
   navigation?: HeaderNavigation;
@@ -44,7 +40,7 @@ export interface NormalHeaderProps {
   rightBtnClickEvent?: (action: PageHeaderAction) => void;
   searchStatus: boolean;
   updateSearchStatus: () => void;
-  searchBlur?: TextInputProps["onBlur"];
+  searchBlur?: TextInputProps['onBlur'];
   textChangeEvent?: (value: string) => void;
 }
 
@@ -68,13 +64,13 @@ const NormalHeader = ({
   const insets = useSafeAreaInsets();
 
   //states
-  const [searchInput, setSearchInput] = useState("");
+  const [searchInput, setSearchInput] = useState('');
 
   //refs
   const searchRef = useRef<TextInput>(null);
 
   const handleSearchInputChange = useCallback(
-    (value: string = "") => {
+    (value: string = '') => {
       textChangeEvent?.(value);
       setSearchInput(value);
     },
@@ -85,7 +81,7 @@ const NormalHeader = ({
   const handleBackPress = useCallback(() => {
     if (searchStatus) {
       updateSearchStatus();
-      handleSearchInputChange("");
+      handleSearchInputChange('');
       return true;
     }
     return false;
@@ -98,10 +94,7 @@ const NormalHeader = ({
   }, [searchStatus]);
 
   useEffect(() => {
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      handleBackPress,
-    );
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
     return () => backHandler.remove();
   }, [handleBackPress]);
 
@@ -114,133 +107,99 @@ const NormalHeader = ({
               <>
                 <Pressable
                   hitSlop={10}
-                  onPress={() =>
-                    customClickEvent
-                      ? customClickEvent()
-                      : navigation?.goBack?.()
-                  }
+                  onPress={() => (customClickEvent ? customClickEvent() : navigation?.goBack?.())}
                   style={styles.headerActionButton}
                 >
                   {backBtn === true && <SvgBackArrow />}
                   {crossBtn === true && <SvgCrossWhite />}
                 </Pressable>
-                <TextComponent
-                  color={headerTitleColor}
-                  styleProfile="large3"
-                  text={headerTitle}
-                />
+                <TextComponent color={headerTitleColor} styleProfile='large3' text={headerTitle} />
               </>
             ) : (
               <TextComponent
                 color={headerTitleColor}
                 containerStyle={styles.headerTitleStandalone}
-                styleProfile="large3"
+                styleProfile='large3'
                 text={headerTitle}
               />
             )}
           </View>
           {iconArr?.length > 0 && (
             <View style={styles.iconRow}>
-              {iconArr.includes("search") && (
-                <Pressable
-                  style={styles.iconStyle}
-                  onPress={updateSearchStatus}
-                >
+              {iconArr.includes('search') && (
+                <Pressable style={styles.iconStyle} onPress={updateSearchStatus}>
                   <SvgSearch width={20} height={20} />
                 </Pressable>
               )}
-              {iconArr.includes("whiteStar") && (
-                <Pressable
-                  style={styles.iconStyle}
-                  onPress={() => rightBtnClickEvent?.("star")}
-                >
+              {iconArr.includes('whiteStar') && (
+                <Pressable style={styles.iconStyle} onPress={() => rightBtnClickEvent?.('star')}>
                   <SvgWhiteStar width={20} height={20} />
                 </Pressable>
               )}
-              {iconArr.includes("pencil") && (
-                <Pressable
-                  style={styles.iconStyle}
-                  onPress={() => rightBtnClickEvent?.("edit")}
-                >
+              {iconArr.includes('pencil') && (
+                <Pressable style={styles.iconStyle} onPress={() => rightBtnClickEvent?.('edit')}>
                   <SvgPencil width={20} height={20} />
                 </Pressable>
               )}
-              {iconArr.includes("share") && (
-                <Pressable
-                  style={styles.iconStyle}
-                  onPress={() => rightBtnClickEvent?.("share")}
-                >
+              {iconArr.includes('share') && (
+                <Pressable style={styles.iconStyle} onPress={() => rightBtnClickEvent?.('share')}>
                   <SvgShare width={20} height={20} />
                 </Pressable>
               )}
-              {iconArr.includes("trash") && (
-                <Pressable
-                  style={styles.iconStyle}
-                  onPress={() => rightBtnClickEvent?.("delete")}
-                >
+              {iconArr.includes('trash') && (
+                <Pressable style={styles.iconStyle} onPress={() => rightBtnClickEvent?.('delete')}>
                   <SvgTrash width={20} height={20} />
                 </Pressable>
               )}
-              {iconArr.includes("saveBtn") && (
+              {iconArr.includes('saveBtn') && (
                 <Pressable
                   style={({ pressed }) => [
                     styles.saveBtn,
                     {
-                      backgroundColor: loaderStatus
-                        ? colors.backgroundColor
-                        : colors.primary,
+                      backgroundColor: loaderStatus ? colors.backgroundColor : colors.primary,
                     },
                     pressed && styles.pressed,
                   ]}
-                  onPress={() => rightBtnClickEvent?.("save")}
+                  onPress={() => rightBtnClickEvent?.('save')}
                 >
                   <TextComponent
-                    color={
-                      loaderStatus ? colors.baseGrey : colors.baseWhite
-                    }
-                    styleProfile="large1"
+                    color={loaderStatus ? colors.baseGrey : colors.baseWhite}
+                    styleProfile='large1'
                     text={loaderStatus ? strings.saving : strings.save}
-                    textAlign="center"
+                    textAlign='center'
                   />
                 </Pressable>
               )}
-              {iconArr.includes("updateBtn") && (
+              {iconArr.includes('updateBtn') && (
                 <Pressable
                   disabled={loaderStatus}
                   style={({ pressed }) => [
                     styles.saveBtn,
                     {
-                      backgroundColor: loaderStatus
-                        ? colors.backgroundColor
-                        : colors.primary,
+                      backgroundColor: loaderStatus ? colors.backgroundColor : colors.primary,
                     },
                     pressed && styles.pressed,
                   ]}
-                  onPress={() => rightBtnClickEvent?.("save")}
+                  onPress={() => rightBtnClickEvent?.('save')}
                 >
                   <TextComponent
-                    color={
-                      loaderStatus ? colors.baseGrey : colors.baseWhite
-                    }
-                    styleProfile="large1"
+                    color={loaderStatus ? colors.baseGrey : colors.baseWhite}
+                    styleProfile='large1'
                     text={loaderStatus ? strings.updating : strings.update}
-                    textAlign="center"
+                    textAlign='center'
                   />
                 </Pressable>
               )}
-              {iconArr.includes("addBtn") && (
+              {iconArr.includes('addBtn') && (
                 <Pressable
-                  onPress={() => rightBtnClickEvent?.("add")}
-                  style={({ pressed }) => [
-                    styles.addBtn,
-                    pressed && styles.pressed,
-                  ]}
+                  onPress={() => rightBtnClickEvent?.('add')}
+                  style={({ pressed }) => [styles.addBtn, pressed && styles.pressed]}
                 >
                   <SvgAdd width={15} height={15} />
                   <TextComponent
                     color={colors.primary}
                     containerStyle={styles.addBtnTextContainer}
-                    styleProfile="large1"
+                    styleProfile='large1'
                     text={strings.add}
                   />
                 </Pressable>
@@ -254,7 +213,7 @@ const NormalHeader = ({
             <Pressable
               onPress={() => {
                 updateSearchStatus();
-                handleSearchInputChange("");
+                handleSearchInputChange('');
               }}
               style={styles.headerActionButton}
             >
@@ -272,11 +231,8 @@ const NormalHeader = ({
               onChangeText={handleSearchInputChange}
             />
           </View>
-          {searchInput !== "" && (
-            <Pressable
-              onPress={() => handleSearchInputChange("")}
-              style={styles.headerActionButton}
-            >
+          {searchInput !== '' && (
+            <Pressable onPress={() => handleSearchInputChange('')} style={styles.headerActionButton}>
               <SvgCross />
             </Pressable>
           )}
@@ -290,21 +246,21 @@ export default NormalHeader;
 
 const styles = StyleSheet.create({
   body: {
-    justifyContent: "space-between",
-    flexDirection: "row",
-    alignItems: "center",
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   headerRow: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingBottom: 20,
   },
   headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    maxWidth: "85%",
+    flexDirection: 'row',
+    alignItems: 'center',
+    maxWidth: '85%',
   },
   headerActionButton: {
     paddingHorizontal: 20,
@@ -313,24 +269,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   iconRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   iconStyle: {
     paddingRight: 20,
   },
   searchInputContainer: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     borderBottomWidth: 1,
     borderColor: colors.baseGrey,
     paddingBottom: 20,
   },
   saveBtn: {
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 12,
     paddingVertical: 10,
     paddingHorizontal: 20,
@@ -345,22 +301,22 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     paddingVertical: 7,
     paddingHorizontal: 15,
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
     marginRight: 20,
   },
   searchLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "87%",
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '87%',
   },
   searchInput: {
     color: colors.baseWhite,
     fontSize: 18,
     fontFamily: fontFamily.outfitRegular,
     paddingHorizontal: 20,
-    width: "85%",
+    width: '85%',
   },
   pressed: {
     opacity: 0.7,

@@ -1,17 +1,17 @@
-import { Image } from "expo-image";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Image } from 'expo-image';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 //import components
-import { TextComponent } from "@/components";
+import { TextComponent } from '@/components';
 
 //import constants
-import { colors, fontFamily } from "@/constants";
+import { colors, fontFamily } from '@/constants';
 
 //import helpers
-import { getContactInitial, getContactName } from "@/helpers/customFun";
+import { getContactInitial, getContactName } from '@/helpers/customFun';
 
 //import types
-import type { DeviceContact } from "@/features/contacts/model";
+import type { DeviceContact } from '@/features/contacts/model';
 
 type FavoriteContactItemProps = {
   item: DeviceContact;
@@ -25,19 +25,16 @@ const FavoriteContactItem = ({ item, onPress }: FavoriteContactItemProps) => {
   return (
     <Pressable
       accessibilityLabel={contactName}
-      accessibilityRole="button"
+      accessibilityRole='button'
       onPress={() => onPress?.(item)}
-      style={({ pressed }) => [
-        styles.container,
-        pressed && styles.containerPressed,
-      ]}
+      style={({ pressed }) => [styles.container, pressed && styles.containerPressed]}
     >
       {thumbnail ? (
         <Image
           accessibilityLabel={`${contactName} contact photo`}
-          cachePolicy="memory-disk"
-          contentFit="cover"
-          priority="high"
+          cachePolicy='memory-disk'
+          contentFit='cover'
+          priority='high'
           recyclingKey={item.id}
           source={thumbnail}
           style={styles.contactImage}
@@ -47,9 +44,9 @@ const FavoriteContactItem = ({ item, onPress }: FavoriteContactItemProps) => {
         <View style={styles.defaultContactImage}>
           <TextComponent
             color={colors.primary}
-            textAlign={"center"}
+            textAlign={'center'}
             fontFamily={fontFamily.outfitMedium}
-            styleProfile="largest1"
+            styleProfile='largest1'
             text={getContactInitial(contactName)}
           />
         </View>
@@ -59,9 +56,9 @@ const FavoriteContactItem = ({ item, onPress }: FavoriteContactItemProps) => {
         containerStyle={styles.contactNameContainer}
         fontFamily={fontFamily.outfitRegular}
         numOfLine={2}
-        styleProfile="large2"
+        styleProfile='large2'
         text={contactName}
-        textAlign="center"
+        textAlign='center'
       />
     </Pressable>
   );
@@ -71,8 +68,8 @@ export default FavoriteContactItem;
 
 const styles = StyleSheet.create({
   container: {
-    width: "25%",
-    alignItems: "center",
+    width: '25%',
+    alignItems: 'center',
     paddingTop: 30,
   },
   containerPressed: {
@@ -86,19 +83,19 @@ const styles = StyleSheet.create({
   defaultContactImage: {
     width: 70,
     height: 70,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 15,
     backgroundColor: colors.primaryLight,
   },
   contactInitial: {
-    textAlign: "center",
+    textAlign: 'center',
   },
   contactNameContainer: {
-    width: "90%",
+    width: '90%',
     marginTop: 15,
   },
   contactName: {
-    textAlign: "center",
+    textAlign: 'center',
   },
 });

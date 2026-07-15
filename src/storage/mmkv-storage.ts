@@ -1,8 +1,8 @@
-import { createMMKV } from "react-native-mmkv";
-import type { StateStorage } from "zustand/middleware";
+import { createMMKV } from 'react-native-mmkv';
+import type { StateStorage } from 'zustand/middleware';
 
 export const mmkv = createMMKV({
-  id: "connect-app-storage",
+  id: 'connect-app-storage',
 });
 
 export const zustandMMKVStorage: StateStorage = {

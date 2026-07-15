@@ -1,24 +1,17 @@
-import { NativeTabs } from "expo-router/unstable-native-tabs";
+import { NativeTabs } from 'expo-router/unstable-native-tabs';
 
 //import constants
-import { colors, fontFamily, strings } from "@/constants";
-import { Platform } from "react-native";
+import { colors, fontFamily, strings } from '@/constants';
+import { Platform } from 'react-native';
 
 export default function TabLayout() {
   return (
     <NativeTabs
       disableTransparentOnScrollEdge
-      minimizeBehavior={
-        Platform.OS === "ios" && Number(Platform.Version) >= 26
-          ? "onScrollDown"
-          : undefined
-      }
+      minimizeBehavior={Platform.OS === 'ios' && Number(Platform.Version) >= 26 ? 'onScrollDown' : undefined}
       labelStyle={{ fontFamily: fontFamily.outfitMedium }}
     >
-      <NativeTabs.Trigger
-        name="contacts"
-        contentStyle={{ backgroundColor: colors.backgroundColor }}
-      >
+      <NativeTabs.Trigger name='contacts' contentStyle={{ backgroundColor: colors.backgroundColor }}>
         <NativeTabs.Trigger.Label
           selectedStyle={{
             color: colors.primary,
@@ -28,15 +21,12 @@ export default function TabLayout() {
           {strings.contacts}
         </NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          sf={{ default: "phone", selected: "phone.fill" }}
-          md={{ default: "contacts", selected: "contacts" }}
+          sf={{ default: 'phone', selected: 'phone.fill' }}
+          md={{ default: 'contacts', selected: 'contacts' }}
           selectedColor={colors.primary}
         />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger
-        name="favorites"
-        contentStyle={{ backgroundColor: colors.backgroundColor }}
-      >
+      <NativeTabs.Trigger name='favorites' contentStyle={{ backgroundColor: colors.backgroundColor }}>
         <NativeTabs.Trigger.Label
           selectedStyle={{
             color: colors.primary,
@@ -45,15 +35,12 @@ export default function TabLayout() {
           {strings.favorites}
         </NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          sf={{ default: "star", selected: "star.fill" }}
-          md={"star"}
+          sf={{ default: 'star', selected: 'star.fill' }}
+          md={'star'}
           selectedColor={colors.primary}
         />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger
-        name="profile"
-        contentStyle={{ backgroundColor: colors.backgroundColor }}
-      >
+      <NativeTabs.Trigger name='profile' contentStyle={{ backgroundColor: colors.backgroundColor }}>
         <NativeTabs.Trigger.Label
           selectedStyle={{
             color: colors.primary,
@@ -62,8 +49,8 @@ export default function TabLayout() {
           {strings.profile}
         </NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          sf={{ default: "person", selected: "person.fill" }}
-          md="person"
+          sf={{ default: 'person', selected: 'person.fill' }}
+          md='person'
           selectedColor={colors.primary}
         />
       </NativeTabs.Trigger>

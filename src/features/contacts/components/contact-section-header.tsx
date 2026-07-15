@@ -1,7 +1,7 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View } from 'react-native';
 
-import TextComponent from "@/components/core-components/text-component";
-import { colors } from "@/constants";
+import TextComponent from '@/components/core-components/text-component';
+import { colors } from '@/constants';
 
 const SCRUBBER_CONTENT_GUTTER = 60;
 
@@ -11,22 +11,12 @@ type ContactSectionHeaderProps = {
   hasScrubber?: boolean;
 };
 
-const ContactSectionHeader = ({
-  letter,
-  isSticky = false,
-  hasScrubber = false,
-}: ContactSectionHeaderProps) => (
-  <View
-    style={[
-      styles.container,
-      hasScrubber && styles.containerWithScrubber,
-      isSticky && styles.stickyContainer,
-    ]}
-  >
+const ContactSectionHeader = ({ letter, isSticky = false, hasScrubber = false }: ContactSectionHeaderProps) => (
+  <View style={[styles.container, hasScrubber && styles.containerWithScrubber, isSticky && styles.stickyContainer]}>
     <TextComponent
       color={colors.baseMediumGrey}
       containerStyle={styles.initialContainer}
-      styleProfile="large3"
+      styleProfile='large3'
       text={letter}
     />
   </View>
@@ -36,7 +26,7 @@ export default ContactSectionHeader;
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%",
+    width: '100%',
     paddingHorizontal: 20,
     paddingTop: 18,
     paddingBottom: 12,

@@ -1,18 +1,13 @@
-import type {
-  ContactListItem,
-  DeviceContact,
-  DevicePhone,
-  PreparedContacts,
-} from "@/features/contacts/model";
+import type { ContactListItem, DeviceContact, DevicePhone, PreparedContacts } from '@/features/contacts/model';
 
-const UNKNOWN_SECTION = "#";
+const UNKNOWN_SECTION = '#';
 const APPLE_CONTACT_LABEL_PATTERN = /^_\$!<([^>]+)>!\$_$/;
 const APPLE_CONTACT_LABEL_OVERRIDES: Readonly<Record<string, string>> = {
-  HomeFAX: "Home Fax",
-  WorkFAX: "Work Fax",
-  OtherFAX: "Other Fax",
-  iPhone: "iPhone",
-  iCloud: "iCloud",
+  HomeFAX: 'Home Fax',
+  WorkFAX: 'Work Fax',
+  OtherFAX: 'Other Fax',
+  iPhone: 'iPhone',
+  iCloud: 'iCloud',
 };
 
 /**
@@ -21,8 +16,7 @@ const APPLE_CONTACT_LABEL_OVERRIDES: Readonly<Record<string, string>> = {
  * @param contact - Device contact whose name should be displayed.
  * @returns The contact's display name.
  */
-export const getContactName = (contact: DeviceContact): string =>
-  contact.fullName?.trim() || "Unnamed contact";
+export const getContactName = (contact: DeviceContact): string => contact.fullName?.trim() || 'Unnamed contact';
 
 /**
  * Returns the uppercase initial used when a contact has no thumbnail.
@@ -39,13 +33,11 @@ export const getContactInitial = (name: string): string =>
  * @param phones - Phone entries returned by the device contacts API.
  * @returns Phone entries with blank and duplicate numbers removed.
  */
-export const getUniqueContactPhones = (
-  phones: readonly DevicePhone[],
-): DevicePhone[] => {
+export const getUniqueContactPhones = (phones: readonly DevicePhone[]): DevicePhone[] => {
   const seenNumbers = new Set<string>();
 
   return phones.filter((phone) => {
-    const normalizedNumber = phone.number?.replace(/\D/g, "") ?? "";
+    const normalizedNumber = phone.number?.replace(/\D/g, '') ?? '';
 
     if (!normalizedNumber || seenNumbers.has(normalizedNumber)) {
       return false;
@@ -63,23 +55,20 @@ export const getUniqueContactPhones = (
  * @param fallback - Text used when the label is unavailable.
  * @returns A readable label with native Apple tokens normalized for display.
  */
-export const formatContactLabel = (
-  label?: string,
-  fallback: string = "Phone",
-): string => {
+export const formatContactLabel = (label?: string, fallback: string = 'Phone'): string => {
   const rawLabel = label?.trim();
   const appleLabelToken = rawLabel?.match(APPLE_CONTACT_LABEL_PATTERN)?.[1];
   const normalizedLabel = appleLabelToken
     ? (APPLE_CONTACT_LABEL_OVERRIDES[appleLabelToken] ?? appleLabelToken)
     : rawLabel || fallback;
 
-  if (normalizedLabel === "iPhone" || normalizedLabel === "iCloud") {
+  if (normalizedLabel === 'iPhone' || normalizedLabel === 'iCloud') {
     return normalizedLabel;
   }
 
   const [firstCharacter, ...remainingCharacters] = Array.from(normalizedLabel);
 
-  return `${firstCharacter?.toLocaleUpperCase() ?? ""}${remainingCharacters.join("")}`;
+  return `${firstCharacter?.toLocaleUpperCase() ?? ''}${remainingCharacters.join('')}`;
 };
 
 /**
@@ -90,17 +79,13 @@ export const formatContactLabel = (
  */
 export const buildContactShareMessage = (contact: DeviceContact): string => {
   const phoneLines = getUniqueContactPhones(contact.phones).map(
-    (phone) =>
-      `${formatContactLabel(phone.label)}: ${phone.number?.trim() ?? ""}`,
+    (phone) => `${formatContactLabel(phone.label)}: ${phone.number?.trim() ?? ''}`,
   );
   const emailLines = contact.emails
     .filter((email) => Boolean(email.address?.trim()))
-    .map(
-      (email) =>
-        `${formatContactLabel(email.label, "Email")}: ${email.address?.trim() ?? ""}`,
-    );
+    .map((email) => `${formatContactLabel(email.label, 'Email')}: ${email.address?.trim() ?? ''}`);
 
-  return [getContactName(contact), ...phoneLines, ...emailLines].join("\n");
+  return [getContactName(contact), ...phoneLines, ...emailLines].join('\n');
 };
 
 /**
@@ -125,7 +110,7 @@ export const getFavoriteContacts = (
  * @returns An uppercase initial, or `#` when the name has no leading letter.
  */
 export const getContactSectionLetter = (contact: DeviceContact): string => {
-  const firstCharacter = Array.from(contact.fullName?.trim() ?? "")[0];
+  const firstCharacter = Array.from(contact.fullName?.trim() ?? '')[0];
 
   if (!firstCharacter || !/^\p{L}$/u.test(firstCharacter)) {
     return UNKNOWN_SECTION;
@@ -141,15 +126,12 @@ export const getContactSectionLetter = (contact: DeviceContact): string => {
  * @param secondLetter - Second section letter to compare.
  * @returns A locale-aware comparison value suitable for `Array.sort`.
  */
-export const compareContactSectionLetters = (
-  firstLetter: string,
-  secondLetter: string,
-): number => {
+export const compareContactSectionLetters = (firstLetter: string, secondLetter: string): number => {
   if (firstLetter === UNKNOWN_SECTION) return 1;
   if (secondLetter === UNKNOWN_SECTION) return -1;
 
   return firstLetter.localeCompare(secondLetter, undefined, {
-    sensitivity: "base",
+    sensitivity: 'base',
   });
 };
 
@@ -162,18 +144,15 @@ export const compareContactSectionLetters = (
  * @param contacts - Contacts to sort and group alphabetically.
  * @returns Prepared list and scrubber data without mutating the input array.
  */
-export const buildAlphabetizedContactsList = (
-  contacts: readonly DeviceContact[],
-): PreparedContacts => {
+export const buildAlphabetizedContactsList = (contacts: readonly DeviceContact[]): PreparedContacts => {
+  //1. Sort the contacts
   const sortedContacts = [...contacts].sort((firstContact, secondContact) =>
-    getContactName(firstContact).localeCompare(
-      getContactName(secondContact),
-      undefined,
-      {
-        sensitivity: "base",
-      },
-    ),
+    getContactName(firstContact).localeCompare(getContactName(secondContact), undefined, {
+      sensitivity: 'base',
+    }),
   );
+
+  //2. Group contacts using a Map
   const groupedContacts = new Map<string, DeviceContact[]>();
 
   for (const contact of sortedContacts) {
@@ -183,27 +162,27 @@ export const buildAlphabetizedContactsList = (
     groupedContacts.set(letter, sectionContacts);
   }
 
-  const scrubberLetters = [...groupedContacts.keys()].sort(
-    compareContactSectionLetters,
-  );
+  //3. Build the scrubber letters
+  const scrubberLetters = [...groupedContacts.keys()].sort(compareContactSectionLetters);
   const listItems: ContactListItem[] = [];
   const stickyHeaderIndices: number[] = [];
   const letterToHeaderIndex: Record<string, number> = {};
 
+  //4. Flatten sections into list items
   for (const letter of scrubberLetters) {
     const headerIndex = listItems.length;
     stickyHeaderIndices.push(headerIndex);
     letterToHeaderIndex[letter] = headerIndex;
     listItems.push({
       id: `header:${letter}`,
-      type: "header",
+      type: 'header',
       letter,
     });
 
     for (const contact of groupedContacts.get(letter) ?? []) {
       listItems.push({
         id: `contact:${contact.id}`,
-        type: "contact",
+        type: 'contact',
         letter,
         contact,
       });

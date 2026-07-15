@@ -1,40 +1,35 @@
+import { FlashList, type FlashListProps, type FlashListRef, type ListRenderItemInfo } from '@shopify/flash-list';
+import * as Haptics from 'expo-haptics';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-    FlashList,
-    type FlashListProps,
-    type FlashListRef,
-    type ListRenderItemInfo,
-} from "@shopify/flash-list";
-import * as Haptics from "expo-haptics";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-    ActivityIndicator,
-    type GestureResponderEvent,
-    type LayoutChangeEvent,
-    type LayoutRectangle,
-    Platform,
-    type StyleProp,
-    StyleSheet,
-    View,
-    type ViewabilityConfig,
-    type ViewStyle,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+  ActivityIndicator,
+  type GestureResponderEvent,
+  type LayoutChangeEvent,
+  type LayoutRectangle,
+  Platform,
+  type StyleProp,
+  StyleSheet,
+  View,
+  type ViewabilityConfig,
+  type ViewStyle,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 //import components
-import AlphabetScrubber from "@/components/alphabet-scrubber";
-import ContactItem from "./contact-item";
-import ContactSectionHeader from "./contact-section-header";
-import EmptyState from "./empty-state";
+import AlphabetScrubber from '@/components/alphabet-scrubber';
+import ContactItem from './contact-item';
+import ContactSectionHeader from './contact-section-header';
+import EmptyState from './empty-state';
 
 //import constants
-import { colors } from "@/constants";
+import { colors } from '@/constants';
 
 //import helpers
-import { getNearestScrubberLetter } from "@/helpers/commonFun";
-import { buildAlphabetizedContactsList } from "@/helpers/customFun";
+import { getNearestScrubberLetter } from '@/helpers/commonFun';
+import { buildAlphabetizedContactsList } from '@/helpers/customFun';
 
 //import types
-import type { ContactListItem, DeviceContact } from "@/features/contacts/model";
+import type { ContactListItem, DeviceContact } from '@/features/contacts/model';
 
 //constants
 const SCRUBBER_PREVIEW_GAP = 8;
@@ -43,7 +38,7 @@ const LIST_FOOTER_HEIGHT_ANDROID = 230;
 const EMPTY_CONTACTS: readonly DeviceContact[] = [];
 const SCRUBBER_PREVIEW_HIDDEN_STYLE = { opacity: 0 } satisfies ViewStyle;
 
-type ScrubberLetterLayout = Pick<LayoutRectangle, "height" | "y">;
+type ScrubberLetterLayout = Pick<LayoutRectangle, 'height' | 'y'>;
 type ScrubberLetterLayouts = Record<string, ScrubberLetterLayout>;
 type MeasuredScrubberRailLayout = LayoutRectangle & {
   pageX?: number;
@@ -74,11 +69,11 @@ const renderContactListItem = (
   { item, target }: ListRenderItemInfo<ContactListItem>,
   options: ContactRenderOptions,
 ) => {
-  if (item.type === "header") {
+  if (item.type === 'header') {
     return (
       <ContactSectionHeader
         letter={item.letter}
-        isSticky={target === "StickyHeader"}
+        isSticky={target === 'StickyHeader'}
         hasScrubber={options.hasScrubber}
       />
     );
@@ -103,7 +98,7 @@ const ContactsList = ({
   selectedContactIds = null,
   selectionVersion = 0,
   onClickContact,
-  searchText = "",
+  searchText = '',
   totalContactsCount = contacts.length,
   style,
 }: ContactsListProps) => {
@@ -119,67 +114,36 @@ const ContactsList = ({
   }).current;
 
   // Keeps the highlighted section synchronized with the first visible list item.
-  const handleViewableItemsChanged = useRef<
-    NonNullable<FlashListProps<ContactListItem>["onViewableItemsChanged"]>
-  >(({ viewableItems }) => {
-    const firstVisibleItem = [...viewableItems]
-      .filter(
-        (viewToken) =>
-          viewToken.isViewable && typeof viewToken.index === "number",
-      )
-      .sort(
-        (firstItem, secondItem) =>
-          (firstItem.index ?? 0) - (secondItem.index ?? 0),
-      )[0]?.item;
+  const handleViewableItemsChanged = useRef<NonNullable<FlashListProps<ContactListItem>['onViewableItemsChanged']>>(
+    ({ viewableItems }) => {
+      const firstVisibleItem = [...viewableItems]
+        .filter((viewToken) => viewToken.isViewable && typeof viewToken.index === 'number')
+        .sort((firstItem, secondItem) => (firstItem.index ?? 0) - (secondItem.index ?? 0))[0]?.item;
 
-    if (!firstVisibleItem) return;
+      if (!firstVisibleItem) return;
 
-    setActiveSectionLetter((previousLetter) =>
-      previousLetter === firstVisibleItem.letter
-        ? previousLetter
-        : firstVisibleItem.letter,
-    );
-  }).current;
+      setActiveSectionLetter((previousLetter) =>
+        previousLetter === firstVisibleItem.letter ? previousLetter : firstVisibleItem.letter,
+      );
+    },
+  ).current;
 
   //states
-  const [activeSectionLetter, setActiveSectionLetter] = useState<string | null>(
-    null,
-  );
-  const [activeScrubLetter, setActiveScrubLetter] = useState<string | null>(
-    null,
-  );
+  const [activeSectionLetter, setActiveSectionLetter] = useState<string | null>(null);
+  const [activeScrubLetter, setActiveScrubLetter] = useState<string | null>(null);
   const [isScrubbing, setIsScrubbing] = useState<boolean>(false);
-  const [scrubberRailLayout, setScrubberRailLayout] =
-    useState<MeasuredScrubberRailLayout | null>(null);
-  const [scrubberLetterLayouts, setScrubberLetterLayouts] =
-    useState<ScrubberLetterLayouts>({});
+  const [scrubberRailLayout, setScrubberRailLayout] = useState<MeasuredScrubberRailLayout | null>(null);
+  const [scrubberLetterLayouts, setScrubberLetterLayouts] = useState<ScrubberLetterLayouts>({});
   const [previewBubbleHeight, setPreviewBubbleHeight] = useState(0);
 
-  const preparedContacts = useMemo(
-    () => buildAlphabetizedContactsList(contacts),
-    [contacts],
-  );
-  const {
-    listItems,
-    stickyHeaderIndices,
-    scrubberLetters,
-    letterToHeaderIndex,
-  } = preparedContacts;
+  const preparedContacts = useMemo(() => buildAlphabetizedContactsList(contacts), [contacts]);
+  const { listItems, stickyHeaderIndices, scrubberLetters, letterToHeaderIndex } = preparedContacts;
   const showScrubber = scrubberLetters.length > 1;
-  const displayActiveLetter = isScrubbing
-    ? (activeScrubLetter ?? activeSectionLetter)
-    : activeSectionLetter;
+  const displayActiveLetter = isScrubbing ? (activeScrubLetter ?? activeSectionLetter) : activeSectionLetter;
   const hasSearchQuery = searchText.trim().length > 0;
-  const showSearchEmptyState =
-    contacts.length === 0 && hasSearchQuery && totalContactsCount > 0;
-  const listFooterHeight =
-    Platform.OS === "android"
-      ? LIST_FOOTER_HEIGHT_ANDROID
-      : LIST_FOOTER_HEIGHT_IOS;
-  const scrubberBottomOffset = Math.max(
-    insets.bottom + 24,
-    listFooterHeight - 20,
-  );
+  const showSearchEmptyState = contacts.length === 0 && hasSearchQuery && totalContactsCount > 0;
+  const listFooterHeight = Platform.OS === 'android' ? LIST_FOOTER_HEIGHT_ANDROID : LIST_FOOTER_HEIGHT_IOS;
+  const scrubberBottomOffset = Math.max(insets.bottom + 24, listFooterHeight - 20);
 
   // Resets scrubber state whenever the available contact sections change.
   useEffect(() => {
@@ -191,45 +155,32 @@ const ContactsList = ({
     lastScrubbedLetterRef.current = null;
   }, [scrubberLetters]);
 
-  const activeLetterLayout = activeScrubLetter
-    ? scrubberLetterLayouts[activeScrubLetter]
-    : undefined;
+  const activeLetterLayout = activeScrubLetter ? scrubberLetterLayouts[activeScrubLetter] : undefined;
   const previewBubbleStyle: ViewStyle =
-    isScrubbing &&
-    activeScrubLetter &&
-    scrubberRailLayout &&
-    activeLetterLayout &&
-    previewBubbleHeight > 0
+    isScrubbing && activeScrubLetter && scrubberRailLayout && activeLetterLayout && previewBubbleHeight > 0
       ? {
           right: scrubberRailLayout.width + SCRUBBER_PREVIEW_GAP,
-          top:
-            scrubberRailLayout.y +
-            activeLetterLayout.y +
-            activeLetterLayout.height / 2 -
-            previewBubbleHeight / 2,
+          top: scrubberRailLayout.y + activeLetterLayout.y + activeLetterLayout.height / 2 - previewBubbleHeight / 2,
         }
       : SCRUBBER_PREVIEW_HIDDEN_STYLE;
 
   // Stores rail measurements only when its size or position has changed.
-  const setMeasuredScrubberRailLayout = useCallback(
-    (nextLayout: MeasuredScrubberRailLayout) => {
-      setScrubberRailLayout((previousLayout) => {
-        if (
-          previousLayout?.x === nextLayout.x &&
-          previousLayout.y === nextLayout.y &&
-          previousLayout.width === nextLayout.width &&
-          previousLayout.height === nextLayout.height &&
-          previousLayout.pageX === nextLayout.pageX &&
-          previousLayout.pageY === nextLayout.pageY
-        ) {
-          return previousLayout;
-        }
+  const setMeasuredScrubberRailLayout = useCallback((nextLayout: MeasuredScrubberRailLayout) => {
+    setScrubberRailLayout((previousLayout) => {
+      if (
+        previousLayout?.x === nextLayout.x &&
+        previousLayout.y === nextLayout.y &&
+        previousLayout.width === nextLayout.width &&
+        previousLayout.height === nextLayout.height &&
+        previousLayout.pageX === nextLayout.pageX &&
+        previousLayout.pageY === nextLayout.pageY
+      ) {
+        return previousLayout;
+      }
 
-        return nextLayout;
-      });
-    },
-    [],
-  );
+      return nextLayout;
+    });
+  }, []);
 
   // Measures the scrubber rail in window coordinates for accurate touch tracking.
   const measureScrubberRailInWindow = useCallback(
@@ -261,7 +212,7 @@ const ContactsList = ({
     (letter: string) => {
       const headerIndex = letterToHeaderIndex[letter];
 
-      if (typeof headerIndex !== "number") return;
+      if (typeof headerIndex !== 'number') return;
 
       flashListRef.current?.scrollToIndex({
         animated: false,
@@ -284,21 +235,14 @@ const ContactsList = ({
 
       const { locationY, pageY } = event.nativeEvent;
       const railPageY = scrubberRailLayout?.pageY;
-      const relativeLocationY =
-        typeof railPageY === "number" ? pageY - railPageY : locationY;
-      const nextLetter = getNearestScrubberLetter(
-        relativeLocationY,
-        scrubberLetters,
-        scrubberLetterLayouts,
-      );
+      const relativeLocationY = typeof railPageY === 'number' ? pageY - railPageY : locationY;
+      const nextLetter = getNearestScrubberLetter(relativeLocationY, scrubberLetters, scrubberLetterLayouts);
 
       if (!nextLetter) return;
 
       setIsScrubbing(true);
       setActiveScrubLetter(nextLetter);
-      setActiveSectionLetter((previousLetter) =>
-        previousLetter === nextLetter ? previousLetter : nextLetter,
-      );
+      setActiveSectionLetter((previousLetter) => (previousLetter === nextLetter ? previousLetter : nextLetter));
 
       if (lastScrubbedLetterRef.current === nextLetter) return;
 
@@ -332,36 +276,28 @@ const ContactsList = ({
   );
 
   // Caches each scrubber letter's vertical position for touch hit resolution.
-  const handleScrubberLetterLayout = useCallback(
-    (letter: string, nextLayout: LayoutRectangle) => {
-      setScrubberLetterLayouts((previousLayouts) => {
-        const currentLayout = previousLayouts[letter];
+  const handleScrubberLetterLayout = useCallback((letter: string, nextLayout: LayoutRectangle) => {
+    setScrubberLetterLayouts((previousLayouts) => {
+      const currentLayout = previousLayouts[letter];
 
-        if (
-          currentLayout?.y === nextLayout.y &&
-          currentLayout.height === nextLayout.height
-        ) {
-          return previousLayouts;
-        }
+      if (currentLayout?.y === nextLayout.y && currentLayout.height === nextLayout.height) {
+        return previousLayouts;
+      }
 
-        return {
-          ...previousLayouts,
-          [letter]: {
-            y: nextLayout.y,
-            height: nextLayout.height,
-          },
-        };
-      });
-    },
-    [],
-  );
+      return {
+        ...previousLayouts,
+        [letter]: {
+          y: nextLayout.y,
+          height: nextLayout.height,
+        },
+      };
+    });
+  }, []);
 
   // Tracks the preview bubble height so it can be centered on the active letter.
   const handlePreviewBubbleLayout = useCallback((event: LayoutChangeEvent) => {
     const nextHeight = event.nativeEvent.layout.height;
-    setPreviewBubbleHeight((previousHeight) =>
-      previousHeight === nextHeight ? previousHeight : nextHeight,
-    );
+    setPreviewBubbleHeight((previousHeight) => (previousHeight === nextHeight ? previousHeight : nextHeight));
   }, []);
 
   const renderOptions = useMemo<ContactRenderOptions>(
@@ -376,20 +312,16 @@ const ContactsList = ({
 
   // Reuses the row renderer until its selection or scrubber options change.
   const renderItem = useCallback(
-    (info: ListRenderItemInfo<ContactListItem>) =>
-      renderContactListItem(info, renderOptions),
+    (info: ListRenderItemInfo<ContactListItem>) => renderContactListItem(info, renderOptions),
     [renderOptions],
   );
-  const listExtraData = useMemo(
-    () => ({ renderOptions, selectionVersion }),
-    [renderOptions, selectionVersion],
-  );
+  const listExtraData = useMemo(() => ({ renderOptions, selectionVersion }), [renderOptions, selectionVersion]);
 
   return (
     <View style={[styles.container, style]}>
       {loaderStatus ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
+          <ActivityIndicator size='large' color={colors.primary} />
         </View>
       ) : contacts.length === 0 ? (
         <EmptyState isSearchResultState={showSearchEmptyState} />
@@ -403,8 +335,8 @@ const ContactsList = ({
             viewabilityConfig={viewabilityConfig}
             onViewableItemsChanged={handleViewableItemsChanged}
             nestedScrollEnabled
-            keyboardDismissMode="on-drag"
-            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode='on-drag'
+            keyboardShouldPersistTaps='handled'
             contentContainerStyle={styles.contactsList}
             showsVerticalScrollIndicator={false}
             renderItem={renderItem}
@@ -441,16 +373,13 @@ const styles = StyleSheet.create({
   },
   loaderContainer: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   contactsList: {
     paddingBottom: 0,
   },
   listFooter: {
-    height:
-      Platform.OS === "android"
-        ? LIST_FOOTER_HEIGHT_ANDROID
-        : LIST_FOOTER_HEIGHT_IOS,
+    height: Platform.OS === 'android' ? LIST_FOOTER_HEIGHT_ANDROID : LIST_FOOTER_HEIGHT_IOS,
   },
 });

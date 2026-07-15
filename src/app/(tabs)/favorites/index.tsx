@@ -1,33 +1,28 @@
-import { ContactField } from "expo-contacts";
-import { useCallback, useMemo, useState } from "react";
-import {
-  FlatList,
-  type ListRenderItemInfo,
-  StyleSheet,
-  View,
-} from "react-native";
+import { ContactField } from 'expo-contacts';
+import { useCallback, useMemo, useState } from 'react';
+import { FlatList, type ListRenderItemInfo, StyleSheet, View } from 'react-native';
 
 //import components
-import { HomeHeader } from "@/components";
-import EmptyState from "@/features/favorites/components/empty-state";
-import FavoriteContactItem from "@/features/favorites/components/favorite-contact-item";
-import FavoritesHeader from "@/features/favorites/components/favorites-header";
+import { HomeHeader } from '@/components';
+import EmptyState from '@/features/favorites/components/empty-state';
+import FavoriteContactItem from '@/features/favorites/components/favorite-contact-item';
+import FavoritesHeader from '@/features/favorites/components/favorites-header';
 
 //import constants
-import { colors } from "@/constants";
+import { colors } from '@/constants';
 
 //import helpers
-import { getFavoriteContacts } from "@/helpers/customFun";
+import { getFavoriteContacts } from '@/helpers/customFun';
 
 //import hooks
-import { useSearchFilter } from "@/hooks";
+import { useSearchFilter } from '@/hooks';
 
 //import store
-import { useAppStore } from "@/store/use-app-store";
+import { useAppStore } from '@/store/use-app-store';
 
 //import types
-import type { DeviceContact } from "@/features/contacts/model";
-import { router } from "expo-router";
+import type { DeviceContact } from '@/features/contacts/model';
+import { router } from 'expo-router';
 
 const MAX_VISIBLE_FAVORITES = 6;
 
@@ -37,27 +32,17 @@ const Favorites = () => {
   const favoriteContactIds = useAppStore((state) => state.favoriteContactIds);
 
   //states
-  const [searchInput, setSearchInput] = useState("");
+  const [searchInput, setSearchInput] = useState('');
 
   const favoriteContacts = useMemo(() => {
     return getFavoriteContacts(contacts, favoriteContactIds);
   }, [contacts, favoriteContactIds]);
 
-  const filteredContacts = useSearchFilter(
-    favoriteContacts,
-    ContactField.FULL_NAME,
-    searchInput,
-  );
+  const filteredContacts = useSearchFilter(favoriteContacts, ContactField.FULL_NAME, searchInput);
 
-  const visibleContacts = useMemo(
-    () => filteredContacts.slice(0, MAX_VISIBLE_FAVORITES),
-    [filteredContacts],
-  );
+  const visibleContacts = useMemo(() => filteredContacts.slice(0, MAX_VISIBLE_FAVORITES), [filteredContacts]);
   const hasSearchQuery = searchInput.trim().length > 0;
-  const showSearchEmptyState =
-    visibleContacts.length === 0 &&
-    hasSearchQuery &&
-    favoriteContacts.length > 0;
+  const showSearchEmptyState = visibleContacts.length === 0 && hasSearchQuery && favoriteContacts.length > 0;
 
   // Add-favorites navigation will be implemented with its dedicated route.
   const handleAddFavorite = useCallback(() => undefined, []);
@@ -66,7 +51,7 @@ const Favorites = () => {
   const openContactDetails = useCallback(
     (contact: DeviceContact) => {
       router.push({
-        pathname: "/contacts/[contactId]",
+        pathname: '/contacts/[contactId]',
         params: { contactId: contact.id },
       });
     },
@@ -75,33 +60,22 @@ const Favorites = () => {
 
   // Renders one favorite in the four-column grid.
   const renderFavoriteContact = useCallback(
-    ({ item }: ListRenderItemInfo<DeviceContact>) => (
-      <FavoriteContactItem item={item} onPress={openContactDetails} />
-    ),
+    ({ item }: ListRenderItemInfo<DeviceContact>) => <FavoriteContactItem item={item} onPress={openContactDetails} />,
     [],
   );
 
   return (
     <View style={styles.container}>
-      <HomeHeader
-        menuBtn={false}
-        placeholder={"Search contacts"}
-        searchEvent={setSearchInput}
-      />
+      <HomeHeader menuBtn={false} placeholder={'Search contacts'} searchEvent={setSearchInput} />
       <FavoritesHeader onPressAdd={handleAddFavorite} />
       <FlatList
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={[
-          styles.listContent,
-          visibleContacts.length === 0 && styles.emptyListContent,
-        ]}
+        contentInsetAdjustmentBehavior='automatic'
+        contentContainerStyle={[styles.listContent, visibleContacts.length === 0 && styles.emptyListContent]}
         data={visibleContacts}
         initialNumToRender={MAX_VISIBLE_FAVORITES}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps='handled'
         keyExtractor={(item) => item.id}
-        ListEmptyComponent={
-          <EmptyState isSearchResultState={showSearchEmptyState} />
-        }
+        ListEmptyComponent={<EmptyState isSearchResultState={showSearchEmptyState} />}
         numColumns={4}
         renderItem={renderFavoriteContact}
         showsVerticalScrollIndicator={false}

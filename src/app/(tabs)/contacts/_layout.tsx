@@ -1,5 +1,5 @@
-import { colors } from "@/constants";
-import Stack from "expo-router/stack";
+import { colors } from '@/constants';
+import Stack from 'expo-router/stack';
 
 const ContactsLayout = () => {
   return (

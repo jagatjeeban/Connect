@@ -1,35 +1,24 @@
-import { Contact } from "expo-contacts";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { Contact } from 'expo-contacts';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, StyleSheet, View } from 'react-native';
 
 //import components
-import { ConfirmationBottomSheet } from "@/components";
-import ContactDetailsContent from "@/features/contacts/components/contact-details-content";
+import { ConfirmationBottomSheet } from '@/components';
+import ContactDetailsContent from '@/features/contacts/components/contact-details-content';
 
 //import constants
-import { colors, strings } from "@/constants";
+import { colors, strings } from '@/constants';
 
 //import helpers
-import {
-  openEmail,
-  openPhoneCall,
-  openTextMessage,
-  shareText,
-} from "@/helpers/commonFun";
-import {
-  buildContactShareMessage,
-  getUniqueContactPhones,
-} from "@/helpers/customFun";
+import { openEmail, openPhoneCall, openTextMessage, shareText } from '@/helpers/commonFun';
+import { buildContactShareMessage, getUniqueContactPhones } from '@/helpers/customFun';
 
 //import store
-import { useAppStore } from "@/store/use-app-store";
+import { useAppStore } from '@/store/use-app-store';
 
 //import types
-import {
-  CONTACT_FIELDS,
-  type DeviceContact,
-} from "@/features/contacts/model";
+import { CONTACT_FIELDS, type DeviceContact } from '@/features/contacts/model';
 
 const ContactDetails = () => {
   //hooks
@@ -40,9 +29,7 @@ const ContactDetails = () => {
   const deletedContactIdRef = useRef<string | null>(null);
 
   //store events
-  const storedContact = useAppStore((state) =>
-    state.contacts.find((contact) => contact.id === contactId),
-  );
+  const storedContact = useAppStore((state) => state.contacts.find((contact) => contact.id === contactId));
   const favoriteContactIds = useAppStore((state) => state.favoriteContactIds);
   const toggleFavorite = useAppStore((state) => state.toggleFavorite);
   const upsertContact = useAppStore((state) => state.upsertContact);
@@ -56,20 +43,11 @@ const ContactDetails = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteSheetPresented, setIsDeleteSheetPresented] = useState(false);
 
-  const contact =
-    storedContact ??
-    (loadedContact?.id === contactId ? loadedContact : undefined);
-  const phones = useMemo(
-    () => getUniqueContactPhones(contact?.phones ?? []),
-    [contact?.phones],
-  );
+  const contact = storedContact ?? (loadedContact?.id === contactId ? loadedContact : undefined);
+  const phones = useMemo(() => getUniqueContactPhones(contact?.phones ?? []), [contact?.phones]);
   const primaryPhoneNumber = phones[0]?.number?.trim();
-  const primaryEmailAddress = contact?.emails
-    .find((email) => Boolean(email.address?.trim()))
-    ?.address?.trim();
-  const isFavorite = contact
-    ? favoriteContactIds.includes(contact.id)
-    : false;
+  const primaryEmailAddress = contact?.emails.find((email) => Boolean(email.address?.trim()))?.address?.trim();
+  const isFavorite = contact ? favoriteContactIds.includes(contact.id) : false;
 
   //loads contact details when the route is opened outside the populated list
   useEffect(() => {
@@ -104,30 +82,22 @@ const ContactDetails = () => {
       setHasLoadError(false);
 
       try {
-        const contactDetails = await new Contact(contactId).getDetails(
-          CONTACT_FIELDS,
-        );
+        const contactDetails = await new Contact(contactId).getDetails(CONTACT_FIELDS);
 
         if (!isMounted) return;
 
         setLoadedContact(contactDetails);
         upsertContact(contactDetails);
       } catch (error) {
-        if (
-          !isMounted ||
-          deletedContactIdRef.current === contactId
-        ) {
+        if (!isMounted || deletedContactIdRef.current === contactId) {
           return;
         }
 
-        console.error("Contact details load error", error);
+        console.error('Contact details load error', error);
         setLoadedContact(undefined);
         setHasLoadError(true);
       } finally {
-        if (
-          isMounted &&
-          deletedContactIdRef.current !== contactId
-        ) {
+        if (isMounted && deletedContactIdRef.current !== contactId) {
           setIsLoading(false);
         }
       }
@@ -146,7 +116,7 @@ const ContactDetails = () => {
       return;
     }
 
-    router.replace("/contacts");
+    router.replace('/contacts');
   }, [router]);
 
   const showActionError = useCallback((label: string, error: unknown) => {
@@ -164,7 +134,7 @@ const ContactDetails = () => {
     if (!primaryPhoneNumber) return;
 
     void openPhoneCall(primaryPhoneNumber).catch((error: unknown) => {
-      showActionError("Contact call", error);
+      showActionError('Contact call', error);
     });
   }, [primaryPhoneNumber, showActionError]);
 
@@ -172,7 +142,7 @@ const ContactDetails = () => {
     if (!primaryPhoneNumber) return;
 
     void openTextMessage(primaryPhoneNumber).catch((error: unknown) => {
-      showActionError("Contact message", error);
+      showActionError('Contact message', error);
     });
   }, [primaryPhoneNumber, showActionError]);
 
@@ -180,18 +150,16 @@ const ContactDetails = () => {
     if (!primaryEmailAddress) return;
 
     void openEmail(primaryEmailAddress).catch((error: unknown) => {
-      showActionError("Contact email", error);
+      showActionError('Contact email', error);
     });
   }, [primaryEmailAddress, showActionError]);
 
   const handleShare = useCallback(() => {
     if (!contact) return;
 
-    void shareText(buildContactShareMessage(contact)).catch(
-      (error: unknown) => {
-        showActionError("Contact share", error);
-      },
-    );
+    void shareText(buildContactShareMessage(contact)).catch((error: unknown) => {
+      showActionError('Contact share', error);
+    });
   }, [contact, showActionError]);
 
   const handleEdit = useCallback(() => {
@@ -210,7 +178,7 @@ const ContactDetails = () => {
         setLoadedContact(updatedContact);
         upsertContact(updatedContact);
       } catch (error) {
-        console.error("Contact edit error", error);
+        console.error('Contact edit error', error);
         Alert.alert(strings.unableEditContact, strings.errorMessage);
       } finally {
         setIsEditing(false);
@@ -239,7 +207,7 @@ const ContactDetails = () => {
         removeContact(contact.id);
         handleBack();
       } catch (error) {
-        console.error("Contact delete error", error);
+        console.error('Contact delete error', error);
         Alert.alert(strings.unableDeleteContact, strings.errorMessage);
       } finally {
         setIsDeleting(false);

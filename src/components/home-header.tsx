@@ -1,25 +1,19 @@
-import { useCallback, useEffect, useState } from "react";
-import {
-  BackHandler,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  View,
-} from "react-native";
+import { useCallback, useEffect, useState } from 'react';
+import { BackHandler, Pressable, StyleSheet, TextInput, View } from 'react-native';
 // import { Menu, MenuItem } from 'react-native-material-menu';
-import { useIsFocused } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useIsFocused } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 //import components
-import TextComponent from "@/components/core-components/text-component";
+import TextComponent from '@/components/core-components/text-component';
 
 //import constants
-import { colors, fontFamily } from "@/constants";
+import { colors, fontFamily } from '@/constants';
 
 //import svgs
-import SvgBackGrey from "@/assets/icons/back-arrow-grey.svg";
-import SvgCross from "@/assets/icons/cross-grey.svg";
-import SvgSearch from "@/assets/icons/search.svg";
+import SvgBackGrey from '@/assets/icons/back-arrow-grey.svg';
+import SvgCross from '@/assets/icons/cross-grey.svg';
+import SvgSearch from '@/assets/icons/search.svg';
 
 type HomeHeaderProps = {
   placeholder: string;
@@ -31,7 +25,7 @@ type HomeHeaderProps = {
 };
 
 const HomeHeader = ({
-  placeholder = "Search",
+  placeholder = 'Search',
   menuBtn = false,
   selectEvent,
   selectAllEvent,
@@ -43,7 +37,7 @@ const HomeHeader = ({
   const insets = useSafeAreaInsets();
 
   //states
-  const [searchInput, setSearchInput] = useState("");
+  const [searchInput, setSearchInput] = useState('');
   const [searchStatus, setSearchStatus] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
 
@@ -51,18 +45,18 @@ const HomeHeader = ({
   const handleBackPress = useCallback(() => {
     if (searchStatus == true) {
       setSearchStatus(false);
-      searchEvent("");
-      setSearchInput("");
+      searchEvent('');
+      setSearchInput('');
       return true;
     }
     return false;
   }, [searchStatus]);
 
   //function to handle the select event types
-  const handleSelectEvent = useCallback((type?: "all") => {
+  const handleSelectEvent = useCallback((type?: 'all') => {
     setMenuVisible(false);
     setTimeout(() => {
-      if (type === "all") selectAllEvent?.();
+      if (type === 'all') selectAllEvent?.();
       else selectEvent?.();
     }, 200);
   }, []);
@@ -75,35 +69,23 @@ const HomeHeader = ({
 
   //function to handle the search input clear event
   const handleSearchClear = useCallback(() => {
-    searchEvent("");
-    setSearchInput("");
+    searchEvent('');
+    setSearchInput('');
   }, []);
 
   useEffect(() => {
     if (isFocused) {
-      const backHandler = BackHandler.addEventListener(
-        "hardwareBackPress",
-        handleBackPress,
-      );
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
       return () => backHandler.remove();
     }
   }, [searchStatus, isFocused]);
 
   return (
-    <View
-      style={[
-        styles.mainContainer,
-        !searchStatus && styles.mainContainerPadded,
-        { paddingTop: insets.top + 10 },
-      ]}
-    >
+    <View style={[styles.mainContainer, !searchStatus && styles.mainContainerPadded, { paddingTop: insets.top + 10 }]}>
       {!searchStatus ? (
         <Pressable
           onPress={() => setSearchStatus(true)}
-          style={[
-            styles.searchContainer,
-            !menuBtn && styles.searchContainerCompact,
-          ]}
+          style={[styles.searchContainer, !menuBtn && styles.searchContainerCompact]}
         >
           <View style={styles.searchRow}>
             <SvgSearch />
@@ -111,7 +93,7 @@ const HomeHeader = ({
               color={colors.baseMediumGrey}
               containerStyle={styles.searchTextContainer}
               fontFamily={fontFamily.outfitRegular}
-              styleProfile="large1"
+              styleProfile='large1'
               text={placeholder}
             />
           </View>
@@ -149,10 +131,7 @@ const HomeHeader = ({
       ) : (
         <View style={styles.activeSearchContainer}>
           <View style={styles.activeSearchLeft}>
-            <Pressable
-              onPress={handleBackPress}
-              style={styles.searchActionButton}
-            >
+            <Pressable onPress={handleBackPress} style={styles.searchActionButton}>
               <SvgBackGrey />
             </Pressable>
             <TextInput
@@ -166,11 +145,8 @@ const HomeHeader = ({
               onChangeText={handleInputChange}
             />
           </View>
-          {searchInput !== "" && (
-            <Pressable
-              onPress={handleSearchClear}
-              style={styles.searchActionButton}
-            >
+          {searchInput !== '' && (
+            <Pressable onPress={handleSearchClear} style={styles.searchActionButton}>
               <SvgCross />
             </Pressable>
           )}
@@ -184,18 +160,18 @@ export default HomeHeader;
 
 const styles = StyleSheet.create({
   mainContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   mainContainerPadded: {
     paddingHorizontal: 20,
   },
   searchContainer: {
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     borderRadius: 12,
     borderWidth: 1,
     paddingHorizontal: 15,
@@ -207,8 +183,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   searchRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   searchTextContainer: {
     marginLeft: 10,
@@ -226,17 +202,17 @@ const styles = StyleSheet.create({
   },
   activeSearchContainer: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     borderBottomWidth: 1,
     borderColor: colors.baseGrey,
     paddingBottom: 20,
   },
   activeSearchLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "87%",
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '87%',
   },
   searchActionButton: {
     paddingHorizontal: 20,
@@ -245,6 +221,6 @@ const styles = StyleSheet.create({
     color: colors.baseWhite,
     fontSize: 16,
     fontFamily: fontFamily.outfitRegular,
-    width: "85%",
+    width: '85%',
   },
 });

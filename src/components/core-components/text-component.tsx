@@ -1,37 +1,31 @@
-import type {
-  PressableProps,
-  StyleProp,
-  TextProps,
-  TextStyle,
-  ViewStyle,
-} from "react-native";
-import { Pressable, Text } from "react-native";
+import type { PressableProps, StyleProp, TextProps, TextStyle, ViewStyle } from 'react-native';
+import { Pressable, Text } from 'react-native';
 
 //import constants
-import { colors } from "@/constants";
+import { colors } from '@/constants';
 
 //import themes
-import textTheme, { type TextThemeName } from "@/themes/text-theme";
+import textTheme, { type TextThemeName } from '@/themes/text-theme';
 
 //import hooks
-import { useResponsive } from "@/hooks";
+import { useResponsive } from '@/hooks';
 
 type TextComponentProps = {
   containerStyle?: StyleProp<ViewStyle>;
   text: string;
-  margin?: TextStyle["marginVertical"];
+  margin?: TextStyle['marginVertical'];
   required?: boolean;
-  onTextLayout?: TextProps["onTextLayout"];
-  selectable?: TextProps["selectable"];
-  clickEvent?: PressableProps["onPress"];
-  numOfLine?: TextProps["numberOfLines"];
-  textAlign?: TextStyle["textAlign"];
-  color?: TextStyle["color"];
-  customFontSize?: TextStyle["fontSize"];
+  onTextLayout?: TextProps['onTextLayout'];
+  selectable?: TextProps['selectable'];
+  clickEvent?: PressableProps['onPress'];
+  numOfLine?: TextProps['numberOfLines'];
+  textAlign?: TextStyle['textAlign'];
+  color?: TextStyle['color'];
+  customFontSize?: TextStyle['fontSize'];
   styleProfile?: TextThemeName;
   customStyle?: TextStyle;
-  fontWeight?: TextStyle["fontWeight"];
-  fontFamily?: TextStyle["fontFamily"];
+  fontWeight?: TextStyle['fontWeight'];
+  fontFamily?: TextStyle['fontFamily'];
 };
 
 const TextComponent = ({
@@ -56,15 +50,10 @@ const TextComponent = ({
   const baseFontSize = customFontSize ?? resolvedTextStyle.fontSize ?? 14;
   const resolvedFontSize = fontSizeToRf(baseFontSize);
   const resolvedFontFamily = fontFamily ?? resolvedTextStyle.fontFamily;
-  const resolvedLineHeight =
-    customStyle?.lineHeight ?? Math.round(resolvedFontSize * 1.15); // avoid clipping descenders on some fonts
+  const resolvedLineHeight = customStyle?.lineHeight ?? Math.round(resolvedFontSize * 1.15); // avoid clipping descenders on some fonts
 
   return (
-    <Pressable
-      disabled={!clickEvent}
-      onPress={clickEvent}
-      style={containerStyle}
-    >
+    <Pressable disabled={!clickEvent} onPress={clickEvent} style={containerStyle}>
       <Text
         numberOfLines={numOfLine}
         onTextLayout={onTextLayout}
@@ -72,7 +61,7 @@ const TextComponent = ({
         style={{
           textAlign: textAlign,
           color: color ?? colors.baseWhite,
-          flexWrap: "wrap",
+          flexWrap: 'wrap',
           marginVertical: margin,
           fontSize: resolvedFontSize,
           fontWeight: fontWeight,
@@ -82,9 +71,7 @@ const TextComponent = ({
         }}
       >
         {text}
-        {required ? (
-          <Text style={{ color: colors.baseRed }}>{"*"}</Text>
-        ) : null}
+        {required ? <Text style={{ color: colors.baseRed }}>{'*'}</Text> : null}
       </Text>
     </Pressable>
   );

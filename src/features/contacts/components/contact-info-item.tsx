@@ -1,19 +1,19 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View } from 'react-native';
 
 //import components
-import TextComponent from "@/components/core-components/text-component";
+import TextComponent from '@/components/core-components/text-component';
 
 //import constants
-import { colors } from "@/constants";
+import { colors } from '@/constants';
 
 //import helpers
-import { formatContactLabel } from "@/helpers/customFun";
+import { formatContactLabel } from '@/helpers/customFun';
 
 //import types
-import type { DevicePhone } from "@/features/contacts/model";
+import type { DevicePhone } from '@/features/contacts/model';
 
 //import svgs
-import SvgCall from "@/assets/icons/call.svg";
+import SvgCall from '@/assets/icons/call.svg';
 
 type ContactInfoItemProps = {
   phone: DevicePhone;
@@ -26,17 +26,8 @@ const ContactInfoItem = ({ phone }: ContactInfoItemProps) => {
         <SvgCall width={20} height={20} />
       </View>
       <View style={styles.textContainer}>
-        <TextComponent
-          color={colors.baseWhite}
-          selectable
-          styleProfile="large2"
-          text={phone.number?.trim() ?? ""}
-        />
-        <TextComponent
-          color={colors.baseMediumGrey}
-          styleProfile="large1"
-          text={formatContactLabel(phone.label)}
-        />
+        <TextComponent color={colors.baseWhite} selectable styleProfile='large2' text={phone.number?.trim() ?? ''} />
+        <TextComponent color={colors.baseMediumGrey} styleProfile='large1' text={formatContactLabel(phone.label)} />
       </View>
     </View>
   );
@@ -46,14 +37,14 @@ export default ContactInfoItem;
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
-    alignItems: "flex-start",
+    flexDirection: 'row',
+    alignItems: 'flex-start',
   },
   iconContainer: {
     width: 36,
     height: 36,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 18,
     backgroundColor: colors.primaryLight,
   },

@@ -1,4 +1,4 @@
-import { Linking, Share } from "react-native";
+import { Linking, Share } from 'react-native';
 
 type VerticalItemLayout = {
   height: number;
@@ -42,7 +42,7 @@ const openExternalUrl = async (url: string): Promise<void> => {
   const isSupported = await Linking.canOpenURL(url);
 
   if (!isSupported) {
-    throw new Error("The device cannot open the requested URL");
+    throw new Error('The device cannot open the requested URL');
   }
 
   await Linking.openURL(url);
@@ -54,7 +54,7 @@ const openExternalUrl = async (url: string): Promise<void> => {
  * @param phoneNumber - Phone number to pass to the system dialer.
  */
 export const openPhoneCall = async (phoneNumber: string): Promise<void> => {
-  const normalizedPhoneNumber = phoneNumber.trim().replace(/\s+/g, "");
+  const normalizedPhoneNumber = phoneNumber.trim().replace(/\s+/g, '');
   await openExternalUrl(`tel:${normalizedPhoneNumber}`);
 };
 
@@ -64,7 +64,7 @@ export const openPhoneCall = async (phoneNumber: string): Promise<void> => {
  * @param phoneNumber - Phone number to pass to the messaging application.
  */
 export const openTextMessage = async (phoneNumber: string): Promise<void> => {
-  const normalizedPhoneNumber = phoneNumber.trim().replace(/\s+/g, "");
+  const normalizedPhoneNumber = phoneNumber.trim().replace(/\s+/g, '');
   await openExternalUrl(`sms:${normalizedPhoneNumber}`);
 };
 
