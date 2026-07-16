@@ -9,7 +9,7 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.jagatjeeban.Connect",
+      "bundleIdentifier": "com.jagatjeeban.connect",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -22,7 +22,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.jagatjeeban.Connect"
+      "package": "com.jagatjeeban.connect"
     },
     "web": {
       "output": "static",
