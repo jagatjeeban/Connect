@@ -1,5 +1,6 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 
 //import constants
@@ -15,10 +16,14 @@ import { useAppStore } from '@/store/use-app-store';
 //import helpers/services
 import { openEmail, openPhoneCall, openTextMessage, shareText } from '@/helpers/commonFun';
 import { buildContactShareMessage, getUniqueContactPhones } from '@/helpers/customFun';
-import { deleteDeviceContact, editDeviceContact, loadDeviceContact } from '@/features/contacts/contacts-service';
-
-//import types
-import type { DeviceContact } from '@/features/contacts/model';
+import {
+  invalidateContactQueries,
+  invalidateContactsCollection,
+  removeContactQueryData,
+  upsertContactQueryData,
+  useContactQuery,
+} from '@/features/contacts/contacts-query';
+import { deleteDeviceContact, presentEditContactForm } from '@/features/contacts/contacts-service';
 
 /**
  * Displays one device contact and coordinates its native actions.
@@ -26,71 +31,28 @@ import type { DeviceContact } from '@/features/contacts/model';
 const ContactDetails = () => {
   //hooks
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { contactId } = useLocalSearchParams<{ contactId?: string }>();
 
   //store events
-  const storedContact = useAppStore((state) => state.contacts.find((contact) => contact.id === contactId));
   const favoriteContactIds = useAppStore((state) => state.favoriteContactIds);
   const toggleFavorite = useAppStore((state) => state.toggleFavorite);
-  const upsertContact = useAppStore((state) => state.upsertContact);
-  const removeContact = useAppStore((state) => state.removeContact);
+  const removeFavorite = useAppStore((state) => state.removeFavorite);
 
   //states
-  const [loadedContact, setLoadedContact] = useState<DeviceContact>();
-  const [failedContactId, setFailedContactId] = useState<string | null>(null);
-  const [deletedContactId, setDeletedContactId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteSheetPresented, setIsDeleteSheetPresented] = useState(false);
 
-  const contact =
-    deletedContactId === contactId
-      ? undefined
-      : (storedContact ?? (loadedContact?.id === contactId ? loadedContact : undefined));
-  const hasLoadError = Boolean(contactId && failedContactId === contactId);
-  const isLoading = Boolean(contactId && !contact && !hasLoadError && deletedContactId !== contactId);
+  //queries
+  const contactQuery = useContactQuery(contactId);
+  const contact = contactQuery.data;
+  const hasLoadError = Boolean(contactId && contactQuery.isError);
+  const isLoading = Boolean(contactId && contactQuery.isPending);
   const phones = useMemo(() => getUniqueContactPhones(contact?.phones ?? []), [contact?.phones]);
   const primaryPhoneNumber = phones[0]?.number?.trim();
   const primaryEmailAddress = contact?.emails.find((email) => Boolean(email.address?.trim()))?.address?.trim();
   const isFavorite = contact ? favoriteContactIds.includes(contact.id) : false;
-
-  //loads contact details when the route is opened outside the populated list
-  useEffect(() => {
-    let isMounted = true;
-
-    if (!contactId || storedContact || deletedContactId === contactId) {
-      return () => {
-        isMounted = false;
-      };
-    }
-
-    //loads and stores contact details when the screen remains mounted
-    const loadContact = async () => {
-      try {
-        const contactDetails = await loadDeviceContact(contactId);
-
-        if (!isMounted) return;
-
-        setLoadedContact(contactDetails);
-        setFailedContactId(null);
-        upsertContact(contactDetails);
-      } catch (error) {
-        if (!isMounted) {
-          return;
-        }
-
-        console.error('Contact details load error', error);
-        setLoadedContact(undefined);
-        setFailedContactId(contactId);
-      }
-    };
-
-    void loadContact();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [contactId, deletedContactId, storedContact, upsertContact]);
 
   //returns to the previous route or falls back to the contacts list
   const handleBack = useCallback(() => {
@@ -160,12 +122,12 @@ const ContactDetails = () => {
       setIsEditing(true);
 
       try {
-        const updatedContact = await editDeviceContact(contact.id);
+        const updatedContact = await presentEditContactForm(contact.id);
 
         if (!updatedContact) return;
 
-        setLoadedContact(updatedContact);
-        upsertContact(updatedContact);
+        upsertContactQueryData(queryClient, updatedContact);
+        void invalidateContactsCollection(queryClient);
       } catch (error) {
         console.error('Contact edit error', error);
         Alert.alert(strings.unableEditContact, strings.errorMessage);
@@ -175,7 +137,7 @@ const ContactDetails = () => {
     };
 
     void editContact();
-  }, [contact, isEditing, upsertContact]);
+  }, [contact, isEditing, queryClient]);
 
   //closes the deletion sheet when no delete operation is active
   const handleDismissDeleteSheet = useCallback(() => {
@@ -194,11 +156,11 @@ const ContactDetails = () => {
 
       try {
         await deleteDeviceContact(contact.id);
-        setDeletedContactId(contact.id);
-        setLoadedContact(undefined);
+        removeContactQueryData(queryClient, contact.id);
+        removeFavorite(contact.id);
         setIsDeleteSheetPresented(false);
-        removeContact(contact.id);
         handleBack();
+        void invalidateContactQueries(queryClient);
       } catch (error) {
         console.error('Contact delete error', error);
         Alert.alert(strings.unableDeleteContact, strings.errorMessage);
@@ -208,7 +170,7 @@ const ContactDetails = () => {
     };
 
     void deleteContact();
-  }, [contact, handleBack, isDeleting, removeContact]);
+  }, [contact, handleBack, isDeleting, queryClient, removeFavorite]);
 
   return (
     <View style={styles.container}>

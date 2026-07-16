@@ -30,11 +30,7 @@ export async function requestDeviceContactsPermission(): Promise<ContactsPermiss
  * @returns Device contacts sorted by given name, or an empty list without permission.
  */
 export async function loadDeviceContacts(): Promise<DeviceContact[]> {
-  let permission = await getPermissionsAsync();
-
-  if (permission.status === 'undetermined') {
-    permission = await requestPermissionsAsync();
-  }
+  const permission = await getPermissionsAsync();
 
   if (permission.status !== 'granted') {
     return [];
@@ -50,7 +46,7 @@ export async function loadDeviceContacts(): Promise<DeviceContact[]> {
  *
  * @returns Whether the user created a contact.
  */
-export async function createDeviceContact(): Promise<boolean> {
+export async function presentCreateContactForm(): Promise<boolean> {
   return Contact.presentCreateForm();
 }
 
@@ -70,7 +66,7 @@ export async function loadDeviceContact(contactId: string): Promise<DeviceContac
  * @param contactId - Native contact identifier.
  * @returns The updated contact, or `null` when the user cancels.
  */
-export async function editDeviceContact(contactId: string): Promise<DeviceContact | null> {
+export async function presentEditContactForm(contactId: string): Promise<DeviceContact | null> {
   const contact = new Contact(contactId);
   const wasUpdated = await contact.editWithForm();
 

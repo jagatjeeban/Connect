@@ -18,14 +18,15 @@ import { useSearchFilter } from '@/hooks';
 //import store
 import { useAppStore } from '@/store/use-app-store';
 
-//import helpers
+//import helpers/services
 import { getFavoriteContacts } from '@/helpers/customFun';
+import { useContactsQuery } from '@/features/contacts/contacts-query';
 
 //import types
 import type { DeviceContact } from '@/features/contacts/model';
 
 //constants
-const MAX_VISIBLE_FAVORITES = 6;
+const EMPTY_CONTACTS: DeviceContact[] = [];
 
 /**
  * Displays searchable favorite contacts in a compact grid.
@@ -34,8 +35,10 @@ const Favorites = () => {
   //hooks
   const router = useRouter();
 
+  //queries
+  const { data: contacts = EMPTY_CONTACTS } = useContactsQuery();
+
   //store events
-  const contacts = useAppStore((state) => state.contacts);
   const favoriteContactIds = useAppStore((state) => state.favoriteContactIds);
 
   //states
@@ -48,10 +51,8 @@ const Favorites = () => {
 
   const filteredContacts = useSearchFilter(favoriteContacts, ContactField.FULL_NAME, searchInput);
 
-  //limits the favorites grid to its current design capacity
-  const visibleContacts = useMemo(() => filteredContacts.slice(0, MAX_VISIBLE_FAVORITES), [filteredContacts]);
   const hasSearchQuery = searchInput.trim().length > 0;
-  const showSearchEmptyState = visibleContacts.length === 0 && hasSearchQuery && favoriteContacts.length > 0;
+  const showSearchEmptyState = filteredContacts.length === 0 && hasSearchQuery && favoriteContacts.length > 0;
 
   // Add-favorites navigation will be implemented with its dedicated route.
   const handleAddFavorite = useCallback(() => undefined, []);
@@ -79,9 +80,8 @@ const Favorites = () => {
       <FavoritesHeader onPressAdd={handleAddFavorite} />
       <FlatList
         contentInsetAdjustmentBehavior={'automatic'}
-        contentContainerStyle={[styles.listContent, visibleContacts.length === 0 && styles.emptyListContent]}
-        data={visibleContacts}
-        initialNumToRender={MAX_VISIBLE_FAVORITES}
+        contentContainerStyle={[styles.listContent, filteredContacts.length === 0 && styles.emptyListContent]}
+        data={filteredContacts}
         keyboardShouldPersistTaps={'handled'}
         keyExtractor={(item) => item.id}
         ListEmptyComponent={<EmptyState isSearchResultState={showSearchEmptyState} />}

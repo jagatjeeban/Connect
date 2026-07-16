@@ -1,6 +1,7 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { ContactField } from 'expo-contacts';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -14,15 +15,9 @@ import ContactsList from '@/features/contacts/components/contacts-list';
 //import hooks
 import { useResponsive, useSearchFilter } from '@/hooks';
 
-//import store
-import { useAppStore } from '@/store/use-app-store';
-
-//import services
-import {
-  createDeviceContact,
-  loadDeviceContacts,
-  requestDeviceContactsPermission,
-} from '@/features/contacts/contacts-service';
+//import helpers/services
+import { invalidateContactsCollection, useContactsQuery } from '@/features/contacts/contacts-query';
+import { presentCreateContactForm, requestDeviceContactsPermission } from '@/features/contacts/contacts-service';
 
 //import assets
 import SvgPlus from '@/assets/icons/plus.svg';
@@ -32,6 +27,7 @@ import type { DeviceContact } from '@/features/contacts/model';
 
 //constants
 const IOS_ADD_BUTTON_TAB_BAR_CLEARANCE = 24;
+const EMPTY_CONTACTS: DeviceContact[] = [];
 
 /**
  * Displays searchable device contacts and coordinates contacts permission and creation flows.
@@ -39,23 +35,21 @@ const IOS_ADD_BUTTON_TAB_BAR_CLEARANCE = 24;
 const Contacts = () => {
   //hooks
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { rh } = useResponsive();
   const insets = useSafeAreaInsets();
 
-  //store events
-  const storedContacts = useAppStore((state) => state.contacts);
-  const setStoredContacts = useAppStore((state) => state.setContacts);
-
-  //refs
-  const hasLoadedInitialContacts = useRef(storedContacts.length > 0);
-
   //states
-  const [loaderStatus, setLoaderStatus] = useState(false);
   const [isGranted, setIsGranted] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [searchInput, setSearchInput] = useState('');
 
+  //queries
+  const contactsQuery = useContactsQuery(isGranted);
+  const contacts = contactsQuery.data ?? EMPTY_CONTACTS;
+
   //filters contacts based on the current search input
-  const filteredContacts = useSearchFilter(storedContacts, ContactField.FULL_NAME, searchInput);
+  const filteredContacts = useSearchFilter(contacts, ContactField.FULL_NAME, searchInput);
 
   //shows an alert that can open the app's system settings
   const openSettingsAlert = useCallback(() => {
@@ -69,22 +63,6 @@ const Contacts = () => {
       },
     ]);
   }, []);
-
-  //loads contacts that contain at least one phone number
-  const getAllContacts = useCallback(async () => {
-    setLoaderStatus(true);
-
-    try {
-      const contactList = await loadDeviceContacts();
-      const contactsWithPhoneNumbers = contactList.filter((contact) => contact.phones.length > 0);
-      setStoredContacts(contactsWithPhoneNumbers);
-    } catch (error) {
-      console.error('Contact fetch error', error);
-      Alert.alert(strings.unableLoadContacts, strings.errorMessage);
-    } finally {
-      setLoaderStatus(false);
-    }
-  }, [setStoredContacts]);
 
   //requests contact access or directs blocked users to system settings
   const requestContactsPermission = useCallback(async () => {
@@ -116,17 +94,23 @@ const Contacts = () => {
 
   //opens the native create-contact form and refreshes after a successful save
   const createContact = useCallback(async () => {
-    try {
-      const wasCreated = await createDeviceContact();
+    if (isCreating) return;
 
-      if (wasCreated && isGranted) {
-        await getAllContacts();
+    setIsCreating(true);
+
+    try {
+      const wasCreated = await presentCreateContactForm();
+
+      if (wasCreated) {
+        await invalidateContactsCollection(queryClient);
       }
     } catch (error) {
       console.error('Create contact error', error);
       Alert.alert(strings.unableCreateContact, strings.errorMessage);
+    } finally {
+      setIsCreating(false);
     }
-  }, [getAllContacts, isGranted]);
+  }, [isCreating, queryClient]);
 
   //requests contact permission when the screen first mounts
   useEffect(() => {
@@ -155,13 +139,20 @@ const Contacts = () => {
     };
   }, [openSettingsAlert]);
 
-  //loads contacts once after permission is granted and the store is empty
+  //invalidates the collection after granted permission has committed locally
   useEffect(() => {
-    if (!isGranted || hasLoadedInitialContacts.current) return;
+    if (!isGranted) return;
 
-    hasLoadedInitialContacts.current = true;
-    void getAllContacts();
-  }, [getAllContacts, isGranted]);
+    void invalidateContactsCollection(queryClient);
+  }, [isGranted, queryClient]);
+
+  //reports native contact query failures while retaining Query's status as the source of truth
+  useEffect(() => {
+    if (!contactsQuery.error) return;
+
+    console.error('Contact fetch error', contactsQuery.error);
+    Alert.alert(strings.unableLoadContacts, strings.errorMessage);
+  }, [contactsQuery.error]);
 
   return (
     <View style={styles.container}>
@@ -187,19 +178,22 @@ const Contacts = () => {
       ) : (
         <ContactsList
           contacts={filteredContacts}
-          loaderStatus={loaderStatus}
+          loaderStatus={contactsQuery.isPending}
           onClickContact={openContactDetails}
           searchText={searchInput}
-          totalContactsCount={storedContacts.length}
+          totalContactsCount={contacts.length}
         />
       )}
 
       <Pressable
         accessibilityLabel={strings.createContact}
         accessibilityRole={'button'}
+        accessibilityState={{ disabled: isCreating }}
+        disabled={isCreating}
         onPress={() => void createContact()}
         style={[
           styles.addContactButton,
+          isCreating && styles.disabled,
           {
             bottom: process.env.EXPO_OS === 'ios' ? insets.bottom + IOS_ADD_BUTTON_TAB_BAR_CLEARANCE : rh(10),
           },
@@ -241,5 +235,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 15,
     backgroundColor: colors.primaryLight,
+  },
+  disabled: {
+    opacity: 0.6,
   },
 });
