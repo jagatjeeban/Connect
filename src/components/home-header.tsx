@@ -1,16 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { BackHandler, Pressable, StyleSheet, TextInput, View } from 'react-native';
-// import { Menu, MenuItem } from 'react-native-material-menu';
 import { useIsFocused } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-//import components
-import TextComponent from '@/components/core-components/text-component';
 
 //import constants
 import { colors, fontFamily } from '@/constants';
 
-//import svgs
+//import components
+import TextComponent from './core-components/text-component';
+
+//import assets
 import SvgBackGrey from '@/assets/icons/back-arrow-grey.svg';
 import SvgCross from '@/assets/icons/cross-grey.svg';
 import SvgSearch from '@/assets/icons/search.svg';
@@ -18,20 +17,14 @@ import SvgSearch from '@/assets/icons/search.svg';
 type HomeHeaderProps = {
   placeholder: string;
   menuBtn: boolean;
-  selectEvent?: () => void;
-  selectAllEvent?: () => void;
   searchBlur?: () => void;
   searchEvent: (req: string) => void;
 };
 
-const HomeHeader = ({
-  placeholder = 'Search',
-  menuBtn = false,
-  selectEvent,
-  selectAllEvent,
-  searchBlur,
-  searchEvent,
-}: HomeHeaderProps) => {
+/**
+ * Displays the shared contacts and favorites search header.
+ */
+const HomeHeader = ({ placeholder = 'Search', menuBtn = false, searchBlur, searchEvent }: HomeHeaderProps) => {
   //hooks
   const isFocused = useIsFocused();
   const insets = useSafeAreaInsets();
@@ -39,46 +32,40 @@ const HomeHeader = ({
   //states
   const [searchInput, setSearchInput] = useState('');
   const [searchStatus, setSearchStatus] = useState(false);
-  const [menuVisible, setMenuVisible] = useState(false);
 
   //function to handle system backpress
   const handleBackPress = useCallback(() => {
-    if (searchStatus == true) {
+    if (searchStatus) {
       setSearchStatus(false);
       searchEvent('');
       setSearchInput('');
       return true;
     }
     return false;
-  }, [searchStatus]);
-
-  //function to handle the select event types
-  const handleSelectEvent = useCallback((type?: 'all') => {
-    setMenuVisible(false);
-    setTimeout(() => {
-      if (type === 'all') selectAllEvent?.();
-      else selectEvent?.();
-    }, 200);
-  }, []);
+  }, [searchEvent, searchStatus]);
 
   //function to handle the change in input value
-  const handleInputChange = useCallback((input: string) => {
-    searchEvent(input);
-    setSearchInput(input);
-  }, []);
+  const handleInputChange = useCallback(
+    (input: string) => {
+      searchEvent(input);
+      setSearchInput(input);
+    },
+    [searchEvent],
+  );
 
   //function to handle the search input clear event
   const handleSearchClear = useCallback(() => {
     searchEvent('');
     setSearchInput('');
-  }, []);
+  }, [searchEvent]);
 
+  //registers Android back handling while this header's screen is focused
   useEffect(() => {
-    if (isFocused) {
-      const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
-      return () => backHandler.remove();
-    }
-  }, [searchStatus, isFocused]);
+    if (!isFocused) return undefined;
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+    return () => backHandler.remove();
+  }, [handleBackPress, isFocused]);
 
   return (
     <View style={[styles.mainContainer, !searchStatus && styles.mainContainerPadded, { paddingTop: insets.top + 10 }]}>
@@ -93,40 +80,10 @@ const HomeHeader = ({
               color={colors.baseMediumGrey}
               containerStyle={styles.searchTextContainer}
               fontFamily={fontFamily.outfitRegular}
-              styleProfile='large1'
+              styleProfile={'large1'}
               text={placeholder}
             />
           </View>
-          {/* {menuBtn === true && (
-            <Menu
-              visible={menuVisible}
-              onRequestClose={() => setMenuVisible(false)}
-              style={styles.menuContainer}
-              anchor={
-                <Pressable
-                  hitSlop={10}
-                  onPress={() => setMenuVisible(true)}
-                >
-                  <SvgMenu />
-                </Pressable>
-              }
-            >
-              <MenuItem
-                onPress={handleSelectEvent}
-                pressColor={null}
-                textStyle={styles.menuItemText}
-              >
-                {strings.select}
-              </MenuItem>
-              <MenuItem
-                onPress={() => handleSelectEvent("all")}
-                pressColor={null}
-                textStyle={styles.menuItemText}
-              >
-                {strings.selectAll}
-              </MenuItem>
-            </Menu>
-          )} */}
         </Pressable>
       ) : (
         <View style={styles.activeSearchContainer}>
@@ -188,17 +145,6 @@ const styles = StyleSheet.create({
   },
   searchTextContainer: {
     marginLeft: 10,
-  },
-  menuItemText: {
-    color: colors.baseWhite,
-    fontSize: 14,
-    fontFamily: fontFamily.outfitRegular,
-  },
-  menuContainer: {
-    backgroundColor: colors.backgroundLight,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.baseGrey,
   },
   activeSearchContainer: {
     flex: 1,

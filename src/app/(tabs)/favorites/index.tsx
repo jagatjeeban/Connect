@@ -1,6 +1,10 @@
 import { ContactField } from 'expo-contacts';
+import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { FlatList, type ListRenderItemInfo, StyleSheet, View } from 'react-native';
+
+//import constants
+import { colors, strings } from '@/constants';
 
 //import components
 import { HomeHeader } from '@/components';
@@ -8,25 +12,28 @@ import EmptyState from '@/features/favorites/components/empty-state';
 import FavoriteContactItem from '@/features/favorites/components/favorite-contact-item';
 import FavoritesHeader from '@/features/favorites/components/favorites-header';
 
-//import constants
-import { colors } from '@/constants';
-
-//import helpers
-import { getFavoriteContacts } from '@/helpers/customFun';
-
 //import hooks
 import { useSearchFilter } from '@/hooks';
 
 //import store
 import { useAppStore } from '@/store/use-app-store';
 
+//import helpers
+import { getFavoriteContacts } from '@/helpers/customFun';
+
 //import types
 import type { DeviceContact } from '@/features/contacts/model';
-import { router } from 'expo-router';
 
+//constants
 const MAX_VISIBLE_FAVORITES = 6;
 
+/**
+ * Displays searchable favorite contacts in a compact grid.
+ */
 const Favorites = () => {
+  //hooks
+  const router = useRouter();
+
   //store events
   const contacts = useAppStore((state) => state.contacts);
   const favoriteContactIds = useAppStore((state) => state.favoriteContactIds);
@@ -34,12 +41,14 @@ const Favorites = () => {
   //states
   const [searchInput, setSearchInput] = useState('');
 
+  //resolves the stored contacts that are marked as favorites
   const favoriteContacts = useMemo(() => {
     return getFavoriteContacts(contacts, favoriteContactIds);
   }, [contacts, favoriteContactIds]);
 
   const filteredContacts = useSearchFilter(favoriteContacts, ContactField.FULL_NAME, searchInput);
 
+  //limits the favorites grid to its current design capacity
   const visibleContacts = useMemo(() => filteredContacts.slice(0, MAX_VISIBLE_FAVORITES), [filteredContacts]);
   const hasSearchQuery = searchInput.trim().length > 0;
   const showSearchEmptyState = visibleContacts.length === 0 && hasSearchQuery && favoriteContacts.length > 0;
@@ -61,19 +70,19 @@ const Favorites = () => {
   // Renders one favorite in the four-column grid.
   const renderFavoriteContact = useCallback(
     ({ item }: ListRenderItemInfo<DeviceContact>) => <FavoriteContactItem item={item} onPress={openContactDetails} />,
-    [],
+    [openContactDetails],
   );
 
   return (
     <View style={styles.container}>
-      <HomeHeader menuBtn={false} placeholder={'Search contacts'} searchEvent={setSearchInput} />
+      <HomeHeader menuBtn={false} placeholder={strings.searchContacts} searchEvent={setSearchInput} />
       <FavoritesHeader onPressAdd={handleAddFavorite} />
       <FlatList
-        contentInsetAdjustmentBehavior='automatic'
+        contentInsetAdjustmentBehavior={'automatic'}
         contentContainerStyle={[styles.listContent, visibleContacts.length === 0 && styles.emptyListContent]}
         data={visibleContacts}
         initialNumToRender={MAX_VISIBLE_FAVORITES}
-        keyboardShouldPersistTaps='handled'
+        keyboardShouldPersistTaps={'handled'}
         keyExtractor={(item) => item.id}
         ListEmptyComponent={<EmptyState isSearchResultState={showSearchEmptyState} />}
         numColumns={4}

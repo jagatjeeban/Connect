@@ -1,24 +1,27 @@
 import { StyleSheet, View } from 'react-native';
 
-//import components
-import TextComponent from '@/components/core-components/text-component';
-
 //import constants
 import { colors } from '@/constants';
+
+//import components
+import { TextComponent } from '@/components';
 
 //import helpers
 import { formatContactLabel } from '@/helpers/customFun';
 
+//import assets
+import SvgCall from '@/assets/icons/call.svg';
+
 //import types
 import type { DevicePhone } from '@/features/contacts/model';
-
-//import svgs
-import SvgCall from '@/assets/icons/call.svg';
 
 type ContactInfoItemProps = {
   phone: DevicePhone;
 };
 
+/**
+ * Displays one normalized phone number and its device-provided label.
+ */
 const ContactInfoItem = ({ phone }: ContactInfoItemProps) => {
   return (
     <View style={styles.container}>
@@ -26,8 +29,8 @@ const ContactInfoItem = ({ phone }: ContactInfoItemProps) => {
         <SvgCall width={20} height={20} />
       </View>
       <View style={styles.textContainer}>
-        <TextComponent color={colors.baseWhite} selectable styleProfile='large2' text={phone.number?.trim() ?? ''} />
-        <TextComponent color={colors.baseMediumGrey} styleProfile='large1' text={formatContactLabel(phone.label)} />
+        <TextComponent color={colors.baseWhite} selectable styleProfile={'large2'} text={phone.number?.trim() ?? ''} />
+        <TextComponent color={colors.baseMediumGrey} styleProfile={'large1'} text={formatContactLabel(phone.label)} />
       </View>
     </View>
   );

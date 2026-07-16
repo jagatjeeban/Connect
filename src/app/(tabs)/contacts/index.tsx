@@ -1,34 +1,41 @@
-import { Contact, ContactField, getPermissionsAsync, requestPermissionsAsync } from 'expo-contacts';
+import { ContactField } from 'expo-contacts';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-//import components
-import { HomeHeader } from '@/components';
-import TextComponent from '@/components/core-components/text-component';
-import ContactsList from '@/features/contacts/components/contacts-list';
-
 //import constants
 import { colors, fontFamily, strings } from '@/constants';
+
+//import components
+import { HomeHeader, TextComponent } from '@/components';
+import ContactsList from '@/features/contacts/components/contacts-list';
 
 //import hooks
 import { useResponsive, useSearchFilter } from '@/hooks';
 
-//import services
-import { loadDeviceContacts } from '@/features/contacts/contacts-service';
-
 //import store
 import { useAppStore } from '@/store/use-app-store';
+
+//import services
+import {
+  createDeviceContact,
+  loadDeviceContacts,
+  requestDeviceContactsPermission,
+} from '@/features/contacts/contacts-service';
+
+//import assets
+import SvgPlus from '@/assets/icons/plus.svg';
 
 //import types
 import type { DeviceContact } from '@/features/contacts/model';
 
-//import svgs
-import SvgPlus from '@/assets/icons/plus.svg';
-
+//constants
 const IOS_ADD_BUTTON_TAB_BAR_CLEARANCE = 24;
 
+/**
+ * Displays searchable device contacts and coordinates contacts permission and creation flows.
+ */
 const Contacts = () => {
   //hooks
   const router = useRouter();
@@ -52,19 +59,15 @@ const Contacts = () => {
 
   //shows an alert that can open the app's system settings
   const openSettingsAlert = useCallback(() => {
-    Alert.alert(
-      'Connect would like to view your contacts',
-      'Contacts access was denied. Please enable it from settings to continue.',
-      [
-        { text: strings.cancel, style: 'cancel' },
-        {
-          text: 'Open Settings',
-          onPress: () => {
-            void Linking.openSettings();
-          },
+    Alert.alert(strings.contactsPermissionTitle, strings.contactsPermissionDenied, [
+      { text: strings.cancel, style: 'cancel' },
+      {
+        text: strings.openSettings,
+        onPress: () => {
+          void Linking.openSettings();
         },
-      ],
-    );
+      },
+    ]);
   }, []);
 
   //loads contacts that contain at least one phone number
@@ -77,7 +80,7 @@ const Contacts = () => {
       setStoredContacts(contactsWithPhoneNumbers);
     } catch (error) {
       console.error('Contact fetch error', error);
-      Alert.alert('Unable to load contacts', strings.errorMessage);
+      Alert.alert(strings.unableLoadContacts, strings.errorMessage);
     } finally {
       setLoaderStatus(false);
     }
@@ -86,11 +89,7 @@ const Contacts = () => {
   //requests contact access or directs blocked users to system settings
   const requestContactsPermission = useCallback(async () => {
     try {
-      let permission = await getPermissionsAsync();
-
-      if (!permission.granted && permission.canAskAgain) {
-        permission = await requestPermissionsAsync();
-      }
+      const permission = await requestDeviceContactsPermission();
 
       setIsGranted(permission.granted);
 
@@ -100,7 +99,7 @@ const Contacts = () => {
     } catch (error) {
       console.error('Contacts permission error', error);
       setIsGranted(false);
-      Alert.alert('Unable to request permission', strings.errorMessage);
+      Alert.alert(strings.unableRequestContactsPermission, strings.errorMessage);
     }
   }, [openSettingsAlert]);
 
@@ -118,21 +117,43 @@ const Contacts = () => {
   //opens the native create-contact form and refreshes after a successful save
   const createContact = useCallback(async () => {
     try {
-      const wasCreated = await Contact.presentCreateForm();
+      const wasCreated = await createDeviceContact();
 
       if (wasCreated && isGranted) {
         await getAllContacts();
       }
     } catch (error) {
       console.error('Create contact error', error);
-      Alert.alert('Unable to create contact', strings.errorMessage);
+      Alert.alert(strings.unableCreateContact, strings.errorMessage);
     }
   }, [getAllContacts, isGranted]);
 
   //requests contact permission when the screen first mounts
   useEffect(() => {
-    void requestContactsPermission();
-  }, [requestContactsPermission]);
+    let isMounted = true;
+
+    void requestDeviceContactsPermission()
+      .then((permission) => {
+        if (!isMounted) return;
+
+        setIsGranted(permission.granted);
+
+        if (!permission.granted && !permission.canAskAgain) {
+          openSettingsAlert();
+        }
+      })
+      .catch((error: unknown) => {
+        if (!isMounted) return;
+
+        console.error('Contacts permission error', error);
+        setIsGranted(false);
+        Alert.alert(strings.unableRequestContactsPermission, strings.errorMessage);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [openSettingsAlert]);
 
   //loads contacts once after permission is granted and the store is empty
   useEffect(() => {
@@ -144,23 +165,23 @@ const Contacts = () => {
 
   return (
     <View style={styles.container}>
-      <HomeHeader placeholder='Search contacts' menuBtn searchEvent={setSearchInput} />
+      <HomeHeader placeholder={strings.searchContacts} menuBtn searchEvent={setSearchInput} />
 
       {!isGranted ? (
         <View style={styles.permissionStateContainer}>
           <TextComponent
             color={colors.baseMediumGrey}
             fontFamily={fontFamily.outfitRegular}
-            styleProfile='large3'
+            styleProfile={'large3'}
             text={strings.requireAccess}
-            textAlign='center'
+            textAlign={'center'}
           />
           <Pressable
-            accessibilityRole='button'
+            accessibilityRole={'button'}
             onPress={() => void requestContactsPermission()}
             style={styles.grantAccessButton}
           >
-            <TextComponent color={colors.primary} styleProfile='large1' text='Grant Permission' />
+            <TextComponent color={colors.primary} styleProfile={'large1'} text={strings.grantPermission} />
           </Pressable>
         </View>
       ) : (
@@ -174,8 +195,8 @@ const Contacts = () => {
       )}
 
       <Pressable
-        accessibilityLabel='Create contact'
-        accessibilityRole='button'
+        accessibilityLabel={strings.createContact}
+        accessibilityRole={'button'}
         onPress={() => void createContact()}
         style={[
           styles.addContactButton,

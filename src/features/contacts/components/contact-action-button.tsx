@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-//import components
-import TextComponent from '@/components/core-components/text-component';
-
 //import constants
 import { colors } from '@/constants';
+
+//import components
+import { TextComponent } from '@/components';
 
 type ContactActionButtonProps = {
   icon: ReactNode;
@@ -14,18 +14,21 @@ type ContactActionButtonProps = {
   onPress: () => void;
 };
 
+/**
+ * Displays one labeled action in the contact-details action row.
+ */
 const ContactActionButton = ({ icon, label, disabled = false, onPress }: ContactActionButtonProps) => {
   return (
     <Pressable
       accessibilityLabel={label}
-      accessibilityRole='button'
+      accessibilityRole={'button'}
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => [styles.container, pressed && styles.pressed, disabled && styles.disabled]}
     >
       <View style={styles.iconContainer}>{icon}</View>
-      <TextComponent color={colors.baseWhite} styleProfile='large1' text={label} textAlign='center' />
+      <TextComponent color={colors.baseWhite} styleProfile={'large1'} text={label} textAlign={'center'} />
     </Pressable>
   );
 };

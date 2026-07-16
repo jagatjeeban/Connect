@@ -1,24 +1,27 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
-//import components
-import TextComponent from '@/components/core-components/text-component';
-
 //import constants
 import { colors, strings } from '@/constants';
 
-//import svgs
+//import components
+import { TextComponent } from '@/components';
+
+//import assets
 import SvgPlus from '@/assets/icons/plus.svg';
 
 type FavoritesHeaderProps = {
   onPressAdd: () => void;
 };
 
+/**
+ * Displays the favorites section title and add action.
+ */
 const FavoritesHeader = ({ onPressAdd }: FavoritesHeaderProps) => (
   <View style={styles.container}>
-    <TextComponent color={colors.baseWhite} styleProfile='large3' text={strings.favorites} />
+    <TextComponent color={colors.baseWhite} styleProfile={'large3'} text={strings.favorites} />
     <Pressable
-      accessibilityLabel='Add favorite'
-      accessibilityRole='button'
+      accessibilityLabel={strings.addFavorite}
+      accessibilityRole={'button'}
       hitSlop={8}
       onPress={onPressAdd}
       style={({ pressed }) => [styles.addButton, pressed && styles.buttonPressed]}
@@ -27,7 +30,7 @@ const FavoritesHeader = ({ onPressAdd }: FavoritesHeaderProps) => (
       <TextComponent
         color={colors.primary}
         containerStyle={styles.addButtonTextContainer}
-        styleProfile='large1'
+        styleProfile={'large1'}
         text={strings.add}
       />
     </Pressable>

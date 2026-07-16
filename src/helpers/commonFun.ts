@@ -38,6 +38,7 @@ export const getNearestScrubberLetter = (
   return closestLetter;
 };
 
+//opens a validated URL with the appropriate native application
 const openExternalUrl = async (url: string): Promise<void> => {
   const isSupported = await Linking.canOpenURL(url);
 

@@ -1,8 +1,12 @@
 import { StyleSheet, View } from 'react-native';
 
-import TextComponent from '@/components/core-components/text-component';
+//import constants
 import { colors } from '@/constants';
 
+//import components
+import { TextComponent } from '@/components';
+
+//constants
 const SCRUBBER_CONTENT_GUTTER = 60;
 
 type ContactSectionHeaderProps = {
@@ -11,12 +15,15 @@ type ContactSectionHeaderProps = {
   hasScrubber?: boolean;
 };
 
+/**
+ * Displays an alphabetical contacts section heading.
+ */
 const ContactSectionHeader = ({ letter, isSticky = false, hasScrubber = false }: ContactSectionHeaderProps) => (
   <View style={[styles.container, hasScrubber && styles.containerWithScrubber, isSticky && styles.stickyContainer]}>
     <TextComponent
       color={colors.baseMediumGrey}
       containerStyle={styles.initialContainer}
-      styleProfile='large3'
+      styleProfile={'large3'}
       text={letter}
     />
   </View>

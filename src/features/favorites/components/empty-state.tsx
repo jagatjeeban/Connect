@@ -1,12 +1,12 @@
 import { StyleSheet, View } from 'react-native';
 
-//import components
-import TextComponent from '@/components/core-components/text-component';
-
 //import constants
-import { colors, fontFamily } from '@/constants';
+import { colors, fontFamily, strings } from '@/constants';
 
-//import svgs
+//import components
+import { TextComponent } from '@/components';
+
+//import assets
 import SvgFavorite from '@/assets/icons/favourites.svg';
 import SvgSearch from '@/assets/icons/search.svg';
 
@@ -14,25 +14,26 @@ type EmptyStateProps = {
   isSearchResultState?: boolean;
 };
 
+/**
+ * Displays the favorites empty state for either saved data or search results.
+ */
 const EmptyState = ({ isSearchResultState = false }: EmptyStateProps) => {
-  const title = isSearchResultState ? 'No results found' : 'No favorites yet';
-  const description = isSearchResultState
-    ? 'Try a different name or clear your search to see your favorites again.'
-    : 'Add your go-to people to favorites so they are easier to reach from here.';
+  const title = isSearchResultState ? strings.noResultsFound : strings.noFavoritesYet;
+  const description = isSearchResultState ? strings.favoritesSearchEmptyDescription : strings.favoritesEmptyDescription;
 
   return (
     <View style={styles.container}>
       <View style={styles.iconWrapper}>
         {isSearchResultState ? <SvgSearch width={34} height={34} /> : <SvgFavorite width={34} height={30} />}
       </View>
-      <TextComponent color={colors.baseWhite} styleProfile='large4' text={title} textAlign='center' />
+      <TextComponent color={colors.baseWhite} styleProfile={'large4'} text={title} textAlign={'center'} />
       <TextComponent
         color={colors.baseMediumGrey}
         containerStyle={styles.descriptionContainer}
         fontFamily={fontFamily.outfitRegular}
-        styleProfile='large1'
+        styleProfile={'large1'}
         text={description}
-        textAlign='center'
+        textAlign={'center'}
       />
     </View>
   );

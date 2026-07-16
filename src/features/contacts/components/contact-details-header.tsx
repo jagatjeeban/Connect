@@ -2,9 +2,9 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 //import constants
-import { colors } from '@/constants';
+import { colors, strings } from '@/constants';
 
-//import svgs
+//import assets
 import SvgBackArrow from '@/assets/icons/back-arrow.svg';
 import SvgPencil from '@/assets/icons/pencil.svg';
 import SvgPrimaryFavorite from '@/assets/icons/primary-favorite.svg';
@@ -19,6 +19,9 @@ type ContactDetailsHeaderProps = {
   onEdit: () => void;
 };
 
+/**
+ * Displays contact-details navigation, favorite, and edit actions.
+ */
 const ContactDetailsHeader = ({
   isFavorite,
   isEditing,
@@ -32,8 +35,8 @@ const ContactDetailsHeader = ({
   return (
     <View style={[styles.container, { paddingTop: insets.top + 10 }]}>
       <Pressable
-        accessibilityLabel='Go back'
-        accessibilityRole='button'
+        accessibilityLabel={strings.goBack}
+        accessibilityRole={'button'}
         hitSlop={10}
         onPress={onBack}
         style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}
@@ -43,8 +46,8 @@ const ContactDetailsHeader = ({
 
       <View style={styles.rightActions}>
         <Pressable
-          accessibilityLabel={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-          accessibilityRole='button'
+          accessibilityLabel={isFavorite ? strings.removeFromFavorites : strings.addToFavorites}
+          accessibilityRole={'button'}
           accessibilityState={{
             disabled: actionsDisabled,
             selected: isFavorite,
@@ -58,8 +61,8 @@ const ContactDetailsHeader = ({
         </Pressable>
 
         <Pressable
-          accessibilityLabel='Edit contact'
-          accessibilityRole='button'
+          accessibilityLabel={strings.editContact}
+          accessibilityRole={'button'}
           accessibilityState={{ disabled: actionsDisabled || isEditing }}
           disabled={actionsDisabled || isEditing}
           hitSlop={10}
@@ -71,7 +74,7 @@ const ContactDetailsHeader = ({
           ]}
         >
           {isEditing ? (
-            <ActivityIndicator color={colors.baseWhite} size='small' />
+            <ActivityIndicator color={colors.baseWhite} size={'small'} />
           ) : (
             <SvgPencil width={20} height={24} />
           )}

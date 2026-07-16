@@ -10,9 +10,13 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-//import components
-import TextComponent from '@/components/core-components/text-component';
+//import constants
+import { colors, fontFamily, strings } from '@/constants';
 
+//import components
+import TextComponent from '../core-components/text-component';
+
+//import assets
 import SvgBackArrow from '@/assets/icons/back-arrow.svg';
 import SvgBackGrey from '@/assets/icons/back-arrow-grey.svg';
 import SvgCross from '@/assets/icons/cross-grey.svg';
@@ -23,8 +27,8 @@ import SvgSearch from '@/assets/icons/search-white.svg';
 import SvgShare from '@/assets/icons/share-white.svg';
 import SvgTrash from '@/assets/icons/trash.svg';
 import SvgWhiteStar from '@/assets/icons/white-favorite.svg';
-import { colors, fontFamily, strings } from '@/constants';
 
+//import types
 import type { HeaderNavigation, PageHeaderAction, PageHeaderIcon } from './types';
 
 export interface NormalHeaderProps {
@@ -44,6 +48,9 @@ export interface NormalHeaderProps {
   textChangeEvent?: (value: string) => void;
 }
 
+/**
+ * Displays the standard page header with navigation, actions, and search states.
+ */
 const NormalHeader = ({
   navigation,
   placeholder,
@@ -69,6 +76,7 @@ const NormalHeader = ({
   //refs
   const searchRef = useRef<TextInput>(null);
 
+  //updates local and consumer-owned search input
   const handleSearchInputChange = useCallback(
     (value: string = '') => {
       textChangeEvent?.(value);
@@ -87,12 +95,14 @@ const NormalHeader = ({
     return false;
   }, [handleSearchInputChange, searchStatus, updateSearchStatus]);
 
+  //focuses the search input whenever search mode opens
   useEffect(() => {
     if (searchStatus) {
       searchRef.current?.focus();
     }
   }, [searchStatus]);
 
+  //registers Android back handling for the header search state
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
     return () => backHandler.remove();
@@ -113,13 +123,13 @@ const NormalHeader = ({
                   {backBtn === true && <SvgBackArrow />}
                   {crossBtn === true && <SvgCrossWhite />}
                 </Pressable>
-                <TextComponent color={headerTitleColor} styleProfile='large3' text={headerTitle} />
+                <TextComponent color={headerTitleColor} styleProfile={'large3'} text={headerTitle} />
               </>
             ) : (
               <TextComponent
                 color={headerTitleColor}
                 containerStyle={styles.headerTitleStandalone}
-                styleProfile='large3'
+                styleProfile={'large3'}
                 text={headerTitle}
               />
             )}
@@ -164,9 +174,9 @@ const NormalHeader = ({
                 >
                   <TextComponent
                     color={loaderStatus ? colors.baseGrey : colors.baseWhite}
-                    styleProfile='large1'
+                    styleProfile={'large1'}
                     text={loaderStatus ? strings.saving : strings.save}
-                    textAlign='center'
+                    textAlign={'center'}
                   />
                 </Pressable>
               )}
@@ -184,9 +194,9 @@ const NormalHeader = ({
                 >
                   <TextComponent
                     color={loaderStatus ? colors.baseGrey : colors.baseWhite}
-                    styleProfile='large1'
+                    styleProfile={'large1'}
                     text={loaderStatus ? strings.updating : strings.update}
-                    textAlign='center'
+                    textAlign={'center'}
                   />
                 </Pressable>
               )}
@@ -199,7 +209,7 @@ const NormalHeader = ({
                   <TextComponent
                     color={colors.primary}
                     containerStyle={styles.addBtnTextContainer}
-                    styleProfile='large1'
+                    styleProfile={'large1'}
                     text={strings.add}
                   />
                 </Pressable>

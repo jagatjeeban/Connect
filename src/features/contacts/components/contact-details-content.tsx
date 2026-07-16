@@ -1,22 +1,22 @@
 import { Image } from 'expo-image';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+//import constants
+import { colors, strings } from '@/constants';
+
 //import components
-import TextComponent from '@/components/core-components/text-component';
+import { TextComponent } from '@/components';
 import ContactActionButton from '@/features/contacts/components/contact-action-button';
 import ContactDetailsHeader from '@/features/contacts/components/contact-details-header';
 import ContactInfoItem from '@/features/contacts/components/contact-info-item';
 
-//import constants
-import { colors, strings } from '@/constants';
+//import hooks
+import { useResponsive } from '@/hooks';
 
 //import helpers
 import { getContactInitial, getContactName } from '@/helpers/customFun';
 
-//import types
-import type { DeviceContact, DevicePhone } from '@/features/contacts/model';
-
-//import svgs
+//import assets
 import SvgCall from '@/assets/icons/call.svg';
 import SvgMail from '@/assets/icons/mail.svg';
 import SvgMessage from '@/assets/icons/message.svg';
@@ -24,8 +24,8 @@ import SvgShare from '@/assets/icons/share.svg';
 import SvgTrash from '@/assets/icons/trash.svg';
 import SvgUpperCurve from '@/assets/images/svgs/upper-curve.svg';
 
-//import hooks
-import { useResponsive } from '@/hooks';
+//import types
+import type { DeviceContact, DevicePhone } from '@/features/contacts/model';
 
 type ContactDetailsContentProps = {
   contact?: DeviceContact;
@@ -44,6 +44,9 @@ type ContactDetailsContentProps = {
   onDelete: () => void;
 };
 
+/**
+ * Displays the complete loading, error, and populated states for contact details.
+ */
 const ContactDetailsContent = ({
   contact,
   phones,
@@ -70,8 +73,8 @@ const ContactDetailsContent = ({
   return (
     <View style={styles.container}>
       <SvgUpperCurve
-        pointerEvents='none'
-        preserveAspectRatio='xMidYMid slice'
+        pointerEvents={'none'}
+        preserveAspectRatio={'xMidYMid slice'}
         style={[styles.upperCurve, { top: -curveHeight * 0.25 }]}
         width={width}
       />
@@ -87,19 +90,19 @@ const ContactDetailsContent = ({
 
       {!contact ? (
         <View style={styles.stateContainer}>
-          {isLoading ? <ActivityIndicator color={colors.primary} size='large' /> : null}
+          {isLoading ? <ActivityIndicator color={colors.primary} size={'large'} /> : null}
           <TextComponent
             color={colors.baseMediumGrey}
-            styleProfile='large2'
+            styleProfile={'large2'}
             text={
               isLoading ? strings.loadingContact : hasLoadError ? strings.unableLoadContact : strings.contactNotFound
             }
-            textAlign='center'
+            textAlign={'center'}
           />
         </View>
       ) : (
         <ScrollView
-          contentInsetAdjustmentBehavior='automatic'
+          contentInsetAdjustmentBehavior={'automatic'}
           contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={false}
         >
@@ -107,9 +110,9 @@ const ContactDetailsContent = ({
             {thumbnail ? (
               <Image
                 accessibilityLabel={`${contactName} contact photo`}
-                cachePolicy='memory-disk'
-                contentFit='cover'
-                priority='high'
+                cachePolicy={'memory-disk'}
+                contentFit={'cover'}
+                priority={'high'}
                 source={thumbnail}
                 style={styles.contactImage}
                 transition={100}
@@ -118,9 +121,9 @@ const ContactDetailsContent = ({
               <View style={styles.defaultContactImage}>
                 <TextComponent
                   color={colors.baseWhite}
-                  styleProfile='largest3'
+                  styleProfile={'largest3'}
                   text={getContactInitial(contactName)}
-                  textAlign='center'
+                  textAlign={'center'}
                 />
               </View>
             )}
@@ -128,9 +131,9 @@ const ContactDetailsContent = ({
             <TextComponent
               color={colors.baseWhite}
               numOfLine={2}
-              styleProfile='large4'
+              styleProfile={'large4'}
               text={contactName}
-              textAlign='center'
+              textAlign={'center'}
             />
           </View>
 
@@ -154,7 +157,7 @@ const ContactDetailsContent = ({
           </View>
 
           <View style={styles.contactInfoContainer}>
-            <TextComponent color={colors.baseMediumGrey} styleProfile='large1' text={strings.contactInfo} />
+            <TextComponent color={colors.baseMediumGrey} styleProfile={'large1'} text={strings.contactInfo} />
 
             <View style={styles.phoneList}>
               {phones.map((phone, index) => (
@@ -168,12 +171,12 @@ const ContactDetailsContent = ({
 
           <Pressable
             accessibilityLabel={strings.deleteContact}
-            accessibilityRole='button'
+            accessibilityRole={'button'}
             onPress={onDelete}
             style={({ pressed }) => [styles.deleteButton, pressed && styles.pressed]}
           >
             <SvgTrash width={20} height={21} />
-            <TextComponent color={colors.baseRed} styleProfile='large1' text={strings.deleteContact} />
+            <TextComponent color={colors.baseRed} styleProfile={'large1'} text={strings.deleteContact} />
           </Pressable>
         </ScrollView>
       )}

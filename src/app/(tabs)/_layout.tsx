@@ -1,9 +1,12 @@
+import { Platform } from 'react-native';
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 
 //import constants
 import { colors, fontFamily, strings } from '@/constants';
-import { Platform } from 'react-native';
 
+/**
+ * Configures the native contacts, favorites, and profile tabs.
+ */
 export default function TabLayout() {
   return (
     <NativeTabs
@@ -11,7 +14,7 @@ export default function TabLayout() {
       minimizeBehavior={Platform.OS === 'ios' && Number(Platform.Version) >= 26 ? 'onScrollDown' : undefined}
       labelStyle={{ fontFamily: fontFamily.outfitMedium }}
     >
-      <NativeTabs.Trigger name='contacts' contentStyle={{ backgroundColor: colors.backgroundColor }}>
+      <NativeTabs.Trigger name={'contacts'} contentStyle={{ backgroundColor: colors.backgroundColor }}>
         <NativeTabs.Trigger.Label
           selectedStyle={{
             color: colors.primary,
@@ -26,7 +29,7 @@ export default function TabLayout() {
           selectedColor={colors.primary}
         />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name='favorites' contentStyle={{ backgroundColor: colors.backgroundColor }}>
+      <NativeTabs.Trigger name={'favorites'} contentStyle={{ backgroundColor: colors.backgroundColor }}>
         <NativeTabs.Trigger.Label
           selectedStyle={{
             color: colors.primary,
@@ -40,7 +43,7 @@ export default function TabLayout() {
           selectedColor={colors.primary}
         />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name='profile' contentStyle={{ backgroundColor: colors.backgroundColor }}>
+      <NativeTabs.Trigger name={'profile'} contentStyle={{ backgroundColor: colors.backgroundColor }}>
         <NativeTabs.Trigger.Label
           selectedStyle={{
             color: colors.primary,
@@ -50,7 +53,7 @@ export default function TabLayout() {
         </NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           sf={{ default: 'person', selected: 'person.fill' }}
-          md='person'
+          md={'person'}
           selectedColor={colors.primary}
         />
       </NativeTabs.Trigger>

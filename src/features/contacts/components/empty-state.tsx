@@ -1,12 +1,12 @@
 import { StyleSheet, View } from 'react-native';
 
 //import constants
-import { colors } from '@/constants';
+import { colors, strings } from '@/constants';
 
 //import components
 import { TextComponent } from '@/components';
 
-//import svg files
+//import assets
 import SvgContacts from '@/assets/icons/contacts.svg';
 import SvgSearch from '@/assets/icons/search.svg';
 
@@ -14,24 +14,25 @@ type EmptyStateProps = {
   isSearchResultState: boolean;
 };
 
+/**
+ * Displays the contacts empty state for either an empty address book or search results.
+ */
 const EmptyState = ({ isSearchResultState = false }: EmptyStateProps) => {
-  const title = isSearchResultState ? 'No results found' : 'No contacts yet';
-  const description = isSearchResultState
-    ? 'Try a different name or clear your search to see all contacts.'
-    : 'Your saved contacts will show up here once they are available.';
+  const title = isSearchResultState ? strings.noResultsFound : strings.noContactsYet;
+  const description = isSearchResultState ? strings.contactsSearchEmptyDescription : strings.contactsEmptyDescription;
 
   return (
     <View style={styles.emptyStateContainer}>
       <View style={styles.emptyStateIconWrapper}>
         {isSearchResultState ? <SvgSearch width={34} height={34} /> : <SvgContacts width={28} height={34} />}
       </View>
-      <TextComponent color={colors.baseWhite} styleProfile='large4' text={title} textAlign='center' />
+      <TextComponent color={colors.baseWhite} styleProfile={'large4'} text={title} textAlign={'center'} />
       <TextComponent
         color={colors.baseMediumGrey}
         containerStyle={styles.descriptionContainer}
-        styleProfile='large1'
+        styleProfile={'large1'}
         text={description}
-        textAlign='center'
+        textAlign={'center'}
       />
     </View>
   );

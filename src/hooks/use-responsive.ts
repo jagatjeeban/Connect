@@ -1,5 +1,7 @@
 import { useWindowDimensions } from 'react-native';
 
+type PercentValue = string | number;
+
 /**
  * Normalizes a numeric input that may be passed as a number, numeric string,
  * or percentage string and returns it as a finite number.
@@ -9,9 +11,6 @@ import { useWindowDimensions } from 'react-native';
  * @returns {number} The normalized finite numeric value.
  * @throws {TypeError} Throws when the input cannot be converted to a valid finite number.
  */
-
-type PercentValue = string | number;
-
 const getValidatedNumericValue = (value: PercentValue, inputName: string): number => {
   if (typeof value === 'number' && Number.isFinite(value)) {
     return value;

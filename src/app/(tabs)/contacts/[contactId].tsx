@@ -1,32 +1,32 @@
-import { Contact } from 'expo-contacts';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
+
+//import constants
+import { colors, strings } from '@/constants';
 
 //import components
 import { ConfirmationBottomSheet } from '@/components';
 import ContactDetailsContent from '@/features/contacts/components/contact-details-content';
 
-//import constants
-import { colors, strings } from '@/constants';
-
-//import helpers
-import { openEmail, openPhoneCall, openTextMessage, shareText } from '@/helpers/commonFun';
-import { buildContactShareMessage, getUniqueContactPhones } from '@/helpers/customFun';
-
 //import store
 import { useAppStore } from '@/store/use-app-store';
 
-//import types
-import { CONTACT_FIELDS, type DeviceContact } from '@/features/contacts/model';
+//import helpers/services
+import { openEmail, openPhoneCall, openTextMessage, shareText } from '@/helpers/commonFun';
+import { buildContactShareMessage, getUniqueContactPhones } from '@/helpers/customFun';
+import { deleteDeviceContact, editDeviceContact, loadDeviceContact } from '@/features/contacts/contacts-service';
 
+//import types
+import type { DeviceContact } from '@/features/contacts/model';
+
+/**
+ * Displays one device contact and coordinates its native actions.
+ */
 const ContactDetails = () => {
   //hooks
   const router = useRouter();
   const { contactId } = useLocalSearchParams<{ contactId?: string }>();
-
-  //refs
-  const deletedContactIdRef = useRef<string | null>(null);
 
   //store events
   const storedContact = useAppStore((state) => state.contacts.find((contact) => contact.id === contactId));
@@ -37,13 +37,18 @@ const ContactDetails = () => {
 
   //states
   const [loadedContact, setLoadedContact] = useState<DeviceContact>();
-  const [isLoading, setIsLoading] = useState(!storedContact);
-  const [hasLoadError, setHasLoadError] = useState(false);
+  const [failedContactId, setFailedContactId] = useState<string | null>(null);
+  const [deletedContactId, setDeletedContactId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteSheetPresented, setIsDeleteSheetPresented] = useState(false);
 
-  const contact = storedContact ?? (loadedContact?.id === contactId ? loadedContact : undefined);
+  const contact =
+    deletedContactId === contactId
+      ? undefined
+      : (storedContact ?? (loadedContact?.id === contactId ? loadedContact : undefined));
+  const hasLoadError = Boolean(contactId && failedContactId === contactId);
+  const isLoading = Boolean(contactId && !contact && !hasLoadError && deletedContactId !== contactId);
   const phones = useMemo(() => getUniqueContactPhones(contact?.phones ?? []), [contact?.phones]);
   const primaryPhoneNumber = phones[0]?.number?.trim();
   const primaryEmailAddress = contact?.emails.find((email) => Boolean(email.address?.trim()))?.address?.trim();
@@ -53,53 +58,30 @@ const ContactDetails = () => {
   useEffect(() => {
     let isMounted = true;
 
-    if (deletedContactIdRef.current === contactId) {
+    if (!contactId || storedContact || deletedContactId === contactId) {
       return () => {
         isMounted = false;
       };
     }
 
-    if (!contactId) {
-      setLoadedContact(undefined);
-      setIsLoading(false);
-      setHasLoadError(false);
-      return () => {
-        isMounted = false;
-      };
-    }
-
-    if (storedContact) {
-      setLoadedContact(storedContact);
-      setIsLoading(false);
-      setHasLoadError(false);
-      return () => {
-        isMounted = false;
-      };
-    }
-
+    //loads and stores contact details when the screen remains mounted
     const loadContact = async () => {
-      setIsLoading(true);
-      setHasLoadError(false);
-
       try {
-        const contactDetails = await new Contact(contactId).getDetails(CONTACT_FIELDS);
+        const contactDetails = await loadDeviceContact(contactId);
 
         if (!isMounted) return;
 
         setLoadedContact(contactDetails);
+        setFailedContactId(null);
         upsertContact(contactDetails);
       } catch (error) {
-        if (!isMounted || deletedContactIdRef.current === contactId) {
+        if (!isMounted) {
           return;
         }
 
         console.error('Contact details load error', error);
         setLoadedContact(undefined);
-        setHasLoadError(true);
-      } finally {
-        if (isMounted && deletedContactIdRef.current !== contactId) {
-          setIsLoading(false);
-        }
+        setFailedContactId(contactId);
       }
     };
 
@@ -108,8 +90,9 @@ const ContactDetails = () => {
     return () => {
       isMounted = false;
     };
-  }, [contactId, storedContact, upsertContact]);
+  }, [contactId, deletedContactId, storedContact, upsertContact]);
 
+  //returns to the previous route or falls back to the contacts list
   const handleBack = useCallback(() => {
     if (router.canGoBack()) {
       router.back();
@@ -119,17 +102,20 @@ const ContactDetails = () => {
     router.replace('/contacts');
   }, [router]);
 
+  //reports a failed native contact action to the user
   const showActionError = useCallback((label: string, error: unknown) => {
     console.error(`${label} error`, error);
     Alert.alert(strings.unableCompleteAction, strings.errorMessage);
   }, []);
 
+  //toggles the current contact's favorite status
   const handleToggleFavorite = useCallback(() => {
     if (contact) {
       toggleFavorite(contact.id);
     }
   }, [contact, toggleFavorite]);
 
+  //opens the dialer for the contact's primary phone number
   const handleCall = useCallback(() => {
     if (!primaryPhoneNumber) return;
 
@@ -138,6 +124,7 @@ const ContactDetails = () => {
     });
   }, [primaryPhoneNumber, showActionError]);
 
+  //opens messaging for the contact's primary phone number
   const handleMessage = useCallback(() => {
     if (!primaryPhoneNumber) return;
 
@@ -146,6 +133,7 @@ const ContactDetails = () => {
     });
   }, [primaryPhoneNumber, showActionError]);
 
+  //opens email for the contact's primary email address
   const handleEmail = useCallback(() => {
     if (!primaryEmailAddress) return;
 
@@ -154,6 +142,7 @@ const ContactDetails = () => {
     });
   }, [primaryEmailAddress, showActionError]);
 
+  //opens the native share sheet with the current contact details
   const handleShare = useCallback(() => {
     if (!contact) return;
 
@@ -162,19 +151,19 @@ const ContactDetails = () => {
     });
   }, [contact, showActionError]);
 
+  //opens the native edit form and stores the refreshed contact
   const handleEdit = useCallback(() => {
     if (!contact || isEditing) return;
 
+    //edits and reloads the selected device contact
     const editContact = async () => {
       setIsEditing(true);
 
       try {
-        const nativeContact = new Contact(contact.id);
-        const wasUpdated = await nativeContact.editWithForm();
+        const updatedContact = await editDeviceContact(contact.id);
 
-        if (!wasUpdated) return;
+        if (!updatedContact) return;
 
-        const updatedContact = await nativeContact.getDetails(CONTACT_FIELDS);
         setLoadedContact(updatedContact);
         upsertContact(updatedContact);
       } catch (error) {
@@ -188,21 +177,25 @@ const ContactDetails = () => {
     void editContact();
   }, [contact, isEditing, upsertContact]);
 
+  //closes the deletion sheet when no delete operation is active
   const handleDismissDeleteSheet = useCallback(() => {
     if (!isDeleting) {
       setIsDeleteSheetPresented(false);
     }
   }, [isDeleting]);
 
+  //deletes the selected device contact and returns to the list
   const handleDelete = useCallback(() => {
     if (!contact || isDeleting) return;
 
+    //deletes the contact while coordinating screen state
     const deleteContact = async () => {
       setIsDeleting(true);
 
       try {
-        await new Contact(contact.id).delete();
-        deletedContactIdRef.current = contact.id;
+        await deleteDeviceContact(contact.id);
+        setDeletedContactId(contact.id);
+        setLoadedContact(undefined);
         setIsDeleteSheetPresented(false);
         removeContact(contact.id);
         handleBack();

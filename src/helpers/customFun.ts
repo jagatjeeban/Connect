@@ -1,3 +1,4 @@
+//import types
 import type { ContactListItem, DeviceContact, DevicePhone, PreparedContacts } from '@/features/contacts/model';
 
 const UNKNOWN_SECTION = '#';
@@ -145,14 +146,14 @@ export const compareContactSectionLetters = (firstLetter: string, secondLetter: 
  * @returns Prepared list and scrubber data without mutating the input array.
  */
 export const buildAlphabetizedContactsList = (contacts: readonly DeviceContact[]): PreparedContacts => {
-  //1. Sort the contacts
+  //sorts a copy so callers retain their original contact order
   const sortedContacts = [...contacts].sort((firstContact, secondContact) =>
     getContactName(firstContact).localeCompare(getContactName(secondContact), undefined, {
       sensitivity: 'base',
     }),
   );
 
-  //2. Group contacts using a Map
+  //groups contacts by their resolved alphabetical section
   const groupedContacts = new Map<string, DeviceContact[]>();
 
   for (const contact of sortedContacts) {
@@ -162,13 +163,13 @@ export const buildAlphabetizedContactsList = (contacts: readonly DeviceContact[]
     groupedContacts.set(letter, sectionContacts);
   }
 
-  //3. Build the scrubber letters
+  //builds ordered scrubber and flattened-list metadata
   const scrubberLetters = [...groupedContacts.keys()].sort(compareContactSectionLetters);
   const listItems: ContactListItem[] = [];
   const stickyHeaderIndices: number[] = [];
   const letterToHeaderIndex: Record<string, number> = {};
 
-  //4. Flatten sections into list items
+  //flattens each section into one header followed by its contacts
   for (const letter of scrubberLetters) {
     const headerIndex = listItems.length;
     stickyHeaderIndices.push(headerIndex);

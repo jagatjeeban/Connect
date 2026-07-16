@@ -3,12 +3,15 @@ import { useCallback, useState } from 'react';
 //import constants
 import { colors } from '@/constants';
 
+//import components
+import NormalHeader from './normal-header';
+
 //import types
 import type { PageHeaderProps } from './types';
 
-//import different headers
-import NormalHeader from './normal-header';
-
+/**
+ * Selects and coordinates the configured page-header presentation.
+ */
 const PageHeader = ({
   navigation,
   placeholder = 'Search',
@@ -24,7 +27,10 @@ const PageHeader = ({
   searchBlur,
   searchEvent,
 }: PageHeaderProps) => {
+  //states
   const [searchStatus, setSearchStatus] = useState(false);
+
+  //toggles the active header search state
   const updateSearchStatus = useCallback(() => {
     setSearchStatus((status) => !status);
   }, []);

@@ -4,11 +4,11 @@ import { Pressable, Text } from 'react-native';
 //import constants
 import { colors } from '@/constants';
 
-//import themes
-import textTheme, { type TextThemeName } from '@/themes/text-theme';
-
 //import hooks
 import { useResponsive } from '@/hooks';
+
+//import themes
+import textTheme, { type TextThemeName } from '@/themes/text-theme';
 
 type TextComponentProps = {
   containerStyle?: StyleProp<ViewStyle>;
@@ -28,6 +28,9 @@ type TextComponentProps = {
   fontFamily?: TextStyle['fontFamily'];
 };
 
+/**
+ * Renders application text with shared typography and responsive sizing.
+ */
 const TextComponent = ({
   containerStyle = {},
   text,

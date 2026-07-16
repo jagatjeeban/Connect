@@ -1,11 +1,11 @@
 import type { Ref } from 'react';
 import { type LayoutRectangle, type StyleProp, StyleSheet, View, type ViewProps, type ViewStyle } from 'react-native';
 
-//import components
-import TextComponent from '@/components/core-components/text-component';
-
 //import constants
 import { colors, fontFamily } from '@/constants';
+
+//import components
+import TextComponent from './core-components/text-component';
 
 //CONSTANTS
 const SCRUBBER_IOS_VERTICAL_OFFSET = 20;
@@ -27,6 +27,9 @@ export type AlphabetScrubberProps = {
   onScrubEnd?: ViewProps['onResponderRelease'];
 };
 
+/**
+ * Displays an interactive alphabet rail with an optional active-letter preview.
+ */
 const AlphabetScrubber = ({
   letters = [],
   highlightedLetter = null,
@@ -77,15 +80,15 @@ const AlphabetScrubber = ({
             <TextComponent
               color={highlightedLetter === letter ? colors.primary : colors.baseMediumGrey}
               fontFamily={highlightedLetter === letter ? fontFamily.outfitBold : fontFamily.outfitMedium}
-              styleProfile='small3'
+              styleProfile={'small3'}
               text={letter}
-              textAlign='center'
+              textAlign={'center'}
             />
           </View>
         ))}
       </View>
       <View
-        pointerEvents='none'
+        pointerEvents={'none'}
         onLayout={onPreviewBubbleLayout}
         style={[
           styles.scrubberPreviewBubble,
@@ -93,7 +96,12 @@ const AlphabetScrubber = ({
           (!isScrubbing || !bubbleLetter) && styles.scrubberPreviewBubbleHidden,
         ]}
       >
-        <TextComponent color={colors.primary} styleProfile='largest2' text={bubbleLetter ?? ''} textAlign='center' />
+        <TextComponent
+          color={colors.primary}
+          styleProfile={'largest2'}
+          text={bubbleLetter ?? ''}
+          textAlign={'center'}
+        />
       </View>
     </View>
   );
