@@ -1,7 +1,7 @@
 import { ContactField } from 'expo-contacts';
 import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { FlatList, type ListRenderItemInfo, StyleSheet, View } from 'react-native';
+import { FlatList, LayoutAnimation, type ListRenderItemInfo, StyleSheet, View } from 'react-native';
 
 //import constants
 import { colors, strings } from '@/constants';
@@ -19,14 +19,18 @@ import { useSearchFilter } from '@/hooks';
 import { useAppStore } from '@/store/use-app-store';
 
 //import helpers/services
-import { getFavoriteContacts } from '@/helpers/customFun';
 import { useContactsQuery } from '@/features/contacts/contacts-query';
+import { showAppMessage } from '@/helpers/app-message';
+import { getContactName, getFavoriteContacts } from '@/helpers/custom-functions';
 
 //import types
 import type { DeviceContact } from '@/features/contacts/model';
 
 //constants
 const EMPTY_CONTACTS: DeviceContact[] = [];
+
+//function to create a stable removal-message identifier for one contact
+const getFavoriteRemovalMessageId = (contactId: string): string => `favorite-removed-${contactId}`;
 
 /**
  * Displays searchable favorite contacts in a compact grid.
@@ -40,6 +44,8 @@ const Favorites = () => {
 
   //store events
   const favoriteContactIds = useAppStore((state) => state.favoriteContactIds);
+  const addFavorite = useAppStore((state) => state.addFavorite);
+  const removeFavorite = useAppStore((state) => state.removeFavorite);
 
   //states
   const [searchInput, setSearchInput] = useState('');
@@ -68,10 +74,33 @@ const Favorites = () => {
     [router],
   );
 
+  //removes a favorite and offers an idempotent undo action
+  const handleRemoveFavorite = useCallback(
+    (contact: DeviceContact) => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      removeFavorite(contact.id);
+
+      showAppMessage(strings.removedFromFavorites, {
+        action: {
+          label: strings.undo,
+          onPress: () => {
+            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+            addFavorite(contact.id);
+          },
+        },
+        description: getContactName(contact),
+        id: getFavoriteRemovalMessageId(contact.id),
+      });
+    },
+    [addFavorite, removeFavorite],
+  );
+
   // Renders one favorite in the four-column grid.
   const renderFavoriteContact = useCallback(
-    ({ item }: ListRenderItemInfo<DeviceContact>) => <FavoriteContactItem item={item} onPress={openContactDetails} />,
-    [openContactDetails],
+    ({ item }: ListRenderItemInfo<DeviceContact>) => (
+      <FavoriteContactItem item={item} onPress={openContactDetails} onRemoveFavorite={handleRemoveFavorite} />
+    ),
+    [handleRemoveFavorite, openContactDetails],
   );
 
   return (

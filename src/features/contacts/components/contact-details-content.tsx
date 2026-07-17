@@ -14,7 +14,7 @@ import ContactInfoItem from '@/features/contacts/components/contact-info-item';
 import { useResponsive } from '@/hooks';
 
 //import helpers
-import { getContactInitial, getContactName } from '@/helpers/customFun';
+import { getContactInitial, getContactName } from '@/helpers/custom-functions';
 
 //import assets
 import SvgCall from '@/assets/icons/call.svg';

@@ -1,6 +1,11 @@
 import Stack from 'expo-router/stack';
+import { StyleSheet } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 //import components
+import { AppToaster } from '@/components';
+
+//import providers
 import AppQueryProvider from '@/providers/app-query-provider';
 
 /**
@@ -8,10 +13,19 @@ import AppQueryProvider from '@/providers/app-query-provider';
  */
 export default function RootLayout() {
   return (
-    <AppQueryProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name={'(tabs)'} />
-      </Stack>
-    </AppQueryProvider>
+    <GestureHandlerRootView style={styles.container}>
+      <AppQueryProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name={'(tabs)'} />
+        </Stack>
+        <AppToaster />
+      </AppQueryProvider>
+    </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});

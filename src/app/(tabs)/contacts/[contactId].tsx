@@ -14,16 +14,16 @@ import ContactDetailsContent from '@/features/contacts/components/contact-detail
 import { useAppStore } from '@/store/use-app-store';
 
 //import helpers/services
-import { openEmail, openPhoneCall, openTextMessage, shareText } from '@/helpers/commonFun';
-import { buildContactShareMessage, getUniqueContactPhones } from '@/helpers/customFun';
 import {
-  invalidateContactQueries,
-  invalidateContactsCollection,
-  removeContactQueryData,
-  upsertContactQueryData,
-  useContactQuery,
+    invalidateContactQueries,
+    invalidateContactsCollection,
+    removeContactQueryData,
+    upsertContactQueryData,
+    useContactQuery,
 } from '@/features/contacts/contacts-query';
 import { deleteDeviceContact, presentEditContactForm } from '@/features/contacts/contacts-service';
+import { openEmail, openPhoneCall, openTextMessage, shareText } from '@/helpers/common-functions';
+import { buildContactShareMessage, getUniqueContactPhones } from '@/helpers/custom-functions';
 
 /**
  * Displays one device contact and coordinates its native actions.

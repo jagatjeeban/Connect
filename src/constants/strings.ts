@@ -38,6 +38,8 @@ const strings = {
   addFavorite: 'Add favorite',
   addToFavorites: 'Add to favorites',
   removeFromFavorites: 'Remove from favorites',
+  removedFromFavorites: 'Removed from favorites',
+  undo: 'Undo',
   goBack: 'Go back',
   contacts: 'Contacts',
   favorites: 'Favorites',

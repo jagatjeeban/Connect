@@ -8,7 +8,7 @@ import { colors, fontFamily } from '@/constants';
 import { TextComponent } from '@/components';
 
 //import helpers
-import { getContactInitial, getContactName } from '@/helpers/customFun';
+import { getContactInitial, getContactName } from '@/helpers/custom-functions';
 
 //import types
 import type { DeviceContact } from '@/features/contacts/model';

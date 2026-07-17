@@ -7,7 +7,7 @@ import { colors } from '@/constants';
 import { TextComponent } from '@/components';
 
 //import helpers
-import { formatContactLabel } from '@/helpers/customFun';
+import { formatContactLabel } from '@/helpers/custom-functions';
 
 //import assets
 import SvgCall from '@/assets/icons/call.svg';

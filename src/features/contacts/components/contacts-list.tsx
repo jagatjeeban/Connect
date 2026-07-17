@@ -25,8 +25,8 @@ import ContactSectionHeader from './contact-section-header';
 import EmptyState from './empty-state';
 
 //import helpers
-import { getNearestScrubberLetter } from '@/helpers/commonFun';
-import { buildAlphabetizedContactsList } from '@/helpers/customFun';
+import { getNearestScrubberLetter } from '@/helpers/common-functions';
+import { buildAlphabetizedContactsList } from '@/helpers/custom-functions';
 
 //import types
 import type { ContactListItem, DeviceContact } from '@/features/contacts/model';

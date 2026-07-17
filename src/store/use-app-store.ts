@@ -12,6 +12,7 @@ interface AppStateData {
 }
 
 interface AppStateActions {
+  addFavorite: (contactId: string) => void;
   toggleFavorite: (contactId: string) => void;
   removeFavorite: (contactId: string) => void;
   setTheme: (theme: ThemePreference) => void;
@@ -32,6 +33,14 @@ export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
       ...initialState,
+
+      //adds a contact identifier when it is not already favorited
+      addFavorite: (contactId) =>
+        set((state) => ({
+          favoriteContactIds: state.favoriteContactIds.includes(contactId)
+            ? state.favoriteContactIds
+            : [...state.favoriteContactIds, contactId],
+        })),
 
       //toggles a contact identifier in the favorites collection
       toggleFavorite: (contactId) =>

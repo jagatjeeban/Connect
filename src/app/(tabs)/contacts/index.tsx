@@ -13,7 +13,7 @@ import { HomeHeader, TextComponent } from '@/components';
 import ContactsList from '@/features/contacts/components/contacts-list';
 
 //import hooks
-import { useResponsive, useSearchFilter } from '@/hooks';
+import { useSearchFilter } from '@/hooks';
 
 //import helpers/services
 import { invalidateContactsCollection, useContactsQuery } from '@/features/contacts/contacts-query';
@@ -26,7 +26,7 @@ import SvgPlus from '@/assets/icons/plus.svg';
 import type { DeviceContact } from '@/features/contacts/model';
 
 //constants
-const IOS_ADD_BUTTON_TAB_BAR_CLEARANCE = 24;
+const ADD_BUTTON_TAB_BAR_CLEARANCE = 24;
 const EMPTY_CONTACTS: DeviceContact[] = [];
 
 /**
@@ -36,7 +36,6 @@ const Contacts = () => {
   //hooks
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { rh } = useResponsive();
   const insets = useSafeAreaInsets();
 
   //states
@@ -195,7 +194,7 @@ const Contacts = () => {
           styles.addContactButton,
           isCreating && styles.disabled,
           {
-            bottom: process.env.EXPO_OS === 'ios' ? insets.bottom + IOS_ADD_BUTTON_TAB_BAR_CLEARANCE : rh(10),
+            bottom: insets.bottom + ADD_BUTTON_TAB_BAR_CLEARANCE,
           },
         ]}
       >
