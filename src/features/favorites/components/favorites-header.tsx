@@ -9,9 +9,8 @@ import { TextComponent } from '@/components';
 //import assets
 import SvgPlus from '@/assets/icons/plus.svg';
 
-type FavoritesHeaderProps = {
-  onPressAdd: () => void;
-};
+//import types
+import type { FavoritesHeaderProps } from '@/features/favorites/model';
 
 /**
  * Displays the favorites section title and add action.

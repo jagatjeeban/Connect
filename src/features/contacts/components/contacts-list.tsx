@@ -1,6 +1,6 @@
 import { FlashList, type FlashListProps, type FlashListRef, type ListRenderItemInfo } from '@shopify/flash-list';
 import * as Haptics from 'expo-haptics';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   type GestureResponderEvent,
@@ -61,6 +61,7 @@ export type ContactsListProps = {
   isSelectEvent?: boolean;
   selectedContactIds?: ReadonlySet<string> | null;
   selectionVersion?: number;
+  onClearSearch?: () => void;
   onClickContact?: (contact: DeviceContact) => void;
   searchText?: string;
   totalContactsCount?: number;
@@ -102,6 +103,7 @@ const ContactsList = ({
   isSelectEvent = false,
   selectedContactIds = null,
   selectionVersion = 0,
+  onClearSearch,
   onClickContact,
   searchText = '',
   totalContactsCount = contacts.length,
@@ -317,6 +319,15 @@ const ContactsList = ({
   );
   const listExtraData = useMemo(() => ({ renderOptions, selectionVersion }), [renderOptions, selectionVersion]);
 
+  //returns the contacts list to its beginning whenever the search query changes
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      flashListRef.current?.scrollToOffset({ animated: false, offset: 0 });
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [searchText]);
+
   return (
     <View style={[styles.container, style]}>
       {loaderStatus ? (
@@ -324,7 +335,7 @@ const ContactsList = ({
           <ActivityIndicator size={'large'} color={colors.primary} />
         </View>
       ) : contacts.length === 0 ? (
-        <EmptyState isSearchResultState={showSearchEmptyState} />
+        <EmptyState isSearchResultState={showSearchEmptyState} onClearSearch={onClearSearch} />
       ) : (
         <>
           <FlashList

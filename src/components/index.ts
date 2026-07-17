@@ -6,5 +6,6 @@ import AlphabetScrubber from './alphabet-scrubber';
 import AppToaster from './app-toaster';
 import ConfirmationBottomSheet from './confirmation-bottom-sheet';
 import HomeHeader from './home-header';
+import SearchEmptyAction from './search-empty-action';
 
-export { AlphabetScrubber, AppToaster, ConfirmationBottomSheet, HomeHeader, TextComponent };
+export { AlphabetScrubber, AppToaster, ConfirmationBottomSheet, HomeHeader, SearchEmptyAction, TextComponent };

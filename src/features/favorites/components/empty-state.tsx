@@ -4,20 +4,19 @@ import { StyleSheet, View } from 'react-native';
 import { colors, fontFamily, strings } from '@/constants';
 
 //import components
-import { TextComponent } from '@/components';
+import { SearchEmptyAction, TextComponent } from '@/components';
 
 //import assets
 import SvgFavorite from '@/assets/icons/favourites.svg';
 import SvgSearch from '@/assets/icons/search.svg';
 
-type EmptyStateProps = {
-  isSearchResultState?: boolean;
-};
+//import types
+import type { EmptyStateProps } from '@/features/favorites/model';
 
 /**
  * Displays the favorites empty state for either saved data or search results.
  */
-const EmptyState = ({ isSearchResultState = false }: EmptyStateProps) => {
+const EmptyState = ({ isSearchResultState = false, onClearSearch }: EmptyStateProps) => {
   const title = isSearchResultState ? strings.noResultsFound : strings.noFavoritesYet;
   const description = isSearchResultState ? strings.favoritesSearchEmptyDescription : strings.favoritesEmptyDescription;
 
@@ -35,6 +34,7 @@ const EmptyState = ({ isSearchResultState = false }: EmptyStateProps) => {
         text={description}
         textAlign={'center'}
       />
+      {isSearchResultState && onClearSearch ? <SearchEmptyAction onPress={onClearSearch} /> : null}
     </View>
   );
 };
@@ -46,6 +46,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 32,
+    paddingBottom: 80,
   },
   iconWrapper: {
     width: 84,

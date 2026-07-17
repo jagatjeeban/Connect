@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ContactField } from 'expo-contacts';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Keyboard, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 //import constants
@@ -83,6 +83,7 @@ const Contacts = () => {
   //opens the contact-details route for the selected contact
   const openContactDetails = useCallback(
     (contact: DeviceContact) => {
+      Keyboard.dismiss();
       router.push({
         pathname: '/contacts/[contactId]',
         params: { contactId: contact.id },
@@ -90,6 +91,11 @@ const Contacts = () => {
     },
     [router],
   );
+
+  //clears the active contact search
+  const handleSearchClear = useCallback(() => {
+    setSearchInput('');
+  }, []);
 
   //opens the native create-contact form and refreshes after a successful save
   const createContact = useCallback(async () => {
@@ -155,7 +161,7 @@ const Contacts = () => {
 
   return (
     <View style={styles.container}>
-      <HomeHeader placeholder={strings.searchContacts} menuBtn searchEvent={setSearchInput} />
+      <HomeHeader placeholder={strings.searchContacts} searchEvent={setSearchInput} searchInput={searchInput} />
 
       {!isGranted ? (
         <View style={styles.permissionStateContainer}>
@@ -178,6 +184,7 @@ const Contacts = () => {
         <ContactsList
           contacts={filteredContacts}
           loaderStatus={contactsQuery.isPending}
+          onClearSearch={handleSearchClear}
           onClickContact={openContactDetails}
           searchText={searchInput}
           totalContactsCount={contacts.length}

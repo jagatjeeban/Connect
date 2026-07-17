@@ -13,21 +13,30 @@ import { getContactInitial, getContactName } from '@/helpers/custom-functions';
 //import assets
 import SvgPrimaryFavorite from '@/assets/icons/primary-favorite.svg';
 
-//import types
-import type { DeviceContact } from '@/features/contacts/model';
+//import models
+import {
+  FAVORITE_BUTTON_BACKGROUND,
+  FAVORITE_CARD_GRADIENT,
+  FAVORITE_CARD_HEIGHTS,
+  type FavoriteContactItemProps,
+} from '@/features/favorites/model';
 
-type FavoriteContactItemProps = {
-  item: DeviceContact;
-  onRemoveFavorite: (contact: DeviceContact) => void;
-  onPress?: (contact: DeviceContact) => void;
+//function to keep a contact's card height stable across searches and masonry reordering
+const getFavoriteCardHeight = (contactId: string): number => {
+  const hash = Array.from(contactId).reduce((currentHash, character) => {
+    return (currentHash * 31 + (character.codePointAt(0) ?? 0)) >>> 0;
+  }, 0);
+
+  return FAVORITE_CARD_HEIGHTS[hash % FAVORITE_CARD_HEIGHTS.length];
 };
 
 /**
- * Displays one favorite contact in the favorites grid.
+ * Displays one favorite contact as an image-led masonry card.
  */
 const FavoriteContactItem = ({ item, onRemoveFavorite, onPress }: FavoriteContactItemProps) => {
   const contactName = getContactName(item);
-  const thumbnail = item.thumbnail?.trim() || item.image?.trim();
+  const contactImage = item.image?.trim() || item.thumbnail?.trim();
+  const cardHeight = getFavoriteCardHeight(item.id);
 
   //removes the favorite without triggering the enclosing card action
   const handleRemoveFavorite = (event: GestureResponderEvent) => {
@@ -40,52 +49,52 @@ const FavoriteContactItem = ({ item, onRemoveFavorite, onPress }: FavoriteContac
       accessibilityLabel={contactName}
       accessibilityRole={'button'}
       onPress={() => onPress?.(item)}
-      style={({ pressed }) => [styles.container, pressed && styles.containerPressed]}
+      style={({ pressed }) => [styles.container, { height: cardHeight }, pressed && styles.containerPressed]}
     >
-      <View style={styles.contactImageContainer}>
-        {thumbnail ? (
-          <Image
-            accessibilityLabel={`${contactName} contact photo`}
-            cachePolicy={'memory-disk'}
-            contentFit={'cover'}
-            priority={'high'}
-            recyclingKey={item.id}
-            source={thumbnail}
-            style={styles.contactImage}
-            transition={100}
+      {contactImage ? (
+        <Image
+          accessibilityLabel={`${contactName} contact photo`}
+          cachePolicy={'memory-disk'}
+          contentFit={'cover'}
+          priority={'normal'}
+          recyclingKey={item.id}
+          source={contactImage}
+          style={styles.contactImage}
+          transition={150}
+        />
+      ) : (
+        <View style={styles.defaultContactImage}>
+          <TextComponent
+            color={colors.primary}
+            textAlign={'center'}
+            fontFamily={fontFamily.outfitSemiBold}
+            styleProfile={'largest3'}
+            text={getContactInitial(contactName)}
           />
-        ) : (
-          <View style={styles.defaultContactImage}>
-            <TextComponent
-              color={colors.primary}
-              textAlign={'center'}
-              fontFamily={fontFamily.outfitMedium}
-              styleProfile={'largest1'}
-              text={getContactInitial(contactName)}
-            />
-          </View>
-        )}
+        </View>
+      )}
 
-        <Pressable
-          accessibilityLabel={`${strings.removeFromFavorites}: ${contactName}`}
-          accessibilityRole={'button'}
-          accessibilityState={{ selected: true }}
-          hitSlop={8}
-          onPress={handleRemoveFavorite}
-          style={({ pressed }) => [styles.favoriteButton, pressed && styles.favoriteButtonPressed]}
-        >
-          <SvgPrimaryFavorite width={16} height={15} />
-        </Pressable>
-      </View>
+      <View pointerEvents={'none'} style={styles.gradientOverlay} />
+
       <TextComponent
         color={colors.baseWhite}
         containerStyle={styles.contactNameContainer}
-        fontFamily={fontFamily.outfitRegular}
+        fontFamily={fontFamily.outfitMedium}
         numOfLine={2}
-        styleProfile={'large2'}
+        styleProfile={'large1'}
         text={contactName}
-        textAlign={'center'}
       />
+
+      <Pressable
+        accessibilityLabel={`${strings.removeFromFavorites}: ${contactName}`}
+        accessibilityRole={'button'}
+        accessibilityState={{ selected: true }}
+        hitSlop={6}
+        onPress={handleRemoveFavorite}
+        style={({ pressed }) => [styles.favoriteButton, pressed && styles.favoriteButtonPressed]}
+      >
+        <SvgPrimaryFavorite width={18} height={17} />
+      </Pressable>
     </Pressable>
   );
 };
@@ -94,55 +103,52 @@ export default FavoriteContactItem;
 
 const styles = StyleSheet.create({
   container: {
-    width: '25%',
-    alignItems: 'center',
-    paddingTop: 30,
+    position: 'relative',
+    overflow: 'hidden',
+    marginHorizontal: 6,
+    marginBottom: 12,
+    borderRadius: 20,
+    borderCurve: 'continuous',
+    backgroundColor: colors.primaryLight,
   },
   containerPressed: {
-    opacity: 0.7,
+    opacity: 0.82,
+    transform: [{ scale: 0.985 }],
   },
   contactImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 15,
-  },
-  contactImageContainer: {
-    width: 70,
-    height: 70,
+    ...StyleSheet.absoluteFill,
   },
   defaultContactImage: {
-    width: 70,
-    height: 70,
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 15,
     backgroundColor: colors.primaryLight,
+  },
+  gradientOverlay: {
+    ...StyleSheet.absoluteFill,
+    experimental_backgroundImage: FAVORITE_CARD_GRADIENT,
+  },
+  contactNameContainer: {
+    position: 'absolute',
+    right: 14,
+    bottom: 14,
+    left: 14,
   },
   favoriteButton: {
     position: 'absolute',
-    top: -10,
-    right: -10,
-    width: 32,
-    height: 32,
+    top: 10,
+    right: 10,
+    width: 36,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 16,
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: colors.baseGrey,
-    backgroundColor: colors.baseDarkBlack,
+    backgroundColor: FAVORITE_BUTTON_BACKGROUND,
   },
   favoriteButtonPressed: {
-    opacity: 0.7,
+    opacity: 0.8,
     transform: [{ scale: 0.94 }],
-  },
-  contactInitial: {
-    textAlign: 'center',
-  },
-  contactNameContainer: {
-    width: '90%',
-    marginTop: 15,
-  },
-  contactName: {
-    textAlign: 'center',
   },
 });

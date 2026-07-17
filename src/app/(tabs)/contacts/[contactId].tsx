@@ -15,11 +15,11 @@ import { useAppStore } from '@/store/use-app-store';
 
 //import helpers/services
 import {
-    invalidateContactQueries,
-    invalidateContactsCollection,
-    removeContactQueryData,
-    upsertContactQueryData,
-    useContactQuery,
+  invalidateContactQueries,
+  invalidateContactsCollection,
+  removeContactQueryData,
+  upsertContactQueryData,
+  useContactQuery,
 } from '@/features/contacts/contacts-query';
 import { deleteDeviceContact, presentEditContactForm } from '@/features/contacts/contacts-service';
 import { openEmail, openPhoneCall, openTextMessage, shareText } from '@/helpers/common-functions';

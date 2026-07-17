@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useState } from 'react';
-import { BackHandler, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useIsFocused } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { BackHandler, Keyboard, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 //import constants
-import { colors, fontFamily } from '@/constants';
+import { colors, fontFamily, strings } from '@/constants';
 
 //import components
 import TextComponent from './core-components/text-component';
@@ -16,7 +16,7 @@ import SvgSearch from '@/assets/icons/search.svg';
 
 type HomeHeaderProps = {
   placeholder: string;
-  menuBtn: boolean;
+  searchInput: string;
   searchBlur?: () => void;
   searchEvent: (req: string) => void;
 };
@@ -24,21 +24,25 @@ type HomeHeaderProps = {
 /**
  * Displays the shared contacts and favorites search header.
  */
-const HomeHeader = ({ placeholder = 'Search', menuBtn = false, searchBlur, searchEvent }: HomeHeaderProps) => {
+const HomeHeader = ({ placeholder, searchInput, searchBlur, searchEvent }: HomeHeaderProps) => {
   //hooks
   const isFocused = useIsFocused();
   const insets = useSafeAreaInsets();
 
   //states
-  const [searchInput, setSearchInput] = useState('');
   const [searchStatus, setSearchStatus] = useState(false);
+
+  //function to open the search input
+  const handleSearchOpen = useCallback(() => {
+    setSearchStatus(true);
+  }, []);
 
   //function to handle system backpress
   const handleBackPress = useCallback(() => {
     if (searchStatus) {
+      Keyboard.dismiss();
       setSearchStatus(false);
       searchEvent('');
-      setSearchInput('');
       return true;
     }
     return false;
@@ -48,7 +52,6 @@ const HomeHeader = ({ placeholder = 'Search', menuBtn = false, searchBlur, searc
   const handleInputChange = useCallback(
     (input: string) => {
       searchEvent(input);
-      setSearchInput(input);
     },
     [searchEvent],
   );
@@ -56,8 +59,12 @@ const HomeHeader = ({ placeholder = 'Search', menuBtn = false, searchBlur, searc
   //function to handle the search input clear event
   const handleSearchClear = useCallback(() => {
     searchEvent('');
-    setSearchInput('');
   }, [searchEvent]);
+
+  //function to dismiss the keyboard after submitting a search
+  const handleSearchSubmit = useCallback(() => {
+    Keyboard.dismiss();
+  }, []);
 
   //registers Android back handling while this header's screen is focused
   useEffect(() => {
@@ -68,47 +75,65 @@ const HomeHeader = ({ placeholder = 'Search', menuBtn = false, searchBlur, searc
   }, [handleBackPress, isFocused]);
 
   return (
-    <View style={[styles.mainContainer, !searchStatus && styles.mainContainerPadded, { paddingTop: insets.top + 10 }]}>
-      {!searchStatus ? (
-        <Pressable
-          onPress={() => setSearchStatus(true)}
-          style={[styles.searchContainer, !menuBtn && styles.searchContainerCompact]}
-        >
-          <View style={styles.searchRow}>
-            <SvgSearch />
-            <TextComponent
-              color={colors.baseMediumGrey}
-              containerStyle={styles.searchTextContainer}
-              fontFamily={fontFamily.outfitRegular}
-              styleProfile={'large1'}
-              text={placeholder}
-            />
-          </View>
-        </Pressable>
-      ) : (
-        <View style={styles.activeSearchContainer}>
-          <View style={styles.activeSearchLeft}>
-            <Pressable onPress={handleBackPress} style={styles.searchActionButton}>
+    <View style={[styles.mainContainer, { paddingTop: insets.top + 10 }]}>
+      <View style={styles.searchContainer}>
+        {!searchStatus ? (
+          <Pressable
+            accessibilityLabel={placeholder}
+            accessibilityRole={'button'}
+            onPress={handleSearchOpen}
+            style={styles.inactiveSearchButton}
+          >
+            <View style={styles.searchRow}>
+              <SvgSearch />
+              <TextComponent
+                color={colors.baseMediumGrey}
+                containerStyle={styles.searchTextContainer}
+                fontFamily={fontFamily.outfitRegular}
+                styleProfile={'large1'}
+                text={placeholder}
+              />
+            </View>
+          </Pressable>
+        ) : (
+          <View style={styles.activeSearchContainer}>
+            <Pressable
+              accessibilityLabel={strings.closeSearch}
+              accessibilityRole={'button'}
+              onPress={handleBackPress}
+              style={styles.searchActionButton}
+            >
               <SvgBackGrey />
             </Pressable>
             <TextInput
-              placeholder={placeholder}
-              selectionColor={colors.primary}
-              placeholderTextColor={colors.baseMediumGrey}
-              value={searchInput}
+              accessibilityLabel={placeholder}
+              autoCapitalize={'words'}
               autoFocus={true}
-              style={styles.searchInput}
+              autoCorrect={false}
+              enterKeyHint={'search'}
               onBlur={searchBlur}
               onChangeText={handleInputChange}
+              onSubmitEditing={handleSearchSubmit}
+              placeholder={placeholder}
+              placeholderTextColor={colors.baseMediumGrey}
+              returnKeyType={'search'}
+              selectionColor={colors.primary}
+              style={styles.searchInput}
+              value={searchInput}
             />
+            {searchInput !== '' ? (
+              <Pressable
+                accessibilityLabel={strings.clearSearch}
+                accessibilityRole={'button'}
+                onPress={handleSearchClear}
+                style={styles.searchActionButton}
+              >
+                <SvgCross />
+              </Pressable>
+            ) : null}
           </View>
-          {searchInput !== '' && (
-            <Pressable onPress={handleSearchClear} style={styles.searchActionButton}>
-              <SvgCross />
-            </Pressable>
-          )}
-        </View>
-      )}
+        )}
+      </View>
     </View>
   );
 };
@@ -117,27 +142,20 @@ export default HomeHeader;
 
 const styles = StyleSheet.create({
   mainContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  mainContainerPadded: {
     paddingHorizontal: 20,
   },
   searchContainer: {
-    width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    height: 48,
     borderRadius: 12,
     borderWidth: 1,
-    paddingHorizontal: 15,
-    paddingVertical: 12,
     borderColor: colors.baseGrey,
     backgroundColor: colors.backgroundLight,
+    overflow: 'hidden',
   },
-  searchContainerCompact: {
-    paddingVertical: 14,
+  inactiveSearchButton: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 15,
   },
   searchRow: {
     flexDirection: 'row',
@@ -150,23 +168,21 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    borderBottomWidth: 1,
-    borderColor: colors.baseGrey,
-    paddingBottom: 20,
-  },
-  activeSearchLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '87%',
+    height: '100%',
   },
   searchActionButton: {
-    paddingHorizontal: 20,
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   searchInput: {
+    flex: 1,
+    height: 48,
+    paddingVertical: 0,
     color: colors.baseWhite,
     fontSize: 16,
     fontFamily: fontFamily.outfitRegular,
-    width: '85%',
+    includeFontPadding: false,
   },
 });

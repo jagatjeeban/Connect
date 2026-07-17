@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { colors, strings } from '@/constants';
 
 //import components
-import { TextComponent } from '@/components';
+import { SearchEmptyAction, TextComponent } from '@/components';
 
 //import assets
 import SvgContacts from '@/assets/icons/contacts.svg';
@@ -12,12 +12,13 @@ import SvgSearch from '@/assets/icons/search.svg';
 
 type EmptyStateProps = {
   isSearchResultState: boolean;
+  onClearSearch?: () => void;
 };
 
 /**
  * Displays the contacts empty state for either an empty address book or search results.
  */
-const EmptyState = ({ isSearchResultState = false }: EmptyStateProps) => {
+const EmptyState = ({ isSearchResultState = false, onClearSearch }: EmptyStateProps) => {
   const title = isSearchResultState ? strings.noResultsFound : strings.noContactsYet;
   const description = isSearchResultState ? strings.contactsSearchEmptyDescription : strings.contactsEmptyDescription;
 
@@ -34,6 +35,7 @@ const EmptyState = ({ isSearchResultState = false }: EmptyStateProps) => {
         text={description}
         textAlign={'center'}
       />
+      {isSearchResultState && onClearSearch ? <SearchEmptyAction onPress={onClearSearch} /> : null}
     </View>
   );
 };

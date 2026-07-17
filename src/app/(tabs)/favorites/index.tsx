@@ -1,7 +1,8 @@
+import { FlashList, type FlashListRef, type ListRenderItemInfo } from '@shopify/flash-list';
 import { ContactField } from 'expo-contacts';
 import { useRouter } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
-import { FlatList, LayoutAnimation, type ListRenderItemInfo, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Keyboard, LayoutAnimation, StyleSheet, View } from 'react-native';
 
 //import constants
 import { colors, strings } from '@/constants';
@@ -33,11 +34,14 @@ const EMPTY_CONTACTS: DeviceContact[] = [];
 const getFavoriteRemovalMessageId = (contactId: string): string => `favorite-removed-${contactId}`;
 
 /**
- * Displays searchable favorite contacts in a compact grid.
+ * Displays searchable favorite contacts in a balanced masonry gallery.
  */
 const Favorites = () => {
   //hooks
   const router = useRouter();
+
+  //refs
+  const favoritesListRef = useRef<FlashListRef<DeviceContact>>(null);
 
   //queries
   const { data: contacts = EMPTY_CONTACTS } = useContactsQuery();
@@ -66,6 +70,7 @@ const Favorites = () => {
   //opens the contact-details route for the selected contact
   const openContactDetails = useCallback(
     (contact: DeviceContact) => {
+      Keyboard.dismiss();
       router.push({
         pathname: '/contacts/[contactId]',
         params: { contactId: contact.id },
@@ -74,17 +79,28 @@ const Favorites = () => {
     [router],
   );
 
+  //clears the active favorites search
+  const handleSearchClear = useCallback(() => {
+    setSearchInput('');
+  }, []);
+
+  //prepares FlashList recycling before animating one favorite insertion or removal
+  const prepareFavoriteLayoutAnimation = useCallback(() => {
+    favoritesListRef.current?.prepareForLayoutAnimationRender();
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+  }, []);
+
   //removes a favorite and offers an idempotent undo action
   const handleRemoveFavorite = useCallback(
     (contact: DeviceContact) => {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      prepareFavoriteLayoutAnimation();
       removeFavorite(contact.id);
 
       showAppMessage(strings.removedFromFavorites, {
         action: {
           label: strings.undo,
           onPress: () => {
-            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+            prepareFavoriteLayoutAnimation();
             addFavorite(contact.id);
           },
         },
@@ -92,10 +108,10 @@ const Favorites = () => {
         id: getFavoriteRemovalMessageId(contact.id),
       });
     },
-    [addFavorite, removeFavorite],
+    [addFavorite, prepareFavoriteLayoutAnimation, removeFavorite],
   );
 
-  // Renders one favorite in the four-column grid.
+  //renders one favorite in the two-column masonry gallery
   const renderFavoriteContact = useCallback(
     ({ item }: ListRenderItemInfo<DeviceContact>) => (
       <FavoriteContactItem item={item} onPress={openContactDetails} onRemoveFavorite={handleRemoveFavorite} />
@@ -103,18 +119,31 @@ const Favorites = () => {
     [handleRemoveFavorite, openContactDetails],
   );
 
+  //returns the masonry list to its beginning whenever the search query changes
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      favoritesListRef.current?.scrollToOffset({ animated: false, offset: 0 });
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [searchInput]);
+
   return (
     <View style={styles.container}>
-      <HomeHeader menuBtn={false} placeholder={strings.searchContacts} searchEvent={setSearchInput} />
+      <HomeHeader placeholder={strings.searchContacts} searchEvent={setSearchInput} searchInput={searchInput} />
       <FavoritesHeader onPressAdd={handleAddFavorite} />
-      <FlatList
+      <FlashList
+        ref={favoritesListRef}
         contentInsetAdjustmentBehavior={'automatic'}
         contentContainerStyle={[styles.listContent, filteredContacts.length === 0 && styles.emptyListContent]}
         data={filteredContacts}
+        keyboardDismissMode={'on-drag'}
         keyboardShouldPersistTaps={'handled'}
         keyExtractor={(item) => item.id}
-        ListEmptyComponent={<EmptyState isSearchResultState={showSearchEmptyState} />}
-        numColumns={4}
+        ListEmptyComponent={<EmptyState isSearchResultState={showSearchEmptyState} onClearSearch={handleSearchClear} />}
+        masonry
+        numColumns={2}
+        optimizeItemArrangement
         renderItem={renderFavoriteContact}
         showsVerticalScrollIndicator={false}
       />
@@ -131,8 +160,8 @@ const styles = StyleSheet.create({
   },
   listContent: {
     flexGrow: 1,
-    paddingHorizontal: 15,
-    paddingBottom: 130,
+    paddingHorizontal: 10,
+    paddingBottom: 140,
   },
   emptyListContent: {
     paddingHorizontal: 0,
