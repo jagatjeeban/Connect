@@ -14,6 +14,25 @@ export type DeviceContact = PartialContactDetails<typeof CONTACT_FIELDS>;
 
 export type DevicePhone = DeviceContact['phones'][number];
 
+export type SharedElementFrame = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+export type ContactIdentitySnapshot = {
+  contactId: string;
+  initial: string;
+  name: string;
+  thumbnail?: string;
+};
+
+export type ContactSharedTransitionSource = {
+  avatarFrame: SharedElementFrame;
+  nameFrame: SharedElementFrame;
+};
+
 export type ContactHeaderItem = {
   id: string;
   type: 'header';

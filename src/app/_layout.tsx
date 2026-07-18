@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AppToaster } from '@/components';
 
 //import providers
+import { ContactSharedTransitionProvider } from '@/features/contacts/contact-shared-transition';
 import AppQueryProvider from '@/providers/app-query-provider';
 
 /**
@@ -15,9 +16,11 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <AppQueryProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name={'(tabs)'} />
-        </Stack>
+        <ContactSharedTransitionProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name={'(tabs)'} />
+          </Stack>
+        </ContactSharedTransitionProvider>
         <AppToaster />
       </AppQueryProvider>
     </GestureHandlerRootView>

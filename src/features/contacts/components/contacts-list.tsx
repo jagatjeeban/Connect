@@ -29,7 +29,7 @@ import { getNearestScrubberLetter } from '@/helpers/common-functions';
 import { buildAlphabetizedContactsList } from '@/helpers/custom-functions';
 
 //import types
-import type { ContactListItem, DeviceContact } from '@/features/contacts/model';
+import type { ContactListItem, ContactSharedTransitionSource, DeviceContact } from '@/features/contacts/model';
 
 //constants
 const SCRUBBER_PREVIEW_GAP = 8;
@@ -51,7 +51,7 @@ type MeasuredScrubberRailLayout = LayoutRectangle & {
 type ContactRenderOptions = {
   isSelectEvent: boolean;
   selectedContactIds: ReadonlySet<string> | null;
-  onClickContact?: (contact: DeviceContact) => void;
+  onClickContact?: (contact: DeviceContact, transitionSource?: ContactSharedTransitionSource) => void;
   hasScrubber: boolean;
 };
 
@@ -62,7 +62,7 @@ export type ContactsListProps = {
   selectedContactIds?: ReadonlySet<string> | null;
   selectionVersion?: number;
   onClearSearch?: () => void;
-  onClickContact?: (contact: DeviceContact) => void;
+  onClickContact?: (contact: DeviceContact, transitionSource?: ContactSharedTransitionSource) => void;
   searchText?: string;
   totalContactsCount?: number;
   style?: StyleProp<ViewStyle>;

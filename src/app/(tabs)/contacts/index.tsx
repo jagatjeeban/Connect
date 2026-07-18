@@ -16,6 +16,7 @@ import ContactsList from '@/features/contacts/components/contacts-list';
 import { useSearchFilter } from '@/hooks';
 
 //import helpers/services
+import { useContactSharedTransition } from '@/features/contacts/contact-shared-transition';
 import { invalidateContactsCollection, useContactsQuery } from '@/features/contacts/contacts-query';
 import { presentCreateContactForm, requestDeviceContactsPermission } from '@/features/contacts/contacts-service';
 
@@ -23,7 +24,7 @@ import { presentCreateContactForm, requestDeviceContactsPermission } from '@/fea
 import SvgPlus from '@/assets/icons/plus.svg';
 
 //import types
-import type { DeviceContact } from '@/features/contacts/model';
+import type { ContactSharedTransitionSource, DeviceContact } from '@/features/contacts/model';
 
 //constants
 const ADD_BUTTON_TAB_BAR_CLEARANCE = 24;
@@ -37,6 +38,7 @@ const Contacts = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
+  const { beginOpening } = useContactSharedTransition();
 
   //states
   const [isGranted, setIsGranted] = useState(false);
@@ -82,14 +84,15 @@ const Contacts = () => {
 
   //opens the contact-details route for the selected contact
   const openContactDetails = useCallback(
-    (contact: DeviceContact) => {
+    (contact: DeviceContact, transitionSource?: ContactSharedTransitionSource) => {
       Keyboard.dismiss();
+      beginOpening(contact, transitionSource);
       router.push({
         pathname: '/contacts/[contactId]',
         params: { contactId: contact.id },
       });
     },
-    [router],
+    [beginOpening, router],
   );
 
   //clears the active contact search
