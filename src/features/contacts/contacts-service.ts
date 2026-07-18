@@ -1,4 +1,5 @@
 import {
+  addContactsChangeListener,
   Contact,
   ContactsSortOrder,
   getPermissionsAsync,
@@ -22,6 +23,24 @@ export async function requestDeviceContactsPermission(): Promise<ContactsPermiss
   }
 
   return permission;
+}
+
+/**
+ * Subscribes to native contact changes only while contact access is granted.
+ *
+ * @param onContactsChange - Callback invoked after the device contacts change.
+ * @returns The native subscription, or `null` when contact access is unavailable.
+ */
+export async function subscribeToDeviceContactChanges(
+  onContactsChange: () => void,
+): Promise<ReturnType<typeof addContactsChangeListener> | null> {
+  const permission = await getPermissionsAsync();
+
+  if (!permission.granted) {
+    return null;
+  }
+
+  return addContactsChangeListener(onContactsChange);
 }
 
 /**

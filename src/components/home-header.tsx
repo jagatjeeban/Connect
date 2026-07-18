@@ -121,7 +121,7 @@ const HomeHeader = ({ placeholder, searchInput, searchBlur, searchEvent }: HomeH
               style={styles.searchInput}
               value={searchInput}
             />
-            {searchInput !== '' ? (
+            {searchInput !== '' && (
               <Pressable
                 accessibilityLabel={strings.clearSearch}
                 accessibilityRole={'button'}
@@ -130,7 +130,7 @@ const HomeHeader = ({ placeholder, searchInput, searchBlur, searchEvent }: HomeH
               >
                 <SvgCross />
               </Pressable>
-            ) : null}
+            )}
           </View>
         )}
       </View>

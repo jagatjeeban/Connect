@@ -28,6 +28,7 @@ const strings = {
   unableCreateContact: 'Unable to create contact',
   grantPermission: 'Grant Permission',
   searchContacts: 'Search contacts',
+  searchFavorites: 'Search favorites',
   clearSearch: 'Clear search',
   closeSearch: 'Close search',
   noResultsFound: 'No results found',

@@ -17,8 +17,8 @@ export type EmptyStateProps = {
 
 export type FavoriteContactItemProps = {
   item: DeviceContact;
+  onPress: (contact: DeviceContact) => void;
   onRemoveFavorite: (contact: DeviceContact) => void;
-  onPress?: (contact: DeviceContact) => void;
 };
 
 export type FavoritesHeaderProps = {

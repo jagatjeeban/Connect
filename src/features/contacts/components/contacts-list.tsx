@@ -1,6 +1,6 @@
 import { FlashList, type FlashListProps, type FlashListRef, type ListRenderItemInfo } from '@shopify/flash-list';
 import * as Haptics from 'expo-haptics';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   type GestureResponderEvent,
@@ -93,6 +93,15 @@ const renderContactListItem = (
     />
   );
 };
+
+//renders the list footer component
+const renderFooterComponent = () => <View style={styles.listFooter} />;
+
+//function to get the contact list item type
+const getItemType = (item: ContactListItem) => item.type;
+
+//function to get the key extractor
+const getKeyExtractor = (item: ContactListItem) => item.id;
 
 /**
  * Displays alphabetized contacts and coordinates the interactive letter scrubber.
@@ -319,15 +328,6 @@ const ContactsList = ({
   );
   const listExtraData = useMemo(() => ({ renderOptions, selectionVersion }), [renderOptions, selectionVersion]);
 
-  //returns the contacts list to its beginning whenever the search query changes
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => {
-      flashListRef.current?.scrollToOffset({ animated: false, offset: 0 });
-    });
-
-    return () => cancelAnimationFrame(frame);
-  }, [searchText]);
-
   return (
     <View style={[styles.container, style]}>
       {loaderStatus ? (
@@ -345,15 +345,14 @@ const ContactsList = ({
             stickyHeaderIndices={stickyHeaderIndices}
             viewabilityConfig={VIEWABILITY_CONFIG}
             onViewableItemsChanged={handleViewableItemsChanged}
-            nestedScrollEnabled
             keyboardDismissMode={'on-drag'}
             keyboardShouldPersistTaps={'handled'}
             contentContainerStyle={styles.contactsList}
             showsVerticalScrollIndicator={false}
             renderItem={renderItem}
-            getItemType={(item) => item.type}
-            ListFooterComponent={<View style={styles.listFooter} />}
-            keyExtractor={(item) => item.id}
+            getItemType={getItemType}
+            ListFooterComponent={renderFooterComponent}
+            keyExtractor={getKeyExtractor}
           />
           <AlphabetScrubber
             letters={scrubberLetters}

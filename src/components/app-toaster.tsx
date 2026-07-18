@@ -16,7 +16,7 @@ const AppToaster = () => (
   <Toaster
     allowFontScaling
     duration={TOAST_DURATION_MS}
-    enableStacking={false}
+    enableStacking={true}
     gap={10}
     offset={TOAST_NATIVE_TAB_OFFSET}
     position={'bottom-center'}

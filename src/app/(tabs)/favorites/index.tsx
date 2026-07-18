@@ -130,7 +130,7 @@ const Favorites = () => {
 
   return (
     <View style={styles.container}>
-      <HomeHeader placeholder={strings.searchContacts} searchEvent={setSearchInput} searchInput={searchInput} />
+      <HomeHeader placeholder={strings.searchFavorites} searchEvent={setSearchInput} searchInput={searchInput} />
       <FavoritesHeader onPressAdd={handleAddFavorite} />
       <FlashList
         ref={favoritesListRef}

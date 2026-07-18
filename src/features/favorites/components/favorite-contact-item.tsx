@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
-import { Pressable, StyleSheet, View, type GestureResponderEvent } from 'react-native';
+import { PressableScale } from 'pressto';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 //import constants
 import { colors, fontFamily, strings } from '@/constants';
@@ -33,57 +34,60 @@ const getFavoriteCardHeight = (contactId: string): number => {
 /**
  * Displays one favorite contact as an image-led masonry card.
  */
-const FavoriteContactItem = ({ item, onRemoveFavorite, onPress }: FavoriteContactItemProps) => {
+const FavoriteContactItem = ({ item, onPress, onRemoveFavorite }: FavoriteContactItemProps) => {
   const contactName = getContactName(item);
   const contactImage = item.image?.trim() || item.thumbnail?.trim();
   const cardHeight = getFavoriteCardHeight(item.id);
 
-  //removes the favorite without triggering the enclosing card action
-  const handleRemoveFavorite = (event: GestureResponderEvent) => {
-    event.stopPropagation();
+  //removes the selected contact from favorites
+  const handleRemoveFavorite = () => {
     onRemoveFavorite(item);
   };
 
   return (
-    <Pressable
-      accessibilityLabel={contactName}
-      accessibilityRole={'button'}
-      onPress={() => onPress?.(item)}
-      style={({ pressed }) => [styles.container, { height: cardHeight }, pressed && styles.containerPressed]}
-    >
-      {contactImage ? (
-        <Image
-          accessibilityLabel={`${contactName} contact photo`}
-          cachePolicy={'memory-disk'}
-          contentFit={'cover'}
-          priority={'normal'}
-          recyclingKey={item.id}
-          source={contactImage}
-          style={styles.contactImage}
-          transition={150}
+    <View style={[styles.container, { height: cardHeight }]}>
+      <PressableScale
+        accessibilityLabel={contactName}
+        accessibilityRole={'button'}
+        onPress={() => onPress(item)}
+        style={styles.cardPressable}
+      >
+        {contactImage ? (
+          <View style={styles.contactImageContainer}>
+            <Image
+              accessibilityLabel={`${contactName} contact photo`}
+              cachePolicy={'memory-disk'}
+              contentFit={'cover'}
+              priority={'normal'}
+              recyclingKey={item.id}
+              source={contactImage}
+              style={styles.contactImage}
+              transition={150}
+            />
+          </View>
+        ) : (
+          <View style={styles.defaultContactImage}>
+            <TextComponent
+              color={colors.primary}
+              textAlign={'center'}
+              fontFamily={fontFamily.outfitSemiBold}
+              styleProfile={'largest3'}
+              text={getContactInitial(contactName)}
+            />
+          </View>
+        )}
+
+        <View pointerEvents={'none'} style={styles.gradientOverlay} />
+
+        <TextComponent
+          color={colors.baseWhite}
+          containerStyle={styles.contactNameContainer}
+          fontFamily={fontFamily.outfitMedium}
+          numOfLine={2}
+          styleProfile={'large1'}
+          text={contactName}
         />
-      ) : (
-        <View style={styles.defaultContactImage}>
-          <TextComponent
-            color={colors.primary}
-            textAlign={'center'}
-            fontFamily={fontFamily.outfitSemiBold}
-            styleProfile={'largest3'}
-            text={getContactInitial(contactName)}
-          />
-        </View>
-      )}
-
-      <View pointerEvents={'none'} style={styles.gradientOverlay} />
-
-      <TextComponent
-        color={colors.baseWhite}
-        containerStyle={styles.contactNameContainer}
-        fontFamily={fontFamily.outfitMedium}
-        numOfLine={2}
-        styleProfile={'large1'}
-        text={contactName}
-      />
+      </PressableScale>
 
       <Pressable
         accessibilityLabel={`${strings.removeFromFavorites}: ${contactName}`}
@@ -95,7 +99,7 @@ const FavoriteContactItem = ({ item, onRemoveFavorite, onPress }: FavoriteContac
       >
         <SvgPrimaryFavorite width={18} height={17} />
       </Pressable>
-    </Pressable>
+    </View>
   );
 };
 
@@ -111,11 +115,14 @@ const styles = StyleSheet.create({
     borderCurve: 'continuous',
     backgroundColor: colors.primaryLight,
   },
-  containerPressed: {
-    opacity: 0.82,
-    transform: [{ scale: 0.985 }],
+  cardPressable: {
+    flex: 1,
   },
   contactImage: {
+    ...StyleSheet.absoluteFill,
+    transform: [{ scale: 1.05 }],
+  },
+  contactImageContainer: {
     ...StyleSheet.absoluteFill,
   },
   defaultContactImage: {
@@ -124,9 +131,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.primaryLight,
   },
+  blurOverlay: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+    left: 0,
+    height: '20%',
+    overflow: 'hidden',
+  },
   gradientOverlay: {
     ...StyleSheet.absoluteFill,
     experimental_backgroundImage: FAVORITE_CARD_GRADIENT,
+    transform: [{ scale: 1.05 }],
   },
   contactNameContainer: {
     position: 'absolute',
@@ -136,6 +152,7 @@ const styles = StyleSheet.create({
   },
   favoriteButton: {
     position: 'absolute',
+    zIndex: 1,
     top: 10,
     right: 10,
     width: 36,
