@@ -33,9 +33,9 @@ const HomeHeader = ({ placeholder, searchInput, searchBlur, searchEvent }: HomeH
   const [searchStatus, setSearchStatus] = useState(false);
 
   //function to open the search input
-  const handleSearchOpen = useCallback(() => {
+  const handleSearchOpen = () => {
     setSearchStatus(true);
-  }, []);
+  };
 
   //function to handle system backpress
   const handleBackPress = useCallback(() => {
@@ -49,22 +49,19 @@ const HomeHeader = ({ placeholder, searchInput, searchBlur, searchEvent }: HomeH
   }, [searchEvent, searchStatus]);
 
   //function to handle the change in input value
-  const handleInputChange = useCallback(
-    (input: string) => {
-      searchEvent(input);
-    },
-    [searchEvent],
-  );
+  const handleInputChange = (input: string) => {
+    searchEvent(input);
+  };
 
   //function to handle the search input clear event
-  const handleSearchClear = useCallback(() => {
+  const handleSearchClear = () => {
     searchEvent('');
-  }, [searchEvent]);
+  };
 
   //function to dismiss the keyboard after submitting a search
-  const handleSearchSubmit = useCallback(() => {
+  const handleSearchSubmit = () => {
     Keyboard.dismiss();
-  }, []);
+  };
 
   //registers Android back handling while this header's screen is focused
   useEffect(() => {

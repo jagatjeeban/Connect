@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { interpolate, useAnimatedStyle } from 'react-native-reanimated';
 
@@ -243,7 +243,7 @@ const ContactDetailsContent = ({
   );
 };
 
-export default ContactDetailsContent;
+export default React.memo(ContactDetailsContent);
 
 const styles = StyleSheet.create({
   container: {

@@ -65,7 +65,7 @@ const Favorites = () => {
   const showSearchEmptyState = filteredContacts.length === 0 && hasSearchQuery && favoriteContacts.length > 0;
 
   // Add-favorites navigation will be implemented with its dedicated route.
-  const handleAddFavorite = useCallback(() => undefined, []);
+  const handleAddFavorite = () => undefined;
 
   //opens the contact-details route for the selected contact
   const openContactDetails = useCallback(
@@ -80,9 +80,9 @@ const Favorites = () => {
   );
 
   //clears the active favorites search
-  const handleSearchClear = useCallback(() => {
+  const handleSearchClear = () => {
     setSearchInput('');
-  }, []);
+  };
 
   //prepares FlashList recycling before animating one favorite insertion or removal
   const prepareFavoriteLayoutAnimation = useCallback(() => {

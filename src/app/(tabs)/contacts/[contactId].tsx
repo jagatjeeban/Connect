@@ -182,6 +182,11 @@ const ContactDetails = () => {
     }
   }, [isDeleting]);
 
+  //presents the delete confirmation bottom sheet
+  const handlePresentDeleteSheet = useCallback(() => {
+    setIsDeleteSheetPresented(true);
+  }, []);
+
   //deletes the selected device contact and returns to the list
   const handleDelete = useCallback(() => {
     if (!contact || isDeleting) return;
@@ -218,7 +223,7 @@ const ContactDetails = () => {
         isLoading={isLoading}
         onBack={handleBack}
         onCall={handleCall}
-        onDelete={() => setIsDeleteSheetPresented(true)}
+        onDelete={handlePresentDeleteSheet}
         onEdit={handleEdit}
         onEmail={primaryEmailAddress ? handleEmail : undefined}
         onMessage={handleMessage}

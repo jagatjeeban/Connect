@@ -1,4 +1,5 @@
 import { BottomSheet, BottomSheetView } from '@expo/ui/community/bottom-sheet';
+import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 //import constants
@@ -100,7 +101,7 @@ const ConfirmationBottomSheet = ({
   );
 };
 
-export default ConfirmationBottomSheet;
+export default React.memo(ConfirmationBottomSheet);
 
 const styles = StyleSheet.create({
   sheetBackground: {

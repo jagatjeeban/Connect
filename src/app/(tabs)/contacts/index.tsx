@@ -96,9 +96,9 @@ const Contacts = () => {
   );
 
   //clears the active contact search
-  const handleSearchClear = useCallback(() => {
+  const handleSearchClear = () => {
     setSearchInput('');
-  }, []);
+  };
 
   //opens the native create-contact form and refreshes after a successful save
   const createContact = useCallback(async () => {
@@ -175,11 +175,7 @@ const Contacts = () => {
             text={strings.requireAccess}
             textAlign={'center'}
           />
-          <Pressable
-            accessibilityRole={'button'}
-            onPress={() => void requestContactsPermission()}
-            style={styles.grantAccessButton}
-          >
+          <Pressable accessibilityRole={'button'} onPress={requestContactsPermission} style={styles.grantAccessButton}>
             <TextComponent color={colors.primary} styleProfile={'large1'} text={strings.grantPermission} />
           </Pressable>
         </View>
@@ -199,7 +195,7 @@ const Contacts = () => {
         accessibilityRole={'button'}
         accessibilityState={{ disabled: isCreating }}
         disabled={isCreating}
-        onPress={() => void createContact()}
+        onPress={createContact}
         style={[
           styles.addContactButton,
           isCreating && styles.disabled,
