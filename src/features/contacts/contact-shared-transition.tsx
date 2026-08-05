@@ -43,6 +43,7 @@ import type {
 const OPEN_DURATION = 420;
 const CLOSE_DURATION = 340;
 const DESTINATION_MEASUREMENT_TIMEOUT = 500;
+const SHARED_ELEMENT_MEASUREMENT_TIMEOUT = 250;
 const SOURCE_AVATAR_RADIUS = 10;
 const DESTINATION_AVATAR_RADIUS = 30;
 
@@ -107,14 +108,33 @@ export const measureSharedElementInWindow = (viewRef: RefObject<View | null>): P
       return;
     }
 
-    view.measureInWindow((x, y, width, height) => {
-      if (width <= 0 || height <= 0) {
-        resolve(null);
-        return;
-      }
+    let isSettled = false;
 
-      resolve({ x, y, width, height });
-    });
+    //settles the measurement once and clears its bounded native-callback fallback
+    const settleMeasurement = (frame: SharedElementFrame | null) => {
+      if (isSettled) return;
+
+      isSettled = true;
+      clearTimeout(measurementTimeout);
+      resolve(frame);
+    };
+
+    const measurementTimeout = setTimeout(() => {
+      settleMeasurement(null);
+    }, SHARED_ELEMENT_MEASUREMENT_TIMEOUT);
+
+    try {
+      view.measureInWindow((x, y, width, height) => {
+        if (width <= 0 || height <= 0) {
+          settleMeasurement(null);
+          return;
+        }
+
+        settleMeasurement({ x, y, width, height });
+      });
+    } catch {
+      settleMeasurement(null);
+    }
   });
 
 //function to measure both identity elements after the current layout commit
@@ -279,9 +299,8 @@ export const ContactSharedTransitionProvider = ({ children }: ContactSharedTrans
                 easing: Easing.inOut(Easing.cubic),
               },
               (finished) => {
-                if (finished) {
-                  runOnJS(finishClosing)(contactId);
-                }
+                runOnJS(finishClosing)(contactId);
+                void finished;
               },
             ),
           );

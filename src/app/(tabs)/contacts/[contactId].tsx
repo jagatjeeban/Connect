@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
-import { usePreventRemove } from 'expo-router/react-navigation';
-import { useCallback, useMemo, useState } from 'react';
+import { usePreventRemove, type NavigationAction } from 'expo-router/react-navigation';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Platform, StyleSheet, View } from 'react-native';
 
 //import constants
@@ -38,6 +38,9 @@ const ContactDetails = () => {
   const { contactId } = useLocalSearchParams<{ contactId?: string }>();
   const { cancel: cancelSharedTransition, requestClose } = useContactSharedTransition();
 
+  //refs
+  const pendingActionRef = useRef<NavigationAction | null>(null);
+
   //store events
   const favoriteContactIds = useAppStore((state) => state.favoriteContactIds);
   const toggleFavorite = useAppStore((state) => state.toggleFavorite);
@@ -61,17 +64,28 @@ const ContactDetails = () => {
 
   //coordinates every Android removal action with the reverse shared transition
   usePreventRemove(Platform.OS === 'android' && !allowRemoval, ({ data }) => {
-    if (!contactId) {
+    const allowAndDispatch = () => {
+      pendingActionRef.current = data.action;
       setAllowRemoval(true);
-      requestAnimationFrame(() => navigation.dispatch(data.action));
+    };
+
+    if (!contactId) {
+      allowAndDispatch();
       return;
     }
 
-    requestClose(contactId, () => {
-      setAllowRemoval(true);
-      requestAnimationFrame(() => navigation.dispatch(data.action));
-    });
+    requestClose(contactId, allowAndDispatch);
   });
+
+  //dispatches the blocked action after removal has been permitted
+  useEffect(() => {
+    const pendingAction = pendingActionRef.current;
+
+    if (!allowRemoval || !pendingAction) return;
+
+    pendingActionRef.current = null;
+    navigation.dispatch(pendingAction);
+  }, [allowRemoval, navigation]);
 
   //returns to the previous route or falls back to the contacts list
   const handleBack = useCallback(() => {
