@@ -1,5 +1,13 @@
 import type { Ref } from 'react';
-import { type LayoutRectangle, type StyleProp, StyleSheet, View, type ViewProps, type ViewStyle } from 'react-native';
+import {
+  type LayoutRectangle,
+  Platform,
+  type StyleProp,
+  StyleSheet,
+  View,
+  type ViewProps,
+  type ViewStyle,
+} from 'react-native';
 
 //import constants
 import { colors, fontFamily } from '@/constants';
@@ -55,7 +63,7 @@ const AlphabetScrubber = ({
         styles.alphabetScrubberContainer,
         {
           right: SCRUBBER_RIGHT_OFFSET,
-          bottom: scrubberBottomOffset + (process.env.EXPO_OS === 'ios' ? SCRUBBER_IOS_VERTICAL_OFFSET : 0),
+          bottom: scrubberBottomOffset + (Platform.OS === 'ios' ? SCRUBBER_IOS_VERTICAL_OFFSET : 0),
         },
       ]}
     >
