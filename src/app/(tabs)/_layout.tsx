@@ -1,5 +1,5 @@
-import { Platform } from 'react-native';
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
+import { Platform, StyleSheet } from 'react-native';
 
 //import constants
 import { colors, fontFamily, strings } from '@/constants';
@@ -16,26 +16,17 @@ export default function TabLayout() {
       unstable_nativeProps={Platform.OS === 'ios' ? { colorScheme: 'dark' } : undefined}
     >
       <NativeTabs.Trigger name={'contacts'} contentStyle={{ backgroundColor: colors.backgroundColor }}>
-        <NativeTabs.Trigger.Label
-          selectedStyle={{
-            color: colors.primary,
-            fontFamily: fontFamily.outfitRegular,
-          }}
-        >
+        <NativeTabs.Trigger.Label selectedStyle={styles.selectedLabelStyle}>
           {strings.contacts}
         </NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          sf={{ default: 'phone', selected: 'phone.fill' }}
+          sf={{ default: 'person.crop.circle', selected: 'person.crop.circle.fill' }}
           md={{ default: 'contacts', selected: 'contacts' }}
           selectedColor={colors.primary}
         />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name={'favorites'} contentStyle={{ backgroundColor: colors.backgroundColor }}>
-        <NativeTabs.Trigger.Label
-          selectedStyle={{
-            color: colors.primary,
-          }}
-        >
+        <NativeTabs.Trigger.Label selectedStyle={styles.selectedLabelStyle}>
           {strings.favorites}
         </NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
@@ -45,13 +36,7 @@ export default function TabLayout() {
         />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name={'profile'} contentStyle={{ backgroundColor: colors.backgroundColor }}>
-        <NativeTabs.Trigger.Label
-          selectedStyle={{
-            color: colors.primary,
-          }}
-        >
-          {strings.profile}
-        </NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label selectedStyle={styles.selectedLabelStyle}>{strings.profile}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           sf={{ default: 'person', selected: 'person.fill' }}
           md={'person'}
@@ -61,3 +46,9 @@ export default function TabLayout() {
     </NativeTabs>
   );
 }
+
+const styles = StyleSheet.create({
+  selectedLabelStyle: {
+    color: colors.primary,
+  },
+});

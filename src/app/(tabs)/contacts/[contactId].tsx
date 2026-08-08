@@ -40,6 +40,7 @@ const ContactDetails = () => {
 
   //refs
   const pendingActionRef = useRef<NavigationAction | null>(null);
+  const pendingDeletedContactIdRef = useRef<string | null>(null);
 
   //store events
   const favoriteContactIds = useAppStore((state) => state.favoriteContactIds);
@@ -196,6 +197,21 @@ const ContactDetails = () => {
     }
   }, [isDeleting]);
 
+  //navigates and clears cached contact data after the native sheet finishes dismissing
+  const handleDeleteSheetDidDismiss = useCallback(() => {
+    setIsDeleteSheetPresented(false);
+
+    const deletedContactId = pendingDeletedContactIdRef.current;
+
+    if (!deletedContactId) return;
+
+    pendingDeletedContactIdRef.current = null;
+    handleBackWithoutTransition();
+    removeContactQueryData(queryClient, deletedContactId);
+    removeFavorite(deletedContactId);
+    void invalidateContactQueries(queryClient);
+  }, [handleBackWithoutTransition, queryClient, removeFavorite]);
+
   //presents the delete confirmation bottom sheet
   const handlePresentDeleteSheet = useCallback(() => {
     setIsDeleteSheetPresented(true);
@@ -211,11 +227,8 @@ const ContactDetails = () => {
 
       try {
         await deleteDeviceContact(contact.id);
-        removeContactQueryData(queryClient, contact.id);
-        removeFavorite(contact.id);
+        pendingDeletedContactIdRef.current = contact.id;
         setIsDeleteSheetPresented(false);
-        handleBackWithoutTransition();
-        void invalidateContactQueries(queryClient);
       } catch (error) {
         console.error('Contact delete error', error);
         Alert.alert(strings.unableDeleteContact, strings.errorMessage);
@@ -225,7 +238,7 @@ const ContactDetails = () => {
     };
 
     void deleteContact();
-  }, [contact, handleBackWithoutTransition, isDeleting, queryClient, removeFavorite]);
+  }, [contact, isDeleting]);
 
   return (
     <View style={styles.container}>
@@ -251,7 +264,8 @@ const ContactDetails = () => {
         isLoading={isDeleting}
         isPresented={isDeleteSheetPresented}
         onConfirm={handleDelete}
-        onDismiss={handleDismissDeleteSheet}
+        onDidDismiss={handleDeleteSheetDidDismiss}
+        onDismissRequest={handleDismissDeleteSheet}
         primaryTitle={isDeleting ? strings.deleting : strings.yesDelete}
         secondaryTitle={strings.noKeep}
       />

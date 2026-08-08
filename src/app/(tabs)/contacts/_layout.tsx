@@ -1,11 +1,10 @@
 import Stack from 'expo-router/stack';
-import { Platform } from 'react-native';
 
 //import constants
 import { colors } from '@/constants';
 
 //import helpers
-import { useContactSharedTransition } from '@/features/contacts/contact-shared-transition';
+import { getContactDetailsAnimation, useContactSharedTransition } from '@/features/contacts/contact-shared-transition';
 
 /**
  * Configures the contacts stack and its shared background.
@@ -24,7 +23,7 @@ const ContactsLayout = () => {
       <Stack.Screen
         name={'[contactId]'}
         options={{
-          animation: Platform.OS === 'android' ? (sharedTransitionPhase ? 'none' : 'fade') : 'default',
+          animation: getContactDetailsAnimation(sharedTransitionPhase),
         }}
       />
     </Stack>

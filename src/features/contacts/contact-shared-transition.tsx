@@ -49,6 +49,12 @@ const DESTINATION_AVATAR_RADIUS = 30;
 
 type ContactSharedTransitionPhase = 'opening' | 'open' | 'closing';
 
+/**
+ * Resolves the contact-detail stack animation for the current shared-transition phase.
+ */
+export const getContactDetailsAnimation = (phase: ContactSharedTransitionPhase | null) =>
+  Platform.OS === 'android' ? (phase ? 'none' : 'fade') : 'default';
+
 type ContactSharedTransitionSession = {
   identity: ContactIdentitySnapshot;
   phase: ContactSharedTransitionPhase;
