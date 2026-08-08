@@ -11,7 +11,6 @@ import { colors } from '@/constants';
 import { AppToaster } from '@/components';
 
 //import providers
-import { ContactSharedTransitionProvider } from '@/features/contacts/contact-shared-transition';
 import AppQueryProvider from '@/providers/app-query-provider';
 
 //constants
@@ -31,13 +30,11 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <AppQueryProvider>
-        <ContactSharedTransitionProvider>
-          <ThemeProvider value={APP_NAVIGATION_THEME}>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name={'(tabs)'} />
-            </Stack>
-          </ThemeProvider>
-        </ContactSharedTransitionProvider>
+        <ThemeProvider value={APP_NAVIGATION_THEME}>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name={'(tabs)'} />
+          </Stack>
+        </ThemeProvider>
         <AppToaster />
       </AppQueryProvider>
     </GestureHandlerRootView>

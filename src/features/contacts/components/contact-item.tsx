@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 //import constants
@@ -9,14 +8,10 @@ import { TextComponent } from '@/components';
 import ContactAvatar from '@/features/contacts/components/contact-avatar';
 
 //import helpers
-import {
-  measureContactIdentityInWindow,
-  useContactSharedTransition,
-} from '@/features/contacts/contact-shared-transition';
 import { getContactInitial, getContactName } from '@/helpers/custom-functions';
 
 //import types
-import type { ContactSharedTransitionSource, DeviceContact } from '@/features/contacts/model';
+import type { DeviceContact } from '@/features/contacts/model';
 
 //constants
 const SCRUBBER_CONTENT_GUTTER = 60;
@@ -25,7 +20,7 @@ export type ContactItemProps = {
   item: DeviceContact;
   isSelectEvent?: boolean;
   isSelected?: boolean;
-  onClickEvent?: (contact: DeviceContact, transitionSource?: ContactSharedTransitionSource) => void;
+  onClickEvent?: (contact: DeviceContact) => void;
   hasScrubber?: boolean;
 };
 
@@ -39,29 +34,12 @@ const ContactItem = ({
   onClickEvent,
   hasScrubber = false,
 }: ContactItemProps) => {
-  //hooks
-  const { activeContactId, phase } = useContactSharedTransition();
-
-  //refs
-  const avatarRef = useRef<View>(null);
-  const nameRef = useRef<View>(null);
-  const isPressPendingRef = useRef(false);
-
   const contactName = getContactName(item);
   const thumbnail = item.thumbnail?.trim() || item.image?.trim();
-  const isIdentityHidden = activeContactId === item.id && (phase === 'opening' || phase === 'closing');
 
-  //measures the avatar and name before opening contact details
-  const handlePress = async () => {
-    if (!onClickEvent || isPressPendingRef.current) return;
-
-    isPressPendingRef.current = true;
-    const transitionSource = await measureContactIdentityInWindow(avatarRef, nameRef);
-    onClickEvent(item, transitionSource);
-
-    requestAnimationFrame(() => {
-      isPressPendingRef.current = false;
-    });
+  //opens the selected contact
+  const handlePress = () => {
+    onClickEvent?.(item);
   };
 
   return (
@@ -78,7 +56,7 @@ const ContactItem = ({
       ]}
     >
       <View style={styles.contactItemLeft}>
-        <View ref={avatarRef} collapsable={false} style={isIdentityHidden ? styles.hiddenIdentity : undefined}>
+        <View>
           <ContactAvatar
             accessibilityLabel={`${contactName} contact photo`}
             fallbackBackgroundColor={colors.primaryLight}
@@ -92,11 +70,7 @@ const ContactItem = ({
           />
         </View>
 
-        <View
-          ref={nameRef}
-          collapsable={false}
-          style={[styles.contactNameContainer, isIdentityHidden && styles.hiddenIdentity]}
-        >
+        <View style={styles.contactNameContainer}>
           <TextComponent
             color={colors.baseWhite}
             fontFamily={fontFamily.outfitRegular}
@@ -155,9 +129,6 @@ const styles = StyleSheet.create({
   contactNameContainer: {
     flex: 1,
     marginLeft: 20,
-  },
-  hiddenIdentity: {
-    opacity: 0,
   },
   checkButton: {
     width: 20,

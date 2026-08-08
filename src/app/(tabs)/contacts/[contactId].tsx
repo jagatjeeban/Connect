@@ -1,8 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
-import { usePreventRemove, type NavigationAction } from 'expo-router/react-navigation';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Platform, StyleSheet, View } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { Alert, StyleSheet, View } from 'react-native';
 
 //import constants
 import { colors, strings } from '@/constants';
@@ -15,7 +14,6 @@ import ContactDetailsContent from '@/features/contacts/components/contact-detail
 import { useAppStore } from '@/store/use-app-store';
 
 //import helpers/services
-import { useContactSharedTransition } from '@/features/contacts/contact-shared-transition';
 import {
   invalidateContactQueries,
   invalidateContactsCollection,
@@ -33,13 +31,10 @@ import { buildContactShareMessage, getUniqueContactPhones } from '@/helpers/cust
 const ContactDetails = () => {
   //hooks
   const router = useRouter();
-  const navigation = useNavigation();
   const queryClient = useQueryClient();
   const { contactId } = useLocalSearchParams<{ contactId?: string }>();
-  const { cancel: cancelSharedTransition, requestClose } = useContactSharedTransition();
 
   //refs
-  const pendingActionRef = useRef<NavigationAction | null>(null);
   const pendingDeletedContactIdRef = useRef<string | null>(null);
 
   //store events
@@ -51,7 +46,6 @@ const ContactDetails = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteSheetPresented, setIsDeleteSheetPresented] = useState(false);
-  const [allowRemoval, setAllowRemoval] = useState(false);
 
   //queries
   const contactQuery = useContactQuery(contactId);
@@ -63,31 +57,6 @@ const ContactDetails = () => {
   const primaryEmailAddress = contact?.emails.find((email) => Boolean(email.address?.trim()))?.address?.trim();
   const isFavorite = contact ? favoriteContactIds.includes(contact.id) : false;
 
-  //coordinates every Android removal action with the reverse shared transition
-  usePreventRemove(Platform.OS === 'android' && !allowRemoval, ({ data }) => {
-    const allowAndDispatch = () => {
-      pendingActionRef.current = data.action;
-      setAllowRemoval(true);
-    };
-
-    if (!contactId) {
-      allowAndDispatch();
-      return;
-    }
-
-    requestClose(contactId, allowAndDispatch);
-  });
-
-  //dispatches the blocked action after removal has been permitted
-  useEffect(() => {
-    const pendingAction = pendingActionRef.current;
-
-    if (!allowRemoval || !pendingAction) return;
-
-    pendingActionRef.current = null;
-    navigation.dispatch(pendingAction);
-  }, [allowRemoval, navigation]);
-
   //returns to the previous route or falls back to the contacts list
   const handleBack = useCallback(() => {
     if (router.canGoBack()) {
@@ -95,25 +64,8 @@ const ContactDetails = () => {
       return;
     }
 
-    cancelSharedTransition(contactId);
-    setAllowRemoval(true);
-    requestAnimationFrame(() => router.replace('/contacts'));
-  }, [cancelSharedTransition, contactId, router]);
-
-  //returns without a shared transition when the source contact no longer exists
-  const handleBackWithoutTransition = useCallback(() => {
-    cancelSharedTransition(contactId);
-    setAllowRemoval(true);
-
-    requestAnimationFrame(() => {
-      if (router.canGoBack()) {
-        router.back();
-        return;
-      }
-
-      router.replace('/contacts');
-    });
-  }, [cancelSharedTransition, contactId, router]);
+    router.replace('/contacts');
+  }, [router]);
 
   //reports a failed native contact action to the user
   const showActionError = useCallback((label: string, error: unknown) => {
@@ -206,11 +158,11 @@ const ContactDetails = () => {
     if (!deletedContactId) return;
 
     pendingDeletedContactIdRef.current = null;
-    handleBackWithoutTransition();
+    handleBack();
     removeContactQueryData(queryClient, deletedContactId);
     removeFavorite(deletedContactId);
     void invalidateContactQueries(queryClient);
-  }, [handleBackWithoutTransition, queryClient, removeFavorite]);
+  }, [handleBack, queryClient, removeFavorite]);
 
   //presents the delete confirmation bottom sheet
   const handlePresentDeleteSheet = useCallback(() => {

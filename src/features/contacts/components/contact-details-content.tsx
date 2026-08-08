@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import Animated, { interpolate, useAnimatedStyle } from 'react-native-reanimated';
 
 //import constants
 import { colors, strings } from '@/constants';
@@ -16,10 +15,6 @@ import ContactInfoItem from '@/features/contacts/components/contact-info-item';
 import { useResponsive } from '@/hooks';
 
 //import helpers
-import {
-  measureContactIdentityInWindow,
-  useContactSharedTransition,
-} from '@/features/contacts/contact-shared-transition';
 import { getContactInitial, getContactName } from '@/helpers/custom-functions';
 
 //import assets
@@ -71,54 +66,10 @@ const ContactDetailsContent = ({
 }: ContactDetailsContentProps) => {
   //hooks
   const { width, rh } = useResponsive();
-  const { activeContactId, phase, progress, registerDestination, updateIdentity } = useContactSharedTransition();
-
-  //refs
-  const avatarRef = useRef<View>(null);
-  const nameRef = useRef<View>(null);
 
   const curveHeight = rh(20);
   const contactName = contact ? getContactName(contact) : '';
   const thumbnail = contact?.thumbnail?.trim() || contact?.image?.trim();
-  const isOpeningTransition = activeContactId === contact?.id && phase === 'opening';
-  const isIdentityHidden = activeContactId === contact?.id && (phase === 'opening' || phase === 'closing');
-
-  const contentAnimatedStyle = useAnimatedStyle(
-    () => ({
-      opacity: isOpeningTransition ? interpolate(progress.value, [0, 0.18, 1], [0, 0, 1]) : 1,
-      transform: [
-        {
-          translateY: isOpeningTransition ? interpolate(progress.value, [0, 1], [8, 0]) : 0,
-        },
-      ],
-    }),
-    [isOpeningTransition],
-  );
-
-  //measures the destination identity after its native layout has committed
-  const measureDestinationIdentity = useCallback(() => {
-    if (!contact || activeContactId !== contact.id || phase !== 'opening') return;
-
-    requestAnimationFrame(() => {
-      void measureContactIdentityInWindow(avatarRef, nameRef).then((target) => {
-        if (target) {
-          registerDestination(contact.id, target);
-        }
-      });
-    });
-  }, [activeContactId, contact, phase, registerDestination]);
-
-  //covers cases where cached contact content mounts with its final layout immediately
-  useEffect(() => {
-    measureDestinationIdentity();
-  }, [measureDestinationIdentity]);
-
-  //keeps the persistent overlay content current after a native edit succeeds
-  useEffect(() => {
-    if (contact) {
-      updateIdentity(contact);
-    }
-  }, [contact, updateIdentity]);
 
   return (
     <View style={styles.container}>
@@ -129,7 +80,7 @@ const ContactDetailsContent = ({
         width={width}
       />
 
-      <Animated.View style={[styles.animatedContent, contentAnimatedStyle]}>
+      <View style={styles.content}>
         <ContactDetailsHeader
           actionsDisabled={!contact}
           isEditing={isEditing}
@@ -158,12 +109,7 @@ const ContactDetailsContent = ({
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.contactHeaderContainer}>
-              <View
-                ref={avatarRef}
-                collapsable={false}
-                onLayout={measureDestinationIdentity}
-                style={isIdentityHidden ? styles.hiddenIdentity : undefined}
-              >
+              <View>
                 <ContactAvatar
                   accessibilityLabel={`${contactName} contact photo`}
                   fallbackTextStyle={'largest3'}
@@ -175,12 +121,7 @@ const ContactDetailsContent = ({
                 />
               </View>
 
-              <View
-                ref={nameRef}
-                collapsable={false}
-                onLayout={measureDestinationIdentity}
-                style={[styles.contactNameTarget, isIdentityHidden && styles.hiddenIdentity]}
-              >
+              <View style={styles.contactNameTarget}>
                 <TextComponent
                   color={colors.baseWhite}
                   numOfLine={2}
@@ -238,7 +179,7 @@ const ContactDetailsContent = ({
             </Pressable>
           </ScrollView>
         )}
-      </Animated.View>
+      </View>
     </View>
   );
 };
@@ -255,7 +196,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
   },
-  animatedContent: {
+  content: {
     flex: 1,
   },
   contentContainer: {
@@ -283,9 +224,6 @@ const styles = StyleSheet.create({
   contactNameTarget: {
     width: '100%',
     alignItems: 'center',
-  },
-  hiddenIdentity: {
-    opacity: 0,
   },
   actionsContainer: {
     paddingHorizontal: 12,
