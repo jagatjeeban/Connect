@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 //import constants
 import { colors, strings } from '@/constants';
@@ -11,10 +11,19 @@ import { TextComponent } from '@/components';
  */
 const Profile = () => {
   return (
-    <View>
+    <View style={styles.mainContainer}>
       <TextComponent color={colors.baseWhite} styleProfile={'large3'} text={strings.profile} />
     </View>
   );
 };
 
 export default Profile;
+
+const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.backgroundColor,
+  },
+});

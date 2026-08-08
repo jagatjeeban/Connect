@@ -27,7 +27,7 @@ import SvgPlus from '@/assets/icons/plus.svg';
 import type { ContactSharedTransitionSource, DeviceContact } from '@/features/contacts/model';
 
 //constants
-const ADD_BUTTON_TAB_BAR_CLEARANCE = 24;
+const ADD_BUTTON_TAB_BAR_CLEARANCE = 50;
 const EMPTY_CONTACTS: DeviceContact[] = [];
 
 /**

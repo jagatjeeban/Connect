@@ -124,6 +124,7 @@ const styles = StyleSheet.create({
     zIndex: 4,
     alignItems: 'flex-end',
     justifyContent: 'center',
+    top: 0,
   },
   alphabetScrubberRail: {
     width: '100%',

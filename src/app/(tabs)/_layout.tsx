@@ -13,6 +13,7 @@ export default function TabLayout() {
       disableTransparentOnScrollEdge
       minimizeBehavior={Platform.OS === 'ios' && Number(Platform.Version) >= 26 ? 'onScrollDown' : undefined}
       labelStyle={{ fontFamily: fontFamily.outfitMedium }}
+      unstable_nativeProps={Platform.OS === 'ios' ? { colorScheme: 'dark' } : undefined}
     >
       <NativeTabs.Trigger name={'contacts'} contentStyle={{ backgroundColor: colors.backgroundColor }}>
         <NativeTabs.Trigger.Label
