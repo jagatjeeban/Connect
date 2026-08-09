@@ -1,24 +1,16 @@
-import React from 'react';
-import { ActivityIndicator, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { PressableScale } from 'pressto';
+import React from 'react';
+import { ActivityIndicator, Platform, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 //import constants
 import { colors } from '@/constants';
 
 //import components
 import TextComponent from '../core-components/text-component';
-import ConfirmationBottomSheetHost from './confirmation-bottom-sheet-host';
+import ConfirmationBottomSheetHost from './host';
 
-type ConfirmationBottomSheetProps = {
-  isPresented: boolean;
-  description: string;
-  primaryTitle: string;
-  secondaryTitle?: string;
-  isLoading?: boolean;
-  onConfirm: () => void;
-  onDidDismiss: () => void;
-  onDismissRequest: () => void;
-};
+//import types
+import type { ConfirmationBottomSheetProps } from './types';
 
 /**
  * Displays a native bottom sheet for destructive or irreversible confirmations.
@@ -35,6 +27,8 @@ const ConfirmationBottomSheet = ({
 }: ConfirmationBottomSheetProps) => {
   const { width } = useWindowDimensions();
 
+  const ButtonComponent = Platform.OS === 'android' ? Pressable : PressableScale;
+
   return (
     <ConfirmationBottomSheetHost
       isDismissEnabled={!isLoading}
@@ -46,7 +40,7 @@ const ConfirmationBottomSheet = ({
         <TextComponent color={colors.baseWhite} styleProfile={'large2'} text={description} textAlign={'center'} />
 
         <View style={styles.actionsContainer}>
-          <PressableScale
+          <ButtonComponent
             accessibilityLabel={primaryTitle}
             accessibilityRole={'button'}
             disabled={isLoading}
@@ -63,10 +57,10 @@ const ConfirmationBottomSheet = ({
                 textAlign={'center'}
               />
             )}
-          </PressableScale>
+          </ButtonComponent>
 
           {secondaryTitle && secondaryTitle.trim() && (
-            <PressableScale
+            <ButtonComponent
               accessibilityLabel={secondaryTitle}
               accessibilityRole={'button'}
               disabled={isLoading}
@@ -79,7 +73,7 @@ const ConfirmationBottomSheet = ({
                 text={secondaryTitle}
                 textAlign={'center'}
               />
-            </PressableScale>
+            </ButtonComponent>
           )}
         </View>
       </View>

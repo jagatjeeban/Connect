@@ -195,6 +195,7 @@ const Contacts = () => {
         onPress={createContact}
         style={[
           styles.addContactButton,
+          // styles.addContactBtnShadow,
           isCreating && styles.disabled,
           {
             bottom: insets.bottom + ADD_BUTTON_TAB_BAR_CLEARANCE,
@@ -237,6 +238,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 15,
     backgroundColor: colors.primaryLight,
+  },
+  addContactBtnShadow: {
+    shadowColor: colors.primary,
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 20,
   },
   disabled: {
     opacity: 0.6,

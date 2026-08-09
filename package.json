@@ -58,5 +58,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
-  "private": true
+  "private": true,
+  "patchedDependencies": {
+    "expo-router@57.0.4": "patches/expo-router@57.0.4.patch"
+  }
 }

@@ -144,9 +144,8 @@ const ContactDetails = () => {
 
   //closes the deletion sheet when no delete operation is active
   const handleDismissDeleteSheet = useCallback(() => {
-    if (!isDeleting) {
-      setIsDeleteSheetPresented(false);
-    }
+    if (isDeleting) return;
+    setIsDeleteSheetPresented(false);
   }, [isDeleting]);
 
   //navigates and clears cached contact data after the native sheet finishes dismissing

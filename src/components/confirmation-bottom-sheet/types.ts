@@ -7,3 +7,14 @@ export type ConfirmationBottomSheetHostProps = {
   onDidDismiss: () => void;
   onDismissRequest: () => void;
 };
+
+export type ConfirmationBottomSheetProps = {
+  isPresented: boolean;
+  description: string;
+  primaryTitle: string;
+  secondaryTitle?: string;
+  isLoading?: boolean;
+  onConfirm: () => void;
+  onDidDismiss: () => void;
+  onDismissRequest: () => void;
+};
