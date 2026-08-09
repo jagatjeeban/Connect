@@ -1,5 +1,6 @@
+import { PressableScale } from 'pressto';
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 //import constants
 import { colors } from '@/constants';
@@ -19,17 +20,17 @@ type ContactActionButtonProps = {
  */
 const ContactActionButton = ({ icon, label, disabled = false, onPress }: ContactActionButtonProps) => {
   return (
-    <Pressable
+    <PressableScale
       accessibilityLabel={label}
       accessibilityRole={'button'}
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}
-      style={({ pressed }) => [styles.container, pressed && styles.pressed, disabled && styles.disabled]}
+      style={[styles.container, disabled && styles.disabled]}
     >
       <View style={styles.iconContainer}>{icon}</View>
       <TextComponent color={colors.baseWhite} styleProfile={'large1'} text={label} textAlign={'center'} />
-    </Pressable>
+    </PressableScale>
   );
 };
 
