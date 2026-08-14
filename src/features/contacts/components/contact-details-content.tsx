@@ -161,7 +161,7 @@ const ContactDetailsContent = ({
               <View style={styles.phoneList}>
                 {phones.map((phone, index) => (
                   <View key={phone.id}>
-                    {index > 0 ? <View style={styles.separator} /> : null}
+                    {index > 0 && <View style={styles.separator} />}
                     <ContactInfoItem phone={phone} />
                   </View>
                 ))}
