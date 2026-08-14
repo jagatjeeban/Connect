@@ -21,6 +21,7 @@ type ContactActionButtonProps = {
 const ContactActionButton = ({ icon, label, disabled = false, onPress }: ContactActionButtonProps) => {
   return (
     <PressableScale
+      rippleColor={'transparent'}
       accessibilityLabel={label}
       accessibilityRole={'button'}
       accessibilityState={{ disabled }}
@@ -49,9 +50,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 28,
     backgroundColor: colors.primaryLight,
-  },
-  pressed: {
-    opacity: 0.7,
   },
   disabled: {
     opacity: 0.4,

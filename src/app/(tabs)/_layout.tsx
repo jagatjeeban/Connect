@@ -10,9 +10,11 @@ import { colors, fontFamily, strings } from '@/constants';
 export default function TabLayout() {
   return (
     <NativeTabs
+      rippleColor={'transparent'}
       disableTransparentOnScrollEdge
       minimizeBehavior={Platform.OS === 'ios' && Number(Platform.Version) >= 26 ? 'onScrollDown' : undefined}
       labelStyle={{ fontFamily: fontFamily.outfitMedium }}
+      backgroundColor={colors.backgroundLight}
       unstable_nativeProps={Platform.OS === 'ios' ? { colorScheme: 'dark' } : undefined}
     >
       <NativeTabs.Trigger name={'contacts'} contentStyle={{ backgroundColor: colors.backgroundColor }}>
