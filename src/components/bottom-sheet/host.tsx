@@ -6,17 +6,12 @@ import { StyleSheet } from 'react-native';
 import { colors } from '@/constants';
 
 //import types
-import type { ConfirmationBottomSheetHostProps } from './types';
+import type { BottomSheetHostProps } from './types';
 
 /**
- * Hosts confirmation content in the platform community bottom sheet.
+ * Hosts sheet content in the platform community bottom sheet.
  */
-const ConfirmationBottomSheetHost = ({
-  children,
-  isDismissEnabled,
-  isPresented,
-  onDidDismiss,
-}: ConfirmationBottomSheetHostProps) => {
+const BottomSheetHost = ({ children, isDismissEnabled, isPresented, onDidDismiss }: BottomSheetHostProps) => {
   //refs
   const sheetRef = useRef<BottomSheetMethods>(null);
 
@@ -44,7 +39,7 @@ const ConfirmationBottomSheetHost = ({
   );
 };
 
-export default ConfirmationBottomSheetHost;
+export default BottomSheetHost;
 
 const styles = StyleSheet.create({
   sheetBackground: {

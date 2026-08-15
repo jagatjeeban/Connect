@@ -12,9 +12,9 @@ export default function TabLayout() {
     <NativeTabs
       rippleColor={'transparent'}
       disableTransparentOnScrollEdge
-      minimizeBehavior={Platform.OS === 'ios' && Number(Platform.Version) >= 26 ? 'onScrollDown' : undefined}
+      minimizeBehavior={'automatic'}
       labelStyle={{ fontFamily: fontFamily.outfitMedium }}
-      backgroundColor={colors.backgroundLight}
+      backgroundColor={Platform.OS === 'android' ? colors.backgroundLight : undefined}
       unstable_nativeProps={Platform.OS === 'ios' ? { colorScheme: 'dark' } : undefined}
     >
       <NativeTabs.Trigger name={'contacts'} contentStyle={{ backgroundColor: colors.backgroundColor }}>
@@ -27,6 +27,7 @@ export default function TabLayout() {
           selectedColor={colors.primary}
         />
       </NativeTabs.Trigger>
+
       <NativeTabs.Trigger name={'favorites'} contentStyle={{ backgroundColor: colors.backgroundColor }}>
         <NativeTabs.Trigger.Label selectedStyle={styles.selectedLabelStyle}>
           {strings.favorites}
@@ -37,6 +38,7 @@ export default function TabLayout() {
           selectedColor={colors.primary}
         />
       </NativeTabs.Trigger>
+
       <NativeTabs.Trigger name={'profile'} contentStyle={{ backgroundColor: colors.backgroundColor }}>
         <NativeTabs.Trigger.Label selectedStyle={styles.selectedLabelStyle}>{strings.profile}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon

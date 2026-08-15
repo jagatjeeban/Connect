@@ -7,7 +7,7 @@ import { Alert, StyleSheet, View } from 'react-native';
 import { colors, strings } from '@/constants';
 
 //import components
-import { ConfirmationBottomSheet } from '@/components';
+import { ConfirmationSheet } from '@/components';
 import ContactDetailsContent from '@/features/contacts/components/contact-details-content';
 
 //import store
@@ -199,7 +199,6 @@ const ContactDetails = () => {
         isEditing={isEditing}
         isFavorite={isFavorite}
         isLoading={isLoading}
-        onBack={handleBack}
         onCall={handleCall}
         onDelete={handlePresentDeleteSheet}
         onEdit={handleEdit}
@@ -210,15 +209,15 @@ const ContactDetails = () => {
         phones={phones}
       />
 
-      <ConfirmationBottomSheet
-        description={strings.deleteNumberText}
-        isLoading={isDeleting}
+      <ConfirmationSheet
         isPresented={isDeleteSheetPresented}
+        isLoading={isDeleting}
+        description={strings.deleteNumberText}
+        primaryTitle={isDeleting ? strings.deleting : strings.yesDelete}
+        secondaryTitle={strings.noKeep}
         onConfirm={handleDelete}
         onDidDismiss={handleDeleteSheetDidDismiss}
         onDismissRequest={handleDismissDeleteSheet}
-        primaryTitle={isDeleting ? strings.deleting : strings.yesDelete}
-        secondaryTitle={strings.noKeep}
       />
     </View>
   );

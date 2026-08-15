@@ -1,28 +1,24 @@
 import { Host } from '@expo/ui';
 import { BottomSheet, Group, RNHostView } from '@expo/ui/swift-ui';
-import {
-  interactiveDismissDisabled,
-  presentationBackground,
-  presentationDragIndicator,
-} from '@expo/ui/swift-ui/modifiers';
+import { interactiveDismissDisabled, presentationDragIndicator } from '@expo/ui/swift-ui/modifiers';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 
 //import constants
 import { colors } from '@/constants';
 
 //import types
-import type { ConfirmationBottomSheetHostProps } from './types';
+import type { BottomSheetHostProps } from './types';
 
 /**
- * Hosts confirmation content in a SwiftUI sheet with a true dismissal-completion callback.
+ * Hosts sheet content in SwiftUI with a true dismissal-completion callback.
  */
-const ConfirmationBottomSheetHost = ({
+const BottomSheetHost = ({
   children,
   isDismissEnabled,
   isPresented,
   onDidDismiss,
   onDismissRequest,
-}: ConfirmationBottomSheetHostProps) => {
+}: BottomSheetHostProps) => {
   const { width } = useWindowDimensions();
 
   //synchronizes interactive native dismissals with React state
@@ -40,13 +36,7 @@ const ConfirmationBottomSheetHost = ({
         onDismiss={onDidDismiss}
         onIsPresentedChange={handlePresentedChange}
       >
-        <Group
-          modifiers={[
-            presentationDragIndicator('hidden'),
-            interactiveDismissDisabled(!isDismissEnabled),
-            presentationBackground(colors.backgroundLight),
-          ]}
-        >
+        <Group modifiers={[presentationDragIndicator('hidden'), interactiveDismissDisabled(!isDismissEnabled)]}>
           <RNHostView matchContents>
             <View style={styles.contentContainer}>
               <View style={styles.dragIndicator} />
@@ -59,7 +49,7 @@ const ConfirmationBottomSheetHost = ({
   );
 };
 
-export default ConfirmationBottomSheetHost;
+export default BottomSheetHost;
 
 const styles = StyleSheet.create({
   host: {

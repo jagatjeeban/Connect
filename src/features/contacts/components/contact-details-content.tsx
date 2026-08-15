@@ -8,8 +8,8 @@ import { colors, strings } from '@/constants';
 import { TextComponent } from '@/components';
 import ContactActionButton from '@/features/contacts/components/contact-action-button';
 import ContactAvatar from '@/features/contacts/components/contact-avatar';
-import ContactDetailsHeader from '@/features/contacts/components/contact-details-header';
 import ContactInfoItem from '@/features/contacts/components/contact-info-item';
+import ContactDetailsHeader from './contact-details-header';
 
 //import hooks
 import { useResponsive } from '@/hooks';
@@ -35,7 +35,6 @@ type ContactDetailsContentProps = {
   isEditing: boolean;
   isLoading: boolean;
   hasLoadError: boolean;
-  onBack: () => void;
   onToggleFavorite: () => void;
   onEdit: () => void;
   onCall: () => void;
@@ -52,10 +51,8 @@ const ContactDetailsContent = ({
   contact,
   phones,
   isFavorite,
-  isEditing,
   isLoading,
   hasLoadError,
-  onBack,
   onToggleFavorite,
   onEdit,
   onCall,
@@ -83,9 +80,7 @@ const ContactDetailsContent = ({
       <View style={styles.content}>
         <ContactDetailsHeader
           actionsDisabled={!contact}
-          isEditing={isEditing}
           isFavorite={isFavorite}
-          onBack={onBack}
           onEdit={onEdit}
           onToggleFavorite={onToggleFavorite}
         />
