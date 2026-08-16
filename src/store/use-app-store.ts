@@ -5,21 +5,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import { zustandMMKVStorage } from '@/storage/mmkv-storage';
 
 //import types
-import type { ThemePreference } from '@/types/theme-preference';
-interface AppStateData {
-  favoriteContactIds: string[];
-  theme: ThemePreference;
-}
-
-interface AppStateActions {
-  addFavorite: (contactId: string) => void;
-  toggleFavorite: (contactId: string) => void;
-  removeFavorite: (contactId: string) => void;
-  setTheme: (theme: ThemePreference) => void;
-  reset: () => void;
-}
-
-type AppState = AppStateData & AppStateActions;
+import type { AppState, AppStateData } from './types';
 
 const initialState: AppStateData = {
   favoriteContactIds: [],

@@ -1,10 +1,8 @@
 //import constants
 import { fontFamily, fontSize } from '@/constants';
 
-type TextTheme = {
-  fontSize: number;
-  fontFamily: string;
-};
+//import types
+import type { TextTheme } from './types';
 
 //function to create text theme
 const createTextTheme = (fontSize: number, fontFamily: string): TextTheme => ({

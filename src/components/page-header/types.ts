@@ -4,11 +4,11 @@ export type PageHeaderIcon = 'search' | 'whiteStar' | 'pencil' | 'share' | 'tras
 
 export type PageHeaderAction = 'star' | 'edit' | 'share' | 'delete' | 'save' | 'add';
 
-export interface HeaderNavigation {
+export type HeaderNavigation = {
   goBack?: () => void;
-}
+};
 
-export interface PageHeaderProps {
+export type PageHeaderProps = {
   navigation?: HeaderNavigation;
   placeholder?: string;
   loaderStatus?: boolean;
@@ -22,4 +22,4 @@ export interface PageHeaderProps {
   rightBtnClickEvent?: (action: PageHeaderAction) => void;
   searchBlur?: TextInputProps['onBlur'];
   searchEvent?: (value: string) => void;
-}
+};

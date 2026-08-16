@@ -31,7 +31,7 @@ import SvgWhiteStar from '@/assets/icons/white-favorite.svg';
 //import types
 import type { HeaderNavigation, PageHeaderAction, PageHeaderIcon } from './types';
 
-export interface NormalHeaderProps {
+export type NormalHeaderProps = {
   navigation?: HeaderNavigation;
   placeholder: string;
   backBtn: boolean;
@@ -46,7 +46,7 @@ export interface NormalHeaderProps {
   updateSearchStatus: () => void;
   searchBlur?: TextInputProps['onBlur'];
   textChangeEvent?: (value: string) => void;
-}
+};
 
 /**
  * Displays the standard page header with navigation, actions, and search states.
