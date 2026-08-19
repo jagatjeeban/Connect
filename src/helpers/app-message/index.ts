@@ -4,22 +4,8 @@ import { toast } from 'sonner-native';
 //import components
 import AppMessageActionButton from '@/components/app-message-action-button';
 
-export type AppMessageVariant = 'default' | 'success' | 'info' | 'warning' | 'error';
-
-export type AppMessageAction = {
-  label: string;
-  onPress: () => void;
-};
-
-export type AppMessageOptions = {
-  action?: AppMessageAction;
-  description?: string;
-  duration?: number;
-  id?: string | number;
-  variant?: AppMessageVariant;
-};
-
-export type AppMessageId = string | number;
+//import types
+import type { AppMessageId, AppMessageOptions } from './types';
 
 //variables
 let appMessageSequence = 0;
