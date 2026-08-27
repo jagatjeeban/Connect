@@ -10,6 +10,7 @@ import type { AppState, AppStateData } from './types';
 const initialState: AppStateData = {
   favoriteContactIds: [],
   theme: 'system',
+  onboardingStatus: false,
 };
 
 /**
@@ -47,6 +48,11 @@ export const useAppStore = create<AppState>()(
         set({ theme });
       },
 
+      //sets the onboarding status
+      setOnboardingStatus: (status) => {
+        set({ onboardingStatus: status });
+      },
+
       //restores the complete store to its initial values
       reset: () => {
         set(initialState);
@@ -61,6 +67,7 @@ export const useAppStore = create<AppState>()(
       partialize: (state) => ({
         favoriteContactIds: state.favoriteContactIds,
         theme: state.theme,
+        onboardingStatus: state.onboardingStatus,
       }),
     },
   ),

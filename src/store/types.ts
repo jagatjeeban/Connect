@@ -4,6 +4,7 @@ import type { ThemePreference } from '@/themes/types';
 export type AppStateData = {
   favoriteContactIds: string[];
   theme: ThemePreference;
+  onboardingStatus: boolean;
 };
 
 type AppStateActions = {
@@ -11,6 +12,7 @@ type AppStateActions = {
   toggleFavorite: (contactId: string) => void;
   removeFavorite: (contactId: string) => void;
   setTheme: (theme: ThemePreference) => void;
+  setOnboardingStatus: (status: boolean) => void;
   reset: () => void;
 };
 
