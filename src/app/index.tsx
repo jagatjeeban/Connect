@@ -1,85 +1,116 @@
-import { Redirect, router } from 'expo-router';
 import { PressableScale } from 'pressto';
-import { useCallback } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 //import svg files
 import SvgWelcome from '@/assets/images/svgs/welcome.svg';
-
-//import hooks
-import { useResponsive } from '@/hooks';
 
 //import components
 import { TextComponent } from '@/components';
 
 //import constants
 import { colors, fontFamily, strings } from '@/constants';
+
+//import store
 import { useAppStore } from '@/store/use-app-store';
 
+//CONSTANTS
+const WELCOME_IMAGE_WIDTH = 337;
+const WELCOME_IMAGE_HEIGHT = 261;
+const ONBOARDING_CONTENT_MAX_WIDTH = 420;
+
+/**
+ * Displays the onboarding welcome screen and completes the first-launch flow.
+ */
 export default function Index() {
   //hooks
-  const { width, height } = useResponsive();
   const insets = useSafeAreaInsets();
 
-  //store events
-  const onboardingStatus = useAppStore((state) => state.onboardingStatus);
+  //store actions
   const setOnboardingStatus = useAppStore((state) => state.setOnboardingStatus);
 
-  const iconWidth = width / 1.2;
-  const iconHeight = height / 2;
-
-  //function to navigate to the contacts screen
-  const navigateToContacts = useCallback(() => {
+  //function to complete onboarding and unlock the application routes
+  const handleGetStarted = () => {
     setOnboardingStatus(true);
-    router.replace('/(tabs)/contacts');
-  }, [setOnboardingStatus]);
-
-  if (onboardingStatus) {
-    return <Redirect href={'/(tabs)/contacts'} />;
-  }
+  };
 
   return (
-    <SafeAreaView style={styles.mainContainer}>
-      <SvgWelcome width={iconWidth} height={iconHeight} />
-      <View style={[styles.welcomeTextsContainer, { top: iconHeight, maxWidth: iconWidth }]}>
-        <TextComponent
-          text={strings.welcomeToConnect}
-          color={colors.baseWhite}
-          fontFamily={fontFamily.outfitMedium}
-          styleProfile={'largest1'}
-        />
-        <TextComponent
-          text={strings.welcomeText}
-          color={colors.baseMediumGrey}
-          textAlign={'center'}
-          styleProfile={'normal4'}
-        />
+    <ScrollView
+      contentContainerStyle={[
+        styles.contentContainer,
+        { paddingBottom: insets.bottom + 20, paddingTop: insets.top + 20 },
+      ]}
+      contentInsetAdjustmentBehavior={'never'}
+      showsVerticalScrollIndicator={false}
+      style={styles.scrollView}
+    >
+      <View style={styles.heroContainer}>
+        <View style={styles.illustrationContainer}>
+          <SvgWelcome height={'100%'} width={'100%'} />
+        </View>
+        <View style={styles.welcomeTextsContainer}>
+          <TextComponent
+            text={strings.welcomeToConnect}
+            color={colors.baseWhite}
+            fontFamily={fontFamily.outfitMedium}
+            styleProfile={'largest1'}
+          />
+          <TextComponent
+            text={strings.welcomeText}
+            color={colors.baseMediumGrey}
+            textAlign={'center'}
+            styleProfile={'normal4'}
+          />
+        </View>
       </View>
-      <PressableScale onPress={navigateToContacts} style={[styles.getStartedBtn, { bottom: insets.bottom + 20 }]}>
-        <TextComponent text={'Get Started'} color={colors.baseWhite} styleProfile={'large1'} />
+      <PressableScale
+        accessibilityRole={'button'}
+        accessibilityLabel={strings.getStarted}
+        onPress={handleGetStarted}
+        style={styles.getStartedBtn}
+      >
+        <TextComponent text={strings.getStarted} color={colors.baseWhite} styleProfile={'large1'} />
       </PressableScale>
-    </SafeAreaView>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  mainContainer: {
+  scrollView: {
     flex: 1,
+    backgroundColor: colors.backgroundColor,
+  },
+  contentContainer: {
+    flexGrow: 1,
     alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 32,
+    paddingHorizontal: 20,
+  },
+  heroContainer: {
+    width: '100%',
+    maxWidth: ONBOARDING_CONTENT_MAX_WIDTH,
+    alignItems: 'center',
+    gap: 24,
+  },
+  illustrationContainer: {
+    width: '100%',
+    maxWidth: WELCOME_IMAGE_WIDTH,
+    aspectRatio: WELCOME_IMAGE_WIDTH / WELCOME_IMAGE_HEIGHT,
   },
   welcomeTextsContainer: {
+    width: '100%',
     alignItems: 'center',
     gap: 20,
-    position: 'absolute',
   },
   getStartedBtn: {
-    position: 'absolute',
+    width: '100%',
+    maxWidth: ONBOARDING_CONTENT_MAX_WIDTH,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 12,
+    borderCurve: 'continuous',
     paddingVertical: 15,
-    width: '90%',
   },
 });

@@ -1,6 +1,5 @@
 const strings = {
-  welcomeText:
-    'Manage, search, and secure your contacts effortlessly, syncing across devices for quick communication and simplifying connections.',
+  welcomeText: 'Your phone remembers numbers. Connect helps you remember people.',
   continueWithGoogle: 'Continue with Google',
   welcomeToConnect: 'Welcome To Connect',
   deleteNumberText: `Are you sure you want to delete this contact? This action can't be undone.`,
@@ -66,6 +65,7 @@ const strings = {
   signOutMessage: 'We’ll be a little sad to see you go, and your Connect space will miss you until you come back.',
   done: 'Done',
   selectContacts: 'Select Contacts',
+  getStarted: 'Get Started',
 } as const;
 
 export default strings;

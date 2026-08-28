@@ -13,6 +13,9 @@ import { AppToaster } from '@/components';
 //import providers
 import AppQueryProvider from '@/providers/app-query-provider';
 
+//import store
+import { useAppStore } from '@/store/use-app-store';
+
 //constants
 const APP_NAVIGATION_THEME: Theme = {
   ...DarkTheme,
@@ -27,12 +30,20 @@ const APP_NAVIGATION_THEME: Theme = {
  * Defines the application root stack and delegates primary navigation to the tabs group.
  */
 export default function RootLayout() {
+  //store selectors
+  const onboardingStatus = useAppStore((state) => state.onboardingStatus);
+
   return (
     <GestureHandlerRootView style={styles.container}>
       <AppQueryProvider>
         <ThemeProvider value={APP_NAVIGATION_THEME}>
           <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name={'(tabs)'} />
+            <Stack.Protected guard={!onboardingStatus}>
+              <Stack.Screen name={'index'} />
+            </Stack.Protected>
+            <Stack.Protected guard={onboardingStatus}>
+              <Stack.Screen name={'(tabs)'} />
+            </Stack.Protected>
           </Stack>
         </ThemeProvider>
         <AppToaster />
