@@ -1,4 +1,6 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { SymbolView } from 'expo-symbols';
+import { PressableScale } from 'pressto';
+import { StyleSheet, View } from 'react-native';
 
 //import constants
 import { colors, strings } from '@/constants';
@@ -7,7 +9,6 @@ import { colors, strings } from '@/constants';
 import { TextComponent } from '@/components';
 
 //import assets
-import SvgPlus from '@/assets/icons/plus.svg';
 
 //import types
 import type { FavoritesHeaderProps } from '@/features/favorites/model';
@@ -18,21 +19,21 @@ import type { FavoritesHeaderProps } from '@/features/favorites/model';
 const FavoritesHeader = ({ onPressAdd }: FavoritesHeaderProps) => (
   <View style={styles.container}>
     <TextComponent color={colors.baseWhite} styleProfile={'large3'} text={strings.favorites} />
-    <Pressable
+    <PressableScale
       accessibilityLabel={strings.addFavorite}
       accessibilityRole={'button'}
-      hitSlop={8}
       onPress={onPressAdd}
-      style={({ pressed }) => [styles.addButton, pressed && styles.buttonPressed]}
+      style={styles.addButton}
     >
-      <SvgPlus width={15} height={15} />
-      <TextComponent
-        color={colors.primary}
-        containerStyle={styles.addButtonTextContainer}
-        styleProfile={'large1'}
-        text={strings.add}
+      <SymbolView
+        name={{
+          ios: 'plus',
+          android: 'add',
+        }}
+        size={22}
+        tintColor={colors.baseWhite}
       />
-    </Pressable>
+    </PressableScale>
   </View>
 );
 
@@ -50,13 +51,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 7,
-    borderRadius: 8,
-    backgroundColor: colors.primaryLight,
-  },
-  buttonPressed: {
-    opacity: 0.7,
+    padding: 7,
+    borderRadius: 50,
+    backgroundColor: colors.primary,
   },
   addButtonTextContainer: {
     marginLeft: 10,

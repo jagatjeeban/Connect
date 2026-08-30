@@ -7,10 +7,8 @@ import {
   type LayoutChangeEvent,
   type LayoutRectangle,
   Platform,
-  type StyleProp,
   StyleSheet,
   View,
-  type ViewabilityConfig,
   type ViewStyle,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -28,45 +26,20 @@ import EmptyState from './empty-state';
 import { getNearestScrubberLetter } from '@/helpers/common-functions';
 import { buildAlphabetizedContactsList } from '@/helpers/custom-functions';
 
-//import types
-import type { ContactListItem, DeviceContact } from '@/features/contacts/model';
-
-//constants
-const SCRUBBER_PREVIEW_GAP = 8;
-const LIST_FOOTER_HEIGHT_IOS = 200;
-const LIST_FOOTER_HEIGHT_ANDROID = 230;
-const EMPTY_CONTACTS: readonly DeviceContact[] = [];
-const SCRUBBER_PREVIEW_HIDDEN_STYLE = { opacity: 0 } satisfies ViewStyle;
-const VIEWABILITY_CONFIG: ViewabilityConfig = {
-  itemVisiblePercentThreshold: 1,
-};
-
-type ScrubberLetterLayout = Pick<LayoutRectangle, 'height' | 'y'>;
-type ScrubberLetterLayouts = Record<string, ScrubberLetterLayout>;
-type MeasuredScrubberRailLayout = LayoutRectangle & {
-  pageX?: number;
-  pageY?: number;
-};
-
-type ContactRenderOptions = {
-  isSelectEvent: boolean;
-  selectedContactIds: ReadonlySet<string> | null;
-  onClickContact?: (contact: DeviceContact) => void;
-  hasScrubber: boolean;
-};
-
-export type ContactsListProps = {
-  contacts?: readonly DeviceContact[];
-  loaderStatus?: boolean;
-  isSelectEvent?: boolean;
-  selectedContactIds?: ReadonlySet<string> | null;
-  selectionVersion?: number;
-  onClearSearch?: () => void;
-  onClickContact?: (contact: DeviceContact) => void;
-  searchText?: string;
-  totalContactsCount?: number;
-  style?: StyleProp<ViewStyle>;
-};
+//import models
+import {
+  type ContactListItem,
+  type ContactRenderOptions,
+  type ContactsListProps,
+  EMPTY_CONTACTS,
+  LIST_FOOTER_HEIGHT_ANDROID,
+  LIST_FOOTER_HEIGHT_IOS,
+  type MeasuredScrubberRailLayout,
+  SCRUBBER_PREVIEW_GAP,
+  SCRUBBER_PREVIEW_HIDDEN_STYLE,
+  type ScrubberLetterLayouts,
+  VIEWABILITY_CONFIG,
+} from '@/features/contacts/model';
 
 // Renders either a sticky section header or a contact row for FlashList.
 const renderContactListItem = (
@@ -110,6 +83,7 @@ const ContactsList = ({
   contacts = EMPTY_CONTACTS,
   loaderStatus = false,
   isSelectEvent = false,
+  isScrubberVisible = true,
   selectedContactIds = null,
   selectionVersion = 0,
   onClearSearch,
@@ -151,7 +125,7 @@ const ContactsList = ({
 
   const preparedContacts = useMemo(() => buildAlphabetizedContactsList(contacts), [contacts]);
   const { listItems, stickyHeaderIndices, scrubberLetters, letterToHeaderIndex } = preparedContacts;
-  const showScrubber = scrubberLetters.length > 1;
+  const showScrubber = isScrubberVisible && scrubberLetters.length > 1;
   const resolvedActiveSectionLetter =
     activeSectionLetter && typeof letterToHeaderIndex[activeSectionLetter] === 'number'
       ? activeSectionLetter
@@ -354,21 +328,23 @@ const ContactsList = ({
             ListFooterComponent={renderFooterComponent}
             keyExtractor={getKeyExtractor}
           />
-          <AlphabetScrubber
-            letters={scrubberLetters}
-            highlightedLetter={displayActiveLetter}
-            bubbleLetter={resolvedActiveScrubLetter}
-            isScrubbing={isScrubbing}
-            scrubberBottomOffset={scrubberBottomOffset}
-            scrubberRailRef={scrubberRailRef}
-            previewBubbleStyle={previewBubbleStyle}
-            onRailLayout={handleScrubberRailLayout}
-            onLetterLayout={handleScrubberLetterLayout}
-            onPreviewBubbleLayout={handlePreviewBubbleLayout}
-            onScrubStart={handleScrubberTouch}
-            onScrubMove={handleScrubberTouch}
-            onScrubEnd={handleScrubberEnd}
-          />
+          {showScrubber && (
+            <AlphabetScrubber
+              letters={scrubberLetters}
+              highlightedLetter={displayActiveLetter}
+              bubbleLetter={resolvedActiveScrubLetter}
+              isScrubbing={isScrubbing}
+              scrubberBottomOffset={scrubberBottomOffset}
+              scrubberRailRef={scrubberRailRef}
+              previewBubbleStyle={previewBubbleStyle}
+              onRailLayout={handleScrubberRailLayout}
+              onLetterLayout={handleScrubberLetterLayout}
+              onPreviewBubbleLayout={handlePreviewBubbleLayout}
+              onScrubStart={handleScrubberTouch}
+              onScrubMove={handleScrubberTouch}
+              onScrubEnd={handleScrubberEnd}
+            />
+          )}
         </>
       )}
     </View>

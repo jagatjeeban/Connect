@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   BackHandler,
@@ -17,8 +18,8 @@ import { colors, fontFamily, strings } from '@/constants';
 import TextComponent from '../core-components/text-component';
 
 //import assets
-import SvgBackArrow from '@/assets/icons/back-arrow.svg';
 import SvgBackGrey from '@/assets/icons/back-arrow-grey.svg';
+import SvgBackArrow from '@/assets/icons/back-arrow.svg';
 import SvgCross from '@/assets/icons/cross-grey.svg';
 import SvgCrossWhite from '@/assets/icons/cross-white.svg';
 import SvgPencil from '@/assets/icons/pencil.svg';
@@ -29,10 +30,9 @@ import SvgTrash from '@/assets/icons/trash.svg';
 import SvgWhiteStar from '@/assets/icons/white-favorite.svg';
 
 //import types
-import type { HeaderNavigation, PageHeaderAction, PageHeaderIcon } from './types';
+import type { PageHeaderAction, PageHeaderIcon } from './types';
 
 export type NormalHeaderProps = {
-  navigation?: HeaderNavigation;
   placeholder: string;
   backBtn: boolean;
   crossBtn: boolean;
@@ -52,7 +52,6 @@ export type NormalHeaderProps = {
  * Displays the standard page header with navigation, actions, and search states.
  */
 const NormalHeader = ({
-  navigation,
   placeholder,
   backBtn,
   crossBtn,
@@ -85,8 +84,17 @@ const NormalHeader = ({
     [textChangeEvent],
   );
 
-  //function to handle the back press event
+  //function to handle header back press
   const handleBackPress = useCallback(() => {
+    if (customClickEvent) {
+      customClickEvent();
+    } else {
+      router.back();
+    }
+  }, [customClickEvent]);
+
+  //function to handle the system back press event
+  const handleSystemBackPress = useCallback(() => {
     if (searchStatus) {
       updateSearchStatus();
       handleSearchInputChange('');
@@ -104,9 +112,9 @@ const NormalHeader = ({
 
   //registers Android back handling for the header search state
   useEffect(() => {
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', handleSystemBackPress);
     return () => backHandler.remove();
-  }, [handleBackPress]);
+  }, [handleSystemBackPress]);
 
   return (
     <View style={[styles.body, { paddingTop: insets.top + 10 }]}>
@@ -115,11 +123,7 @@ const NormalHeader = ({
           <View style={styles.headerLeft}>
             {backBtn || crossBtn ? (
               <>
-                <Pressable
-                  hitSlop={10}
-                  onPress={() => (customClickEvent ? customClickEvent() : navigation?.goBack?.())}
-                  style={styles.headerActionButton}
-                >
+                <Pressable hitSlop={10} onPress={handleBackPress} style={styles.headerActionButton}>
                   {backBtn === true && <SvgBackArrow />}
                   {crossBtn === true && <SvgCrossWhite />}
                 </Pressable>

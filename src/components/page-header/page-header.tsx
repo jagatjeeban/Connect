@@ -13,7 +13,6 @@ import type { PageHeaderProps } from './types';
  * Selects and coordinates the configured page-header presentation.
  */
 const PageHeader = ({
-  navigation,
   placeholder = 'Search',
   loaderStatus = false,
   headerType = 'normalHeader',
@@ -39,7 +38,6 @@ const PageHeader = ({
     <>
       {headerType === 'normalHeader' && (
         <NormalHeader
-          navigation={navigation}
           headerTitle={headerTitle}
           headerTitleColor={headerTitleColor}
           placeholder={placeholder}

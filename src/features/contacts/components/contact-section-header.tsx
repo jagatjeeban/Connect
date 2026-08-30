@@ -6,14 +6,8 @@ import { colors } from '@/constants';
 //import components
 import { TextComponent } from '@/components';
 
-//constants
-const SCRUBBER_CONTENT_GUTTER = 60;
-
-type ContactSectionHeaderProps = {
-  letter: string;
-  isSticky?: boolean;
-  hasScrubber?: boolean;
-};
+//import models
+import { type ContactSectionHeaderProps, SCRUBBER_CONTENT_GUTTER } from '../model';
 
 /**
  * Displays an alphabetical contacts section heading.

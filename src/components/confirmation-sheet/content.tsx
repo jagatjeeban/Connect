@@ -1,4 +1,4 @@
-import { PressableScale } from 'pressto';
+import { PressableScale, PressablesConfig } from 'pressto';
 import { ActivityIndicator, Platform, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 //import constants
@@ -29,33 +29,45 @@ const ConfirmationSheetContent = ({
     <View style={[styles.content, { width }]} testID={'confirmation-sheet'}>
       <TextComponent color={colors.baseWhite} styleProfile={'large2'} text={description} textAlign={'center'} />
 
-      <View style={styles.actionsContainer}>
-        <ButtonComponent
-          accessibilityLabel={primaryTitle}
-          accessibilityRole={'button'}
-          disabled={isLoading}
-          onPress={onConfirm}
-          style={[styles.actionButton, styles.confirmButton, isLoading && styles.disabled]}
-        >
-          {isLoading ? (
-            <ActivityIndicator color={colors.baseWhite} />
-          ) : (
-            <TextComponent color={colors.baseWhite} styleProfile={'large1'} text={primaryTitle} textAlign={'center'} />
-          )}
-        </ButtonComponent>
-
-        {secondaryTitle && secondaryTitle.trim() && (
+      <PressablesConfig config={{ baseScale: 1, minScale: 1.05 }}>
+        <View style={styles.actionsContainer}>
           <ButtonComponent
-            accessibilityLabel={secondaryTitle}
+            accessibilityLabel={primaryTitle}
             accessibilityRole={'button'}
             disabled={isLoading}
-            onPress={onDismissRequest}
-            style={[styles.actionButton, styles.cancelButton, isLoading && styles.disabled]}
+            onPress={onConfirm}
+            style={[styles.actionButton, styles.confirmButton, isLoading && styles.disabled]}
           >
-            <TextComponent color={colors.primary} styleProfile={'large1'} text={secondaryTitle} textAlign={'center'} />
+            {isLoading ? (
+              <ActivityIndicator color={colors.baseWhite} />
+            ) : (
+              <TextComponent
+                color={colors.baseWhite}
+                styleProfile={'large1'}
+                text={primaryTitle}
+                textAlign={'center'}
+              />
+            )}
           </ButtonComponent>
-        )}
-      </View>
+
+          {secondaryTitle && secondaryTitle.trim() && (
+            <ButtonComponent
+              accessibilityLabel={secondaryTitle}
+              accessibilityRole={'button'}
+              disabled={isLoading}
+              onPress={onDismissRequest}
+              style={[styles.actionButton, styles.cancelButton, isLoading && styles.disabled]}
+            >
+              <TextComponent
+                color={colors.primary}
+                styleProfile={'large1'}
+                text={secondaryTitle}
+                textAlign={'center'}
+              />
+            </ButtonComponent>
+          )}
+        </View>
+      </PressablesConfig>
     </View>
   );
 };

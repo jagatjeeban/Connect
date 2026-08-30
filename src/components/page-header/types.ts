@@ -4,12 +4,7 @@ export type PageHeaderIcon = 'search' | 'whiteStar' | 'pencil' | 'share' | 'tras
 
 export type PageHeaderAction = 'star' | 'edit' | 'share' | 'delete' | 'save' | 'add';
 
-export type HeaderNavigation = {
-  goBack?: () => void;
-};
-
 export type PageHeaderProps = {
-  navigation?: HeaderNavigation;
   placeholder?: string;
   loaderStatus?: boolean;
   headerType?: 'normalHeader';

@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 import {
   addContactsChangeListener,
   Contact,
@@ -6,6 +8,7 @@ import {
   requestPermissionsAsync,
   type ContactsPermissionResponse,
 } from 'expo-contacts';
+import { ContactTypes, presentFormAsync } from 'expo-contacts/legacy';
 
 //import types
 import { CONTACT_FIELDS, type DeviceContact } from '@/features/contacts/model';
@@ -66,7 +69,14 @@ export async function loadDeviceContacts(): Promise<DeviceContact[]> {
  * @returns Whether the user created a contact.
  */
 export async function presentCreateContactForm(): Promise<boolean> {
-  return Contact.presentCreateForm();
+  if (Platform.OS === 'ios') {
+    const contactCount = await Contact.getCount();
+
+    await presentFormAsync(null, { contactType: ContactTypes.Person, name: '' }, { isNew: true });
+    return (await Contact.getCount()) > contactCount;
+  }
+
+  return Contact.presentCreateForm({});
 }
 
 /**

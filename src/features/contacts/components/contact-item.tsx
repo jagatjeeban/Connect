@@ -1,3 +1,4 @@
+import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 //import constants
@@ -11,18 +12,7 @@ import ContactAvatar from '@/features/contacts/components/contact-avatar';
 import { getContactInitial, getContactName } from '@/helpers/custom-functions';
 
 //import types
-import type { DeviceContact } from '@/features/contacts/model';
-
-//constants
-const SCRUBBER_CONTENT_GUTTER = 60;
-
-export type ContactItemProps = {
-  item: DeviceContact;
-  isSelectEvent?: boolean;
-  isSelected?: boolean;
-  onClickEvent?: (contact: DeviceContact) => void;
-  hasScrubber?: boolean;
-};
+import { type ContactItemProps, SCRUBBER_CONTENT_GUTTER } from '@/features/contacts/model';
 
 /**
  * Displays one contact row with an image fallback and optional selection state.
@@ -81,20 +71,17 @@ const ContactItem = ({
         </View>
       </View>
 
-      {isSelectEvent &&
-        (isSelected ? (
-          <View style={styles.checkedButton}>
-            <TextComponent
-              color={colors.baseWhite}
-              fontFamily={fontFamily.outfitBold}
-              styleProfile={'normal2'}
-              text={'✓'}
-              textAlign={'center'}
-            />
-          </View>
-        ) : (
-          <View style={styles.checkButton} />
-        ))}
+      {isSelectEvent && (
+        <SymbolView
+          name={{
+            ios: isSelected ? 'star.fill' : 'star',
+            android: isSelected ? 'star' : 'star_border',
+          }}
+          size={24}
+          tintColor={isSelected ? colors.primary : colors.baseGrey}
+          weight={'semibold'}
+        />
+      )}
     </Pressable>
   );
 };
@@ -129,20 +116,5 @@ const styles = StyleSheet.create({
   contactNameContainer: {
     flex: 1,
     marginLeft: 20,
-  },
-  checkButton: {
-    width: 20,
-    height: 20,
-    borderWidth: 1,
-    borderColor: colors.baseGrey,
-    borderRadius: 6,
-  },
-  checkedButton: {
-    width: 20,
-    height: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 6,
-    backgroundColor: colors.primary,
   },
 });

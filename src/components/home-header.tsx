@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     height: 48,
     paddingVertical: 0,
     color: colors.baseWhite,
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: fontFamily.outfitRegular,
     includeFontPadding: false,
   },

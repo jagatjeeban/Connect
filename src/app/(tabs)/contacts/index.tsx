@@ -20,10 +20,11 @@ import { invalidateContactsCollection, useContactsQuery } from '@/features/conta
 import { presentCreateContactForm, requestDeviceContactsPermission } from '@/features/contacts/contacts-service';
 
 //import assets
-import SvgPlus from '@/assets/icons/plus.svg';
 
 //import types
 import type { DeviceContact } from '@/features/contacts/model';
+import { SymbolView } from 'expo-symbols';
+import { PressableScale } from 'pressto';
 
 //constants
 const ADD_BUTTON_TAB_BAR_CLEARANCE = 50;
@@ -187,7 +188,7 @@ const Contacts = () => {
         />
       )}
 
-      <Pressable
+      <PressableScale
         accessibilityLabel={strings.createContact}
         accessibilityRole={'button'}
         accessibilityState={{ disabled: isCreating }}
@@ -195,15 +196,21 @@ const Contacts = () => {
         onPress={createContact}
         style={[
           styles.addContactButton,
-          // styles.addContactBtnShadow,
           isCreating && styles.disabled,
           {
             bottom: insets.bottom + ADD_BUTTON_TAB_BAR_CLEARANCE,
           },
         ]}
       >
-        <SvgPlus />
-      </Pressable>
+        <SymbolView
+          name={{
+            ios: 'plus',
+            android: 'add',
+          }}
+          size={30}
+          tintColor={colors.primary}
+        />
+      </PressableScale>
     </View>
   );
 };
@@ -233,18 +240,11 @@ const styles = StyleSheet.create({
   addContactButton: {
     position: 'absolute',
     right: 20,
-    padding: 17,
+    padding: 13,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 15,
     backgroundColor: colors.primaryLight,
-  },
-  addContactBtnShadow: {
-    shadowColor: colors.primary,
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 20,
   },
   disabled: {
     opacity: 0.6,
