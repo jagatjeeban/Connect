@@ -18,3 +18,19 @@ export type PageHeaderProps = {
   searchBlur?: TextInputProps['onBlur'];
   searchEvent?: (value: string) => void;
 };
+
+export type NormalHeaderProps = {
+  placeholder: string;
+  backBtn: boolean;
+  crossBtn: boolean;
+  loaderStatus: boolean;
+  headerTitle: string;
+  headerTitleColor: ColorValue;
+  iconArr: readonly PageHeaderIcon[];
+  customClickEvent?: () => void;
+  rightBtnClickEvent?: (action: PageHeaderAction) => void;
+  searchStatus: boolean;
+  updateSearchStatus: () => void;
+  searchBlur?: TextInputProps['onBlur'];
+  textChangeEvent?: (value: string) => void;
+};

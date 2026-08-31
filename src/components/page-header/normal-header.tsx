@@ -1,14 +1,6 @@
 import { router } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  BackHandler,
-  type ColorValue,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  type TextInputProps,
-  View,
-} from 'react-native';
+import { BackHandler, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 //import constants
@@ -30,23 +22,7 @@ import SvgTrash from '@/assets/icons/trash.svg';
 import SvgWhiteStar from '@/assets/icons/white-favorite.svg';
 
 //import types
-import type { PageHeaderAction, PageHeaderIcon } from './types';
-
-export type NormalHeaderProps = {
-  placeholder: string;
-  backBtn: boolean;
-  crossBtn: boolean;
-  loaderStatus: boolean;
-  headerTitle: string;
-  headerTitleColor: ColorValue;
-  iconArr: readonly PageHeaderIcon[];
-  customClickEvent?: () => void;
-  rightBtnClickEvent?: (action: PageHeaderAction) => void;
-  searchStatus: boolean;
-  updateSearchStatus: () => void;
-  searchBlur?: TextInputProps['onBlur'];
-  textChangeEvent?: (value: string) => void;
-};
+import type { NormalHeaderProps } from './types';
 
 /**
  * Displays the standard page header with navigation, actions, and search states.
